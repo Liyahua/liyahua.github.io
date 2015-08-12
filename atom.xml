@@ -35,39 +35,6 @@
   </entry>
   
   <entry>
-    <title><![CDATA[OpenStack基础环境搭建]]></title>
-    <link href="http://liyahua.github.io/2015/08/09/OpenStack-%E5%9F%BA%E7%A1%80%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/"/>
-    <id>http://liyahua.github.io/2015/08/09/OpenStack-基础环境搭建/</id>
-    <published>2015-08-09T14:58:11.000Z</published>
-    <updated>2015-08-12T02:52:07.564Z</updated>
-    <content type="html"><![CDATA[<p>显示全文：<br><a id="more"></a></p>
-<p>   <em>操作系统系统选择</em>：使用ubuntu server  ubuntu-14.04.2-server-amd64  作为服务器的操作系统。<br>   第一次给服务器安装操作系统，我很low的拿着个小U盘来安装，使用UltraISO制作系统镜像。安装系统前对磁盘做了RAID5。</p>
-<p>安装完操作系统之后，需要修改接口的ip地址，使服务器能够连得上外网。具体接口的配置如下：<br><em>controller</em>节点：<br>root@controller:~# cat /etc/network/interfaces<br># This file describes the network interfaces available on your system<br># and how to activate them. For more information, see interfaces(5).</p>
-<p># The loopback network interface<br>auto lo<br>iface lo inet loopback<br>auto eth0<br>iface eth0 inet static<br>address 192.168.3.10<br>netmask 255.255.255.0<br>gateway 192.168.3.254<br>auto eth1<br>iface eth1 inet static<br>address 10.0.0.11<br>netmask 255.255.255.0<br>root@controller:~#<br>\这里发生过一件很挫的事，居然在同一台服务器上配置了两个网关，导致有的时候网关是10.0.0.1一会儿又编程192.168.3.254.使得网络出现故障。</p>
-<p>修改/etc/hosts这个文件，地址和服务器名相关联，地址解析。<br>root@controller:~# cat /etc/hosts<br>#127.0.0.1    localhost<br>#127.0.1.1    controller</p>
-<p># controller    192.168.3.10<br>10.0.0.11       controller<br>#compute    192.168.3.12<br>10.0.0.31       compute<br>#compute1    192.168.3.11<br>10.0.0.41    compute1<br>#compute2    192.168.3.14<br>10.0.0.51    compute2</p>
-<p># The following lines are desirable for IPv6 capable hosts<br>#::1     localhost ip6-localhost ip6-loopback<br>#ff02::1 ip6-allnodes<br>#ff02::2 ip6-allrouters</p>
-<p>这里注释掉了127.0.0.1。这里使用hosts为以后网络环境发生变化提供了很高的可扩展性，比如我从公司的内网192.168.0.0/24迁移到192.168.3.0/24段，需要进行改变的内容就比较小(因为很多配置文件中用到ip地址进行彼此之间信息交互)目前的博客是在我迁移过后做的.</p>
-<p><em>compute</em>节点：<br>root@compute:~# cat /etc/network/interfaces<br># This file describes the network interfaces available on your system<br># and how to activate them. For more information, see interfaces(5).</p>
-<p># The loopback network interface<br>auto lo<br>iface lo inet loopback</p>
-<p>auto eth0<br>iface eth0 inet static<br>#address 192.168.0.142<br>address 192.168.3.12<br>netmask 255.255.255.0<br>gateway 192.168.3.254<br>#auto eth0<br>iface eth0 inet manual<br>        up ip link set dev $IFACE up<br>        down ip link set dev $IFACE down<br>auto eth1<br>iface eth1 inet static<br>address 10.0.0.31<br>netmask 255.255.255.0</p>
-<p>修改/etc/hosts配置文件，关联IP和name<br>root@compute:~# cat /etc/hosts<br>#127.0.0.1    localhost<br>#127.0.1.1    compute<br>#computel<br>10.0.0.31    compute<br>#controller<br>10.0.0.11    controller</p>
-<h1 id="The_following_lines_are_desirable_for_IPv6_capable_hosts">The following lines are desirable for IPv6 capable hosts</h1><p>::1     localhost ip6-localhost ip6-loopback<br>ff02::1 ip6-allnodes<br>ff02::2 ip6-allrouters<br>root@compute:~# </p>
-<p>同时修改两个节点的DNS配置文件为：/etc/resolv.conf<br>添加：  nameserver  114.114.114.114     //使用电信的DNS服务器。其实这样修改在ubuntu系统环境中时不对的，只能够暂时生效，如果想要永久生效，必须修改配置文件/etc/resolvconf/resolv.conf.d/base  每次开机都会从这个配置文件加载dns到/etc/resolv.conf这个配置文件中。</p>
-<p>基本的网络地址配置完成之后，能够实现：<br>    1），compute和controller之间相互ping通，包括10.0.0.0网段和192.168.3.0网段<br>    2），都能够访问外网。<br>    3），都能够进行地址解析。</p>
-<p>接着配置ubuntu的更新源：这里使用的是阿里云的更新源。 配置文件是：/etc/apt/source.list<br>root@controller:~# cat /etc/apt/sources.list<br>deb <a href="http://mirrors.aliyun.com/ubuntu/" target="_blank" rel="external">http://mirrors.aliyun.com/ubuntu/</a> trusty main restricted universe multiverse<br>deb <a href="http://mirrors.aliyun.com/ubuntu/" target="_blank" rel="external">http://mirrors.aliyun.com/ubuntu/</a> trusty-security main restricted universe multiverse<br>deb <a href="http://mirrors.aliyun.com/ubuntu/" target="_blank" rel="external">http://mirrors.aliyun.com/ubuntu/</a> trusty-updates main restricted universe multiverse<br>deb <a href="http://mirrors.aliyun.com/ubuntu/" target="_blank" rel="external">http://mirrors.aliyun.com/ubuntu/</a> trusty-proposed main restricted universe multiverse<br>deb <a href="http://mirrors.aliyun.com/ubuntu/" target="_blank" rel="external">http://mirrors.aliyun.com/ubuntu/</a> trusty-backports main restricted universe multiverse<br>deb-src <a href="http://mirrors.aliyun.com/ubuntu/" target="_blank" rel="external">http://mirrors.aliyun.com/ubuntu/</a> trusty main restricted universe multiverse<br>deb-src <a href="http://mirrors.aliyun.com/ubuntu/" target="_blank" rel="external">http://mirrors.aliyun.com/ubuntu/</a> trusty-security main restricted universe multiverse<br>deb-src <a href="http://mirrors.aliyun.com/ubuntu/" target="_blank" rel="external">http://mirrors.aliyun.com/ubuntu/</a> trusty-updates main restricted universe multiverse<br>deb-src <a href="http://mirrors.aliyun.com/ubuntu/" target="_blank" rel="external">http://mirrors.aliyun.com/ubuntu/</a> trusty-proposed main restricted universe multiverse<br>deb-src <a href="http://mirrors.aliyun.com/ubuntu/" target="_blank" rel="external">http://mirrors.aliyun.com/ubuntu/</a> trusty-backports main restricted universe multiverse<br>root@controller:~# </p>
-<p>配置完更新源之后进行更新：<br>#apt-get  update<br>然后安装ssh服务，实现远程访问：<br>#apt-get install  ssh  -y</p>
-]]></content>
-    <summary type="html">
-    <![CDATA[<p>显示全文：<br>]]>
-    
-    </summary>
-    
-      <category term="openstack" scheme="http://liyahua.github.io/tags/openstack/"/>
-    
-  </entry>
-  
-  <entry>
     <title><![CDATA[OpenStack基础环境搭建二]]></title>
     <link href="http://liyahua.github.io/2015/08/09/OpenStack-%E5%9F%BA%E7%A1%80%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E4%BA%8C/"/>
     <id>http://liyahua.github.io/2015/08/09/OpenStack-基础环境搭建二/</id>
@@ -157,6 +124,39 @@ Status of node rabbit@controller ...
       <category term="AMQP" scheme="http://liyahua.github.io/tags/AMQP/"/>
     
       <category term="NTP" scheme="http://liyahua.github.io/tags/NTP/"/>
+    
+      <category term="openstack" scheme="http://liyahua.github.io/tags/openstack/"/>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[OpenStack基础环境搭建]]></title>
+    <link href="http://liyahua.github.io/2015/08/09/OpenStack-%E5%9F%BA%E7%A1%80%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E4%B8%80/"/>
+    <id>http://liyahua.github.io/2015/08/09/OpenStack-基础环境搭建一/</id>
+    <published>2015-08-09T14:58:11.000Z</published>
+    <updated>2015-08-12T02:52:07.564Z</updated>
+    <content type="html"><![CDATA[<p>显示全文：<br><a id="more"></a></p>
+<p>   <em>操作系统系统选择</em>：使用ubuntu server  ubuntu-14.04.2-server-amd64  作为服务器的操作系统。<br>   第一次给服务器安装操作系统，我很low的拿着个小U盘来安装，使用UltraISO制作系统镜像。安装系统前对磁盘做了RAID5。</p>
+<p>安装完操作系统之后，需要修改接口的ip地址，使服务器能够连得上外网。具体接口的配置如下：<br><em>controller</em>节点：<br>root@controller:~# cat /etc/network/interfaces<br># This file describes the network interfaces available on your system<br># and how to activate them. For more information, see interfaces(5).</p>
+<p># The loopback network interface<br>auto lo<br>iface lo inet loopback<br>auto eth0<br>iface eth0 inet static<br>address 192.168.3.10<br>netmask 255.255.255.0<br>gateway 192.168.3.254<br>auto eth1<br>iface eth1 inet static<br>address 10.0.0.11<br>netmask 255.255.255.0<br>root@controller:~#<br>\这里发生过一件很挫的事，居然在同一台服务器上配置了两个网关，导致有的时候网关是10.0.0.1一会儿又编程192.168.3.254.使得网络出现故障。</p>
+<p>修改/etc/hosts这个文件，地址和服务器名相关联，地址解析。<br>root@controller:~# cat /etc/hosts<br>#127.0.0.1    localhost<br>#127.0.1.1    controller</p>
+<p># controller    192.168.3.10<br>10.0.0.11       controller<br>#compute    192.168.3.12<br>10.0.0.31       compute<br>#compute1    192.168.3.11<br>10.0.0.41    compute1<br>#compute2    192.168.3.14<br>10.0.0.51    compute2</p>
+<p># The following lines are desirable for IPv6 capable hosts<br>#::1     localhost ip6-localhost ip6-loopback<br>#ff02::1 ip6-allnodes<br>#ff02::2 ip6-allrouters</p>
+<p>这里注释掉了127.0.0.1。这里使用hosts为以后网络环境发生变化提供了很高的可扩展性，比如我从公司的内网192.168.0.0/24迁移到192.168.3.0/24段，需要进行改变的内容就比较小(因为很多配置文件中用到ip地址进行彼此之间信息交互)目前的博客是在我迁移过后做的.</p>
+<p><em>compute</em>节点：<br>root@compute:~# cat /etc/network/interfaces<br># This file describes the network interfaces available on your system<br># and how to activate them. For more information, see interfaces(5).</p>
+<p># The loopback network interface<br>auto lo<br>iface lo inet loopback</p>
+<p>auto eth0<br>iface eth0 inet static<br>#address 192.168.0.142<br>address 192.168.3.12<br>netmask 255.255.255.0<br>gateway 192.168.3.254<br>#auto eth0<br>iface eth0 inet manual<br>        up ip link set dev $IFACE up<br>        down ip link set dev $IFACE down<br>auto eth1<br>iface eth1 inet static<br>address 10.0.0.31<br>netmask 255.255.255.0</p>
+<p>修改/etc/hosts配置文件，关联IP和name<br>root@compute:~# cat /etc/hosts<br>#127.0.0.1    localhost<br>#127.0.1.1    compute<br>#computel<br>10.0.0.31    compute<br>#controller<br>10.0.0.11    controller</p>
+<h1 id="The_following_lines_are_desirable_for_IPv6_capable_hosts">The following lines are desirable for IPv6 capable hosts</h1><p>::1     localhost ip6-localhost ip6-loopback<br>ff02::1 ip6-allnodes<br>ff02::2 ip6-allrouters<br>root@compute:~# </p>
+<p>同时修改两个节点的DNS配置文件为：/etc/resolv.conf<br>添加：  nameserver  114.114.114.114     //使用电信的DNS服务器。其实这样修改在ubuntu系统环境中时不对的，只能够暂时生效，如果想要永久生效，必须修改配置文件/etc/resolvconf/resolv.conf.d/base  每次开机都会从这个配置文件加载dns到/etc/resolv.conf这个配置文件中。</p>
+<p>基本的网络地址配置完成之后，能够实现：<br>    1），compute和controller之间相互ping通，包括10.0.0.0网段和192.168.3.0网段<br>    2），都能够访问外网。<br>    3），都能够进行地址解析。</p>
+<p>接着配置ubuntu的更新源：这里使用的是阿里云的更新源。 配置文件是：/etc/apt/source.list<br>root@controller:~# cat /etc/apt/sources.list<br>deb <a href="http://mirrors.aliyun.com/ubuntu/" target="_blank" rel="external">http://mirrors.aliyun.com/ubuntu/</a> trusty main restricted universe multiverse<br>deb <a href="http://mirrors.aliyun.com/ubuntu/" target="_blank" rel="external">http://mirrors.aliyun.com/ubuntu/</a> trusty-security main restricted universe multiverse<br>deb <a href="http://mirrors.aliyun.com/ubuntu/" target="_blank" rel="external">http://mirrors.aliyun.com/ubuntu/</a> trusty-updates main restricted universe multiverse<br>deb <a href="http://mirrors.aliyun.com/ubuntu/" target="_blank" rel="external">http://mirrors.aliyun.com/ubuntu/</a> trusty-proposed main restricted universe multiverse<br>deb <a href="http://mirrors.aliyun.com/ubuntu/" target="_blank" rel="external">http://mirrors.aliyun.com/ubuntu/</a> trusty-backports main restricted universe multiverse<br>deb-src <a href="http://mirrors.aliyun.com/ubuntu/" target="_blank" rel="external">http://mirrors.aliyun.com/ubuntu/</a> trusty main restricted universe multiverse<br>deb-src <a href="http://mirrors.aliyun.com/ubuntu/" target="_blank" rel="external">http://mirrors.aliyun.com/ubuntu/</a> trusty-security main restricted universe multiverse<br>deb-src <a href="http://mirrors.aliyun.com/ubuntu/" target="_blank" rel="external">http://mirrors.aliyun.com/ubuntu/</a> trusty-updates main restricted universe multiverse<br>deb-src <a href="http://mirrors.aliyun.com/ubuntu/" target="_blank" rel="external">http://mirrors.aliyun.com/ubuntu/</a> trusty-proposed main restricted universe multiverse<br>deb-src <a href="http://mirrors.aliyun.com/ubuntu/" target="_blank" rel="external">http://mirrors.aliyun.com/ubuntu/</a> trusty-backports main restricted universe multiverse<br>root@controller:~# </p>
+<p>配置完更新源之后进行更新：<br>#apt-get  update<br>然后安装ssh服务，实现远程访问：<br>#apt-get install  ssh  -y</p>
+]]></content>
+    <summary type="html">
+    <![CDATA[<p>显示全文：<br>]]>
+    
+    </summary>
     
       <category term="openstack" scheme="http://liyahua.github.io/tags/openstack/"/>
     
