@@ -3,18 +3,17 @@
 <head>
   <meta charset="utf-8">
   
-  <title>OpenStack搭建文档 | Leoli&#39;s  blog</title>
+  <title>Tag: NTP | Leoli&#39;s  blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="显示全文：">
-<meta property="og:type" content="article">
-<meta property="og:title" content="OpenStack搭建文档">
-<meta property="og:url" content="http://liyahua.github.io/2015/08/09/OpenStack搭建文档/index.html">
+  <meta name="description">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Leoli's  blog">
+<meta property="og:url" content="http://liyahua.github.io/tags/NTP/index.html">
 <meta property="og:site_name" content="Leoli's  blog">
-<meta property="og:description" content="显示全文：">
-<meta property="og:updated_time" content="2015-08-12T02:51:10.838Z">
+<meta property="og:description">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="OpenStack搭建文档">
-<meta name="twitter:description" content="显示全文：">
+<meta name="twitter:title" content="Leoli's  blog">
+<meta name="twitter:description">
   
     <link rel="alternative" href="/atom.xml" title="Leoli&#39;s  blog" type="application/atom+xml">
   
@@ -65,57 +64,39 @@
   </div>
 </header>
       <div class="outer">
-        <section id="main"><article id="post-OpenStack搭建文档" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2015/08/09/OpenStack搭建文档/" class="article-date">
-  <time datetime="2015-08-09T14:58:11.000Z" itemprop="datePublished">2015-08-09</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
+        <section id="main">
   
-    <h1 class="article-title" itemprop="name">
-      OpenStack搭建文档
+  
+    
+    
+      
+      
+      <section class="archives-wrap">
+        <div class="archive-year-wrap">
+          <a href="/archives/2015" class="archive-year">2015</a>
+        </div>
+        <div class="archives">
+    
+    <article class="archive-article archive-type-post">
+  <div class="archive-article-inner">
+    <header class="archive-article-header">
+      <a href="/2015/08/09/OpenStack-基础环境搭建二/" class="archive-article-date">
+  <time datetime="2015-08-09T14:58:11.000Z" itemprop="datePublished">8月 9</time>
+</a>
+      
+  
+    <h1 itemprop="name">
+      <a class="archive-article-title" href="/2015/08/09/OpenStack-基础环境搭建二/">OpenStack基础环境搭建二</a>
     </h1>
   
 
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>显示全文：<br><a id="more"></a></p>
-<p><strong>openstack</strong>：<br>    官方文档中有两种openstack的架构，一种是采用openstack的neutron网络模型来搭建，需要至少三个节点：compute，controller和network。<br><strong>一，硬件的需求：</strong><br>    <em>三个节点要求：</em><br>        Controller Node: 1 processor, 2 GB memory, and 5 GB storage<br>        Network Node: 1 processor, 512 MB memory, and 5 GB storage<br>        Compute Node: 1 processor, 2 GB memory, and 10 GB storage<br><strong>网卡要求：</strong><br>    <em>compute节点</em>：2 NIC<br>    <em>controller节点</em>：1 NIC<br>    <em>network节点</em>： 3 NIC  (因为三台服务器的网卡都只有两块。暂时不满足硬件需求，第一次尝试搭建的时候没注意，按照三个节点搭建，并且没配置tunnel接口，导致网络不通）。</p>
-<p><em>外部网络</em>:公共网络，外部或Internet可以访问的网络<br><em>内部网络</em>:私有网络，仅内部访问的网络<br><em>管理网络</em>:用于OpenStack组件以及MySQL DB Server, RabbitMQmessaging server之间的通信<br>这次采用的网络拓扑架构比较简单，网络模式选择的是nova-network的FlatDHCP，只配置了两个节点，compute和controller节点。最多只需要两个NIC，现有的服务器满足需求。</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://liyahua.github.io/2015/08/09/OpenStack搭建文档/" data-id="cid87za1500039w7b5483i5x1" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/openstack/">openstack</a></li></ul>
-
-    </footer>
+    </header>
   </div>
-  
-    
-<nav id="article-nav">
-  
-  
-    <a href="/2015/08/09/OpenStack-基础环境搭建/" id="article-nav-older" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Older</strong>
-      <div class="article-nav-title">OpenStack基础环境搭建</div>
-    </a>
-  
-</nav>
-
-  
 </article>
-
+  
+  
+    </div></section>
+  
 </section>
         
           <aside id="sidebar">
