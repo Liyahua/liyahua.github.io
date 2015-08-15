@@ -5,7 +5,7 @@
   <subtitle><![CDATA[Follow your heart]]></subtitle>
   <link href="/atom.xml" rel="self"/>
   <link href="http://www.stackops.info//"/>
-  <updated>2015-08-15T04:32:49.780Z</updated>
+  <updated>2015-08-15T10:40:43.717Z</updated>
   <id>http://www.stackops.info//</id>
   
   <author>
@@ -16,15 +16,190 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
-    <title></title>
-    <link href="http://www.stackops.info/2015/08/15/svn%E5%9B%BE%E5%BD%A2%E5%8C%96%E7%AE%A1%E7%90%86%E5%B7%A5%E5%85%B7submin%E6%90%AD%E5%BB%BA/"/>
-    <id>http://www.stackops.info/2015/08/15/svn图形化管理工具submin搭建/</id>
-    <published>2015-08-15T04:33:19.685Z</published>
-    <updated>2015-08-15T04:32:49.780Z</updated>
-    <content type="html"></content>
+    <title><![CDATA[使用submin搭建图形化svn管理工具]]></title>
+    <link href="http://www.stackops.info/2015/08/09/%E4%BD%BF%E7%94%A8submin%E6%90%AD%E5%BB%BA%E5%9B%BE%E5%BD%A2%E5%8C%96svn%E7%AE%A1%E7%90%86%E5%B7%A5%E5%85%B7/"/>
+    <id>http://www.stackops.info/2015/08/09/使用submin搭建图形化svn管理工具/</id>
+    <published>2015-08-09T14:58:11.000Z</published>
+    <updated>2015-08-15T10:40:43.717Z</updated>
+    <content type="html"><![CDATA[<p>显示全文：<br><a id="more"></a></p>
+<h2 id="具体的安装步骤分四个部分：">具体的安装步骤分四个部分：</h2><ul>
+<li>安装subversion+mod_dav_svn模块。</li>
+<li>apache安装</li>
+<li>python安装</li>
+<li>submin安装</li>
+<li>apache配置</li>
+<li>问题汇总<h3 id="1-安装subversion+mod_dav_svn模块：">1.安装subversion+mod_dav_svn模块：</h3></li>
+</ul>
+<p><strong>注意:</strong>这里一定要安装mod_dav_svn这个模块。subversion也直接用yum安装即可。</p>
+<pre><code><span class="id">#yum</span> install subversion  mod_dav_svn
+</code></pre><p>如果没有安装mod_dav_svn这个模块则会导致不能打开库，不能使用svn的客户端连接svn库。</p>
+<p>提示如下错误：</p>
+<pre><code>[root@submin modules]# /etc/init.<span class="keyword">d</span>/httpd restart
+
+Stopping httpd:                                            [  OK  ]
+
+Starting httpd: httpd: <span class="keyword">Syntax</span> <span class="keyword">error</span> <span class="keyword">on</span> <span class="keyword">line</span> 221 of /etc/httpd/<span class="keyword">conf</span>/httpd.<span class="keyword">conf</span>: <span class="keyword">Syntax</span> <span class="keyword">error</span> <span class="keyword">on</span> <span class="keyword">line</span> 2 of /etc/httpd/<span class="keyword">conf</span>.<span class="keyword">d</span>/subversion.<span class="keyword">conf</span>: Cannot load /etc/httpd/modules/mod_dav_svn.<span class="keyword">so</span> into server: /etc/httpd/modules/mod_dav_svn.<span class="keyword">so</span>: cannot <span class="keyword">open</span> shared object <span class="keyword">file</span>: <span class="keyword">No</span> such <span class="keyword">file</span> or directory
+
+                                                           [FAILED]
+</code></pre><p><strong>并且每次对apache的配置文件进行修改之后都要记得进行httpd服务的重启。</strong></p>
+<h3 id="2_安装apache2-2-15(可以编译或者直接yum安装，视情况而定)">2 安装apache2.2.15(可以编译或者直接yum安装，视情况而定)</h3><hr>
+<p>安装apache中间由于涉及到很多依赖的插件，因此需要先完成apr，pcre等安装才能进行apache安装。<br>具体的安装操作命令如下：</p>
+<h4 id="a)_apr安装_//_#_这里直接用yum安装即可：_#yum_install_apr_apr-util">a) apr安装      // # 这里直接用yum安装即可： #yum  install  apr   apr-util</h4><pre><code>wget http:<span class="comment">//www.apache.org/dist/apr/apr-1.4.6.tar.gz</span>
+tar -xzvf apr-<span class="number">1.4</span><span class="number">.6</span>.tar.gz
+cd apr-<span class="number">1.4</span><span class="number">.6</span>
+./configure --prefix=/opt/apr --enable-threads
+make
+make install
+</code></pre><h4 id="b)_apr-util安装">b) apr-util安装</h4><pre><code>wget http:<span class="comment">//www.apache.org/dist/apr/apr-util-1.5.1.tar.gz</span>
+tar -xzvf apr-util-<span class="number">1.5</span><span class="number">.1</span>.tar.gz
+cd apr-util-<span class="number">1.5</span><span class="number">.1</span>
+./configure --prefix=/opt/apr --with-apr=/opt/apr
+make
+make install
+</code></pre><h4 id="c)_pcre安装_//#直接yum安装:_#yum_install_pcre">c) pcre安装    //#直接yum安装:  #yum install pcre</h4><pre><code>wget <span class="symbol">http:</span>/<span class="regexp">/sourceforge.net/projects</span><span class="regexp">/pcre/files</span><span class="regexp">/pcre/</span><span class="number">8.32</span>/pcre-<span class="number">8.32</span>.tar.gz/download
+tar -xzvf pcre-<span class="number">8.32</span>.tar.gz
+cd pcre-<span class="number">8.32</span>
+./configure --prefix=<span class="regexp">/opt/pcre</span>
+make
+make install
+</code></pre><h4 id="d)_apache2-4-4安装_//注意这里submin2对apache2-2支持更好些，并没选择2-4-4直接用yum安装apache2-2即可。#yum_install_httpd">d) apache2.4.4安装    //注意这里submin2对apache2.2支持更好些，并没选择2.4.4直接用yum安装apache2.2即可。#yum install httpd</h4><pre><code>wget http:<span class="comment">//www.apache.org/dist/httpd/httpd-2.4.4.tar.gz</span>
+tar -xzvf httpd-<span class="number">2.4</span><span class="number">.4</span>.tar.gz
+cd httpd-<span class="number">2.4</span><span class="number">.4</span>
+./configure --prefix=<span class="regexp">/opt/</span>apache24 --<span class="keyword">with</span>-pcre=<span class="regexp">/opt/</span>pcre --<span class="keyword">with</span>-apr=<span class="regexp">/opt/</span>apr --<span class="keyword">with</span>-apr-util=<span class="regexp">/opt/</span>apr  --enable-cgid  --enable-cgi
+make clean
+make
+make install
+</code></pre><h3 id="2-_安装python2-7-3_#//这里还是简单起见，直接yum安装python2-6（系统默认就带的是python2-6）个人使用的是python2-6没有问题。">2. 安装python2.7.3  #//这里还是简单起见，直接yum安装python2.6（系统默认就带的是python2.6）个人使用的是python2.6没有问题。</h3><hr>
+<p>由于submin需要使用到sqlite3数据库，因此在安装python2.7.3的时候，把sqlite3模块安装上。但2.7.3的安装脚本中存在bug，需要打最新的patch解决。具体的步骤如下：</p>
+<pre><code>yum search sqlite3
+yum <span class="operator"><span class="keyword">install</span> sqlite-devel
+wget <span class="keyword">http</span>://python.org/<span class="keyword">ftp</span>/python/<span class="number">2.7</span><span class="number">.3</span>/Python-<span class="number">2.7</span><span class="number">.3</span>.tar.bz2
+tar -xvjf Python-<span class="number">2.7</span><span class="number">.3</span>.tar.bz2
+cd Python-<span class="number">2.7</span><span class="number">.3</span>
+more README
+wget <span class="keyword">http</span>://bugs.python.org/file25647/sqlite3_int64_v2.<span class="keyword">patch</span>
+<span class="keyword">patch</span> -p1 &lt; sqlite3_int64_v2.<span class="keyword">patch</span>  #打补丁   
+./configure
+make
+make <span class="keyword">install</span></span>
+</code></pre><p>因为是通过sqlite这个数据库存储用户的账户名和密码。而且验证的时候也是直接从sqlite数据库中读取比较，所以不要忘记安装  apr-util-sqlite</p>
+<pre><code><span class="id">#yum</span> install apr-util-sqlite
+</code></pre><p>这个包。安装正常之后我们可以在/usr/lib64/apr-util-1/这个目录下看到apr_dbd_sqlite3.so这个动态库。</p>
+<pre><code>[root@svnadmin conf]<span class="preprocessor"># cd /usr/lib64/apr-util-<span class="number">1</span>/</span>
+
+[root@svnadmin apr-util-<span class="number">1</span>]<span class="preprocessor"># ls</span>
+
+apr_dbd_sqlite3-<span class="number">1.</span>so  apr_dbd_sqlite3.so  apr_ldap-<span class="number">1.</span>so  apr_ldap.so
+
+[root@svnadmin apr-util-<span class="number">1</span>]<span class="preprocessor"># ll</span>
+
+total <span class="number">28</span>
+
+-rwxr-xr-x. <span class="number">1</span> root root <span class="number">15792</span> Jun <span class="number">25</span>  <span class="number">2011</span> apr_dbd_sqlite3-<span class="number">1.</span>so
+
+lrwxrwxrwx. <span class="number">1</span> root root    <span class="number">20</span> Aug <span class="number">13</span> <span class="number">15</span>:<span class="number">51</span> apr_dbd_sqlite3.so -&gt; apr_dbd_sqlite3-<span class="number">1.</span>so
+
+-rwxr-xr-x. <span class="number">1</span> root root  <span class="number">9488</span> Jun <span class="number">25</span>  <span class="number">2011</span> apr_ldap-<span class="number">1.</span>so
+
+lrwxrwxrwx. <span class="number">1</span> root root    <span class="number">13</span> Aug <span class="number">13</span> <span class="number">14</span>:<span class="number">25</span> apr_ldap.so -&gt; apr_ldap-<span class="number">1.</span>so
+</code></pre><h2 id="3-_安装submin">3. 安装submin</h2><hr>
+<p>安装submin过程比较简单的，直接使用python执行安装包中的安装脚本。</p>
+<pre><code>wget http:<span class="comment">//supermind.nl/submin/current/submin-2.1.0-1.tar.gz</span>
+tar -zxvf submin-<span class="number">2.1</span><span class="number">.0</span>-<span class="number">1.</span>tar.gz
+cd submin-<span class="number">2.1</span><span class="number">.0</span>-<span class="number">1</span>
+python setup.py install  <span class="comment">//还是使用的python2.6安装。使用python2.7安装可能会报错：</span>
+
+submin2-admin /var/lib/submin initenv liyahua@xxx.com
+</code></pre><h2 id="4-_配置apache">4. 配置apache</h2><hr>
+<p>配置apache的过程中需要修改submin的配置文件。默认安装路径是/var/lib/submin/，需要安装相应的模块：</p>
+<h3 id="例如报错：">例如报错：</h3><p><img src="http://7xl5dz.com1.z0.glb.clouddn.com/12a90e46-b7dd-4480-8fc5-490ee586bbd5.png" alt="error"><br>报错有  <strong>mod_dbd</strong>和<strong>mod_auth_dbd</strong>两个模块没有加载。只需要在/etc/httpd/conf/httpd.conf中加载相关的模块就可以了。</p>
+<pre><code><span class="keyword"><span class="common">LoadModule</span></span> authn_dbd_module modules/mod_authn_dbd.so
+<span class="keyword"><span class="common">LoadModule</span></span> dbd_module modules/mod_dbd.so
+</code></pre><p><strong>配置apache</strong>，主要是设置submin的conf文件，另外需要dbd,authz,cgi的module就可以。如果启动过程发现缺少，就打开配置即可。</p>
+<p>另外一个问题就是在配置完毕后，访问submin报403错误，后查到是，submin的脚本是在apache2.2的基础上开发的，没有支持apache2.4.4，需要设置符合apache2.4.4的访问策略。//我这里使用的是apache2.2，所以没有上述的问题。</p>
+<pre><code>[root@localhost ~]# tail -<span class="number">10</span>f /opt/apache24/conf/httpd.conf
+<span class="preprocessor">#BrowserMatch "MSIE 10.0;" bad_DNT</span>
+<span class="preprocessor">#</span>
+<span class="preprocessor">#</span>
+<span class="preprocessor">#RequestHeader unset DNT env=bad_DNT</span>
+<span class="preprocessor">#</span>
+Include /<span class="keyword">var</span>/lib/submin/conf/apache-webui-cgi.conf
+Include /<span class="keyword">var</span>/lib/submin/conf/apache-svn.conf
+</code></pre><p>这里附上我修改过后的submin的配置文件：</p>
+<pre><code><span class="tag">&lt;Virtualhost *:80&gt;</span>
+        <span class="keyword">serveradmin</span> liyahua@xxx.com
+        <span class="keyword"><span class="common">Servername</span></span> svnadmin.xx.com
+        <span class="keyword"><span class="common">DocumentRoot</span></span> /var/lib/submin/cgi-bin
+
+     <span class="keyword"><span class="common">RewriteEngine</span></span> <span class="literal">On</span>
+        <span class="keyword"><span class="common">RewriteRule</span></span> ^[/]?$ http://svnadmin.ci.com/submin<span class="sqbracket"> [L,R]</span>
+<span class="tag">&lt;IfModule !mod_authn_dbd.c&gt;</span>
+    <span class="comment"># Nothing should work, so show a page describing this</span>
+    <span class="keyword">AliasMatch</span> <span class="string">"^/svn"</span> /usr/lib/python2.6/site-packages/submin/static/www/nomodauthndbd.html
+    <span class="tag">&lt;Location "/svn"&gt;</span>
+        <span class="keyword"><span class="common">Order</span></span> allow,deny
+        <span class="keyword"><span class="common">Allow</span></span> from <span class="literal">all</span>
+    <span class="tag">&lt;/Location&gt;</span>
+<span class="tag">&lt;/IfModule&gt;</span>
+<span class="tag">&lt;IfModule mod_authn_dbd.c&gt;</span>
+    <span class="keyword">DBDriver</span> sqlite3
+    <span class="keyword">DBDParams</span> <span class="string">"/var/lib/submin/conf/submin.db"</span>    #这是一个sqlite的数据库文件，存放了用户名和密码。
+
+    <span class="tag">&lt;IfModule mod_dav_svn.c&gt;</span>
+        <span class="tag">&lt;Location "/svn"&gt;</span>
+            <span class="keyword">DAV</span> svn
+            <span class="keyword">SVNParentPath</span> /var/lib/submin/svn   #这给目录里面存放了所有的svn库
+
+            <span class="keyword">AuthType</span> Basic
+            <span class="keyword">AuthName</span> <span class="string">"Subversion repository"</span>
+
+            <span class="comment"># Authentication</span>
+            <span class="keyword">AuthBasicProvider</span> dbd
+            <span class="keyword">AuthDBDUserPWQuery</span> <span class="string">"SELECT password FROM users WHERE name=%s"</span>
+
+            <span class="comment"># Authorization</span>
+            <span class="keyword">AuthzSVNAccessFile</span> /var/lib/submin/conf/authz       #这个文件定义了不同的用户角色，具有不同的权限
+
+            <span class="keyword">Satisfy</span> Any
+            <span class="keyword">Require</span> valid-user
+        <span class="tag">&lt;/Location&gt;</span>
+    <span class="tag">&lt;/IfModule&gt;</span>
+
+<span class="tag">&lt;/IfModule&gt;</span>
+<span class="tag">&lt;/VirtualHost&gt;</span>
+</code></pre><p>当通过浏览器访问web管理界面的时候：<a href="http://192.168.3.48/submin会提示你输入账户和密码，这时候你可以点击页面上的" target="_blank" rel="external">http://192.168.3.48/submin会提示你输入账户和密码，这时候你可以点击页面上的</a>  Forgot your  password , 然后会主动发一封邮件给root用户：<br>可以通过命令：# cat /var/spool/mail/root 查看发过来的重置密码的连接，我们可以通过该链接进行密码的修改：<br>    From: root@localhost.novalocal<br>    To: liyahua@xxx.com<br>    Subject: Submin password reset request<br>    Message-Id: <a href="&#109;&#x61;&#x69;&#x6c;&#116;&#111;&#58;&#50;&#x30;&#x31;&#x35;&#48;&#x38;&#x31;&#x33;&#48;&#x36;&#50;&#x37;&#x35;&#x35;&#x2e;&#x42;&#x36;&#56;&#x36;&#x46;&#54;&#x31;&#x46;&#55;&#x44;&#64;&#115;&#x76;&#110;&#97;&#x64;&#x6d;&#x69;&#x6e;&#46;&#x6e;&#x6f;&#118;&#97;&#x6c;&#111;&#x63;&#97;&#108;">&#50;&#x30;&#x31;&#x35;&#48;&#x38;&#x31;&#x33;&#48;&#x36;&#50;&#x37;&#x35;&#x35;&#x2e;&#x42;&#x36;&#56;&#x36;&#x46;&#54;&#x31;&#x46;&#55;&#x44;&#64;&#115;&#x76;&#110;&#97;&#x64;&#x6d;&#x69;&#x6e;&#46;&#x6e;&#x6f;&#118;&#97;&#x6c;&#111;&#x63;&#97;&#108;</a><br>    Date: Thu, 13 Aug 2015 06:27:55 +0000 (UTC)</p>
+<pre><code>You <span class="keyword">are</span> receiving this email because someone requested a password reset for
+your account. If you don't know what this <span class="keyword">is</span> about, you can safely ignore it,
+the reset request will expire automatically.
+
+If you requested this passwod reset, you can reset your password by going to
+the following URL:
+
+http://svnadmin.novalocal/submin/password/admin/IANqikp4ZvSIFIWZ9sTDKoYr4OIYmTtBBcnYfkiXIc9y1oegJm
+
+<span class="keyword">Kind</span> regards,
+Submin
+
+PS. The request was sent from submin2-admin
+
+--B686F61F7D.1439447277/svnadmin.novalocal--
+</code></pre><p>可以看到链接，在浏览器中打开链接，输入账户之后会再发一封邮件给你，里面包含了重置之后的密码。可以使用密码重新登陆submin。<br><img src="http://7xl5dz.com1.z0.glb.clouddn.com/5eede493-8e20-429e-95e6-eff22784e4f5.png" alt="login"><br>可以在这个图形化的界面中进行密码修改，用户，组，repository创建删除，权限的授予等svn账户管理,比较方便直观.</p>
+<p>当所有的环境都安装完成之后，可以使用tortoise svn这个windows下的客户端连接svn库。<br><img src="http://7xl5dz.com1.z0.glb.clouddn.com/2b2576d2-5dc5-4e31-b3bb-3b4cbdfff49b.jpg" alt="tortois svn"><br>至此，svn的图形化管理工具submin已经安装完成了。<br>这里还是有必要提一下，submin几个比较重要的目录：</p>
+<ul>
+<li>1   /var/lib/submin/svn : 这个目录相当于svn仓库，存放了所有svn的repository，至关重要。</li>
+<li>2   /var/lib/conf/  :  这个目录下存放了submin的所有配置文件，</li>
+<li>3   /var/lib/conf/submin.db  ：这是一个sqlite数据库文件，里面存放的是svn的用户名和密码</li>
+<li>4   /var/lib/conf/authz  ：这个文件里面存放了每个svn用户对应的权限。</li>
+</ul>
+]]></content>
     <summary type="html">
+    <![CDATA[<p>显示全文：<br>]]>
     
     </summary>
+    
+      <category term="submin" scheme="http://www.stackops.info/tags/submin/"/>
+    
+      <category term="svn" scheme="http://www.stackops.info/tags/svn/"/>
     
   </entry>
   
@@ -157,7 +332,7 @@ Status of node rabbit@controller ...
     <link href="http://www.stackops.info/2015/08/09/OpenStack-%E5%9F%BA%E7%A1%80%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E4%B8%80/"/>
     <id>http://www.stackops.info/2015/08/09/OpenStack-基础环境搭建一/</id>
     <published>2015-08-09T14:58:11.000Z</published>
-    <updated>2015-08-15T03:29:20.084Z</updated>
+    <updated>2015-08-15T10:48:06.023Z</updated>
     <content type="html"><![CDATA[<p>显示全文：<br><a id="more"></a></p>
 <p> <strong>操作系统系统选择</strong>：使用ubuntu server  ubuntu-14.04.2-server-amd64  作为服务器的操作系统。<br> 第一次给服务器安装操作系统，我很low的拿着个小U盘来安装，使用UltraISO制作系统镜像。安装系统前对磁盘做了RAID5。</p>
 <p>安装完操作系统之后，需要修改接口的ip地址，使服务器能够连得上外网(不能简单的按照官方文档配置，必须切合实际，毕竟还需要安装组件),具体接口的配置如下：</p>
