@@ -11,7 +11,7 @@
 <meta property="og:url" content="http://liyahua.github.io/2015/08/09/OpenStack-基础环境搭建二/index.html">
 <meta property="og:site_name" content="Leoli's  blog">
 <meta property="og:description" content="显示全文：">
-<meta property="og:updated_time" content="2015-08-12T03:52:34.469Z">
+<meta property="og:updated_time" content="2015-08-15T03:00:50.443Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="OpenStack基础环境搭建二">
 <meta name="twitter:description" content="显示全文：">
@@ -98,26 +98,25 @@ var _hmt = _hmt || [];
     <div class="article-entry" itemprop="articleBody">
       
         <p>显示全文：<br><a id="more"></a></p>
-<p><strong>NTP服务的安装</strong>：<br>（1），安装NTP服务实现各个节点之间的时间同步(这点很重要，如果各节点之间时间不同步会导致后来的服务异常)。<br><em>controller</em>节点：</p>
-<pre><code><span class="number">1.</span> 安装NTP服务：
-    <span class="preprocessor">#apt-get install ntp </span>
+<h2 id="NTP服务的安装_：">NTP服务的安装 ：</h2><p>（1），安装NTP服务实现各个节点之间的时间同步(这点很重要，如果各节点之间时间不同步会导致后来的服务异常)。</p>
+<h2 id="controller节点：">controller节点：</h2><pre><code><span class="number">1.</span> 安装NTP服务：
+   <span class="preprocessor">#apt-get install ntp </span>
 <span class="number">2.</span> 修改/etc/ntp.conf配置文件：
 server controller iburst
 <span class="keyword">restrict</span> -<span class="number">4</span> <span class="keyword">default</span> kod notrap nomodify
-<span class="keyword">restrict</span> -<span class="number">6</span> <span class="keyword">default</span> kod notrap nomodify  
+<span class="keyword">restrict</span> -<span class="number">6</span> <span class="keyword">default</span> kod notrap nomodify   
 （删掉nopeer and noquery ）
 如果 /var/lib/ntp/ntp.conf文件存在，则删除。
 <span class="number">3.</span> 重启ntp的服务
 <span class="preprocessor">#  service ntp restart</span>
-</code></pre><p><em>其他节点</em>：</p>
-<pre><code><span class="number">1.</span> 安装NTP服务
+</code></pre><h2 id="其他节点：">其他节点：</h2><pre><code><span class="number">1.</span> 安装NTP服务
  <span class="preprocessor">#apt-get install  ntp</span>
 <span class="number">2.</span> 修改/etc/ntp.conf的配置文件
  server controller iburst 
 <span class="number">3.</span> 重启ntp服务
  <span class="preprocessor">#service  ntp restart</span>
-</code></pre><p><em>NTP同步状态查看</em>：<br>    root@compute:~# ntpq -c peers</p>
-<pre><code> remote           refid      st t when poll reach   delay   offset  jitter
+</code></pre><h3 id="NTP同步状态查看：">NTP同步状态查看：</h3><pre><code>root@compute:~<span class="preprocessor"># ntpq -c peers</span>
+ remote           refid      st t when poll reach   delay   offset  jitter
 ==============================================================================
 +controller      <span class="number">91.189</span><span class="number">.89</span><span class="number">.199</span>    <span class="number">3</span> u  <span class="number">796</span> <span class="number">1024</span>  <span class="number">377</span>    <span class="number">0.165</span>   <span class="number">10.130</span>  <span class="number">19.549</span>
 *golem.canonical <span class="number">131.188</span><span class="number">.3</span><span class="number">.220</span>    <span class="number">2</span> u <span class="number">1067</span> <span class="number">1024</span>  <span class="number">336</span>  <span class="number">409.188</span>   <span class="number">66.053</span>  <span class="number">24.625</span>
@@ -135,7 +134,11 @@ very <span class="number">2.0</span>s: ntpq -p                                  
 ==============================================================================
 +controller      <span class="number">91.189</span><span class="number">.89</span><span class="number">.199</span>    <span class="number">3</span> u  <span class="number">448</span> <span class="number">1024</span>  <span class="number">377</span>    <span class="number">0.165</span>   <span class="number">10.130</span>  <span class="number">20.335</span>
 *golem.canonical <span class="number">131.188</span><span class="number">.3</span><span class="number">.220</span>    <span class="number">2</span> u <span class="number">1800</span> <span class="number">1024</span>  <span class="number">336</span>  <span class="number">409.188</span>   <span class="number">66.053</span>  <span class="number">24.625</span>
-</code></pre><p>现在我就来解释一下其中的含义<br><em>remote</em>: 它指的就是本地机器所连接的远程NTP服务器<br><em>refid</em>: 它指的是给远程服务器(e.g. 91.189.89.199 )提供时间同步的服务器<br><em>st</em>: 远程服务器的层级别（stratum）. 由于NTP是层型结构,有顶端的服务器,多层的Relay Server再到客户端. 所以服务器从高到低级别可以设定为1-16. 为了减缓负荷和网络堵塞,原则上应该避免直接连接到级别为1的服务器的.<br><em>t</em>: 这个…..我也不知道啥意思^_^<br><em>when</em>: 我个人把它理解为一个计时器用来告诉我们还有多久本地机器就需要和远程服务器进行一次时间同步<br><em>poll</em>: 本地机和远程服务器多少时间进行一次同步(单位为秒). 在一开始运行NTP的时候这个poll值会比较小,那样和服务器同步的频率也就增加了,可以尽快调整到正确的时间范围.之后poll值会逐渐增大,同步的频率也就会相应减小<br><em>reach</em>: 这是一个八进制值,用来测试能否和服务器连接.每成功连接一次它的值就会增加<br><em>delay</em>: 从本地机发送同步要求到服务器的round trip time<br><em>offset</em>: 这是个最关键的值, 它告诉了我们本地机和服务器之间的时间差别. offset越接近于0,我们就和服务器的时间越接近<br><em>jitter</em>: 这是一个用来做统计的值. 它统计了在特定个连续的连接数里offset的分布情况. 简单地说这个数值的绝对值越小我们和服务器的时间就越精确<br><em>NTP安全设置(restrict)</em><br>运行一个NTP Server不需要占用很多的系统资源,所以也不用专门配置独立的服务器,就可以给许多client提供时间同步服务, 但是一些基本的安全设置还是很有必要的<br>那么这里一个很简单的思路就是第一我们只允许局域网内一部分的用户连接到我们的服务器. 第二个就是这些client不能修改我们服务器上的时间<br>关于权限设定部分<br>权限的设定主要以 restrict 这个参数来设定，主要的语法为：<br>restrict IP地址 mask 子网掩码 参数<br>其中 IP 可以是IP地址，也可以是 default ，default 就是指所有的IP<br>参数有以下几个：<br><em>ignore</em>　：关闭所有的 NTP 联机服务<br><em>nomodify</em>：客户端不能更改服务端的时间参数，但是客户端可以通过服务端进行网络校时。<br><em>notrust</em> ：客户端除非通过认证，否则该客户端来源将被视为不信任子网<br><em>noquery</em> ：不提供客户端的时间查询</p>
+</code></pre><p>我来解释一下其中的含义</p>
+<h3 id="remote:_它指的就是本地机器所连接的远程NTP服务器">remote: 它指的就是本地机器所连接的远程NTP服务器</h3><h3 id="refid:_它指的是给远程服务器(e-g-_91-189-89-199_)提供时间同步的服务器">refid: 它指的是给远程服务器(e.g. 91.189.89.199 )提供时间同步的服务器</h3><h3 id="st:_远程服务器的层级别（stratum）-_由于NTP是层型结构,有顶端的服务器,多层的Relay_Server再到客户端-_所以服务器从高到低级别可以设定为1-16-_为了减缓负荷和网络堵塞,原则上应该避免直接连接到级别为1的服务器的-">st: 远程服务器的层级别（stratum）. 由于NTP是层型结构,有顶端的服务器,多层的Relay Server再到客户端. 所以服务器从高到低级别可以设定为1-16. 为了减缓负荷和网络堵塞,原则上应该避免直接连接到级别为1的服务器的.</h3><h3 id="t:_这个…-我也不知道啥意思^_^">t: 这个…..我也不知道啥意思^_^</h3><h3 id="when:_我个人把它理解为一个计时器用来告诉我们还有多久本地机器就需要和远程服务器进行一次时间同步">when: 我个人把它理解为一个计时器用来告诉我们还有多久本地机器就需要和远程服务器进行一次时间同步</h3><h3 id="poll:_本地机和远程服务器多少时间进行一次同步(单位为秒)-_在一开始运行NTP的时候这个poll值会比较小,那样和服务器同步的频率也就增加了,可以尽快调整到正确的时间范围-之后poll值会逐渐增大,同步的频率也就会相应减小">poll: 本地机和远程服务器多少时间进行一次同步(单位为秒). 在一开始运行NTP的时候这个poll值会比较小,那样和服务器同步的频率也就增加了,可以尽快调整到正确的时间范围.之后poll值会逐渐增大,同步的频率也就会相应减小</h3><h3 id="reach:_这是一个八进制值,用来测试能否和服务器连接-每成功连接一次它的值就会增加">reach: 这是一个八进制值,用来测试能否和服务器连接.每成功连接一次它的值就会增加</h3><h3 id="delay:_从本地机发送同步要求到服务器的round_trip_time">delay: 从本地机发送同步要求到服务器的round trip time</h3><h3 id="offset:_这是个最关键的值,_它告诉了我们本地机和服务器之间的时间差别-_offset越接近于0,我们就和服务器的时间越接近">offset: 这是个最关键的值, 它告诉了我们本地机和服务器之间的时间差别. offset越接近于0,我们就和服务器的时间越接近</h3><h3 id="jitter:_这是一个用来做统计的值-_它统计了在特定个连续的连接数里offset的分布情况-_简单地说这个数值的绝对值越小我们和服务器的时间就越精确">jitter: 这是一个用来做统计的值. 它统计了在特定个连续的连接数里offset的分布情况. 简单地说这个数值的绝对值越小我们和服务器的时间就越精确</h3><h3 id="NTP安全设置(restrict)">NTP安全设置(restrict)</h3><h3 id="运行一个NTP_Server不需要占用很多的系统资源,所以也不用专门配置独立的服务器,就可以给许多client提供时间同步服务但是一些基本的安全设置还是很有必要的。">运行一个NTP Server不需要占用很多的系统资源,所以也不用专门配置独立的服务器,就可以给许多client提供时间同步服务但是一些基本的安全设置还是很有必要的。</h3><h3 id="那么这里一个很简单的思路就是第一我们只允许局域网内一部分的用户连接到我们的服务器-_第二个就是这些client不能修改我们服务器上的时间关于权限设定部分">那么这里一个很简单的思路就是第一我们只允许局域网内一部分的用户连接到我们的服务器. 第二个就是这些client不能修改我们服务器上的时间关于权限设定部分</h3><h3 id="权限的设定主要以_restrict_这个参数来设定，主要的语法为：">权限的设定主要以 restrict 这个参数来设定，主要的语法为：</h3><pre><code><span class="label">restrict</span> <span class="literal">IP</span>地址 mask 子网掩码 参数 
+</code></pre><h3 id="其中_IP_可以是IP地址，也可以是_default_，default_就是指所有的IP">其中 IP 可以是IP地址，也可以是 default ，default 就是指所有的IP</h3><ul>
+<li>参数有以下几个 ： <h3 id="ignore_：关闭所有的_NTP_联机服务">ignore　：关闭所有的 NTP 联机服务</h3><h3 id="nomodify：客户端不能更改服务端的时间参数，但是客户端可以通过服务端进行网络校时。">nomodify：客户端不能更改服务端的时间参数，但是客户端可以通过服务端进行网络校时。</h3><h3 id="notrust_：客户端除非通过认证，否则该客户端来源将被视为不信任子网">notrust ：客户端除非通过认证，否则该客户端来源将被视为不信任子网</h3><h3 id="noquery_：不提供客户端的时间查询">noquery ：不提供客户端的时间查询</h3></li>
+</ul>
 <p>在安装Openstack的各个功能组件之前，先安装Openstack的packages：（在所有节点上都安装）</p>
 <pre><code><span class="id">#apt-get</span> install ubuntu-cloud-keyring
 <span class="id">#echo</span> <span class="string">"deb http://ubuntu-cloud.archive.canonical.com/ubuntu"</span> \
@@ -143,23 +146,23 @@ very <span class="number">2.0</span>s: ntpq -p                                  
 </code></pre><p>更新系统上的包：</p>
 <pre><code>#apt-<span class="built_in">get</span> update &amp;&amp; apt-<span class="built_in">get</span> <span class="built_in">dist</span>-upgrade  
 </code></pre><p>如果不安装openstack库，直接安装keystone，会keystone能够安装成功，但是keystone启动后，接着就会失败。造成keystone为unknown instance</p>
-<p><strong>（2），接着安装MYSQL的数据库</strong>：<br>Openstack的主要组件都需要数据库的支持，Openstack支持MySQL，PostgreSQL，SQLite。这里选择mysql作为数据库。数据库安装在controller节点上。<br> (补充： MariaDB数据库管理系统是MySQL的一个分支，主要由开源社区在维护，采用GPL授权许可。开发这个分支的原因之一是：甲骨文公司收购了MySQL后，有将MySQL闭源的潜在风险，因此社区采用分支的方式来避开这个风险).<br>    <em>controller</em>节点安装：</p>
-<pre><code>1. 安装包：#apt-get <span class="operator"><span class="keyword">install</span> mariadb-<span class="keyword">server</span> python-mysqldb
-       （安装完会提示输入root密码）
-<span class="number">2.</span> 修改/etc/mysql/my.cnf这个配置文件，修改以下内容：
-[mysqld]
-...
-bind-address = <span class="number">10.0</span><span class="number">.0</span><span class="number">.11</span>  
-<span class="keyword">default</span>-<span class="keyword">storage</span>-<span class="keyword">engine</span> = <span class="keyword">innodb</span>
-innodb_file_per_table
-<span class="keyword">collation</span>-<span class="keyword">server</span> = utf8_general_ci
-init-<span class="keyword">connect</span> = <span class="string">'SET NAMES utf8'</span>
-<span class="built_in">character</span>-<span class="keyword">set</span>-<span class="keyword">server</span> = utf8
+<h2 id="（2），接着安装MYSQL的数据库**：">（2），接着安装MYSQL的数据库**：</h2><p>Openstack的主要组件都需要数据库的支持，Openstack支持MySQL，PostgreSQL，SQLite。这里选择mysql作为数据库。数据库安装在controller节点上。<br> (补充： MariaDB数据库管理系统是MySQL的一个分支，主要由开源社区在维护，采用GPL授权许可。开发这个分支的原因之一是：甲骨文公司收购了MySQL后，有将MySQL闭源的潜在风险，因此社区采用分支的方式来避开这个风险).</p>
+<pre><code>## controller节点安装：
+        1. 安装包：#apt-get <span class="operator"><span class="keyword">install</span> mariadb-<span class="keyword">server</span> python-mysqldb
+               （安装完会提示输入root密码）
+        <span class="number">2.</span> 修改/etc/mysql/my.cnf这个配置文件，修改以下内容：
+        [mysqld]
+        ...
+        bind-address = <span class="number">10.0</span><span class="number">.0</span><span class="number">.11</span>  
+        <span class="keyword">default</span>-<span class="keyword">storage</span>-<span class="keyword">engine</span> = <span class="keyword">innodb</span>
+        innodb_file_per_table
+        <span class="keyword">collation</span>-<span class="keyword">server</span> = utf8_general_ci
+        init-<span class="keyword">connect</span> = <span class="string">'SET NAMES utf8'</span>
+        <span class="built_in">character</span>-<span class="keyword">set</span>-<span class="keyword">server</span> = utf8
 
-<span class="number">3.</span> 重启服务：# service mysql restart
-<span class="number">4.</span> 保护数据库服务：# mysql_secure_installation</span>
-</code></pre><p><strong>（3），安装Messaging服务</strong>：（通常安装在controller节点上）。</p>
-<pre><code><span class="number">1.</span> Openstack组件之间的通需要通过支持AMQP的Messaging的服务软件，Openstack支持的有RabbitMQ，Qpid，和ZeroMQ，这里安装的RabbitMQ，
+        <span class="number">3.</span> 重启服务：# service mysql restart
+        <span class="number">4.</span> 保护数据库服务：# mysql_secure_installation</span>
+</code></pre><h2 id="（3），安装Messaging服务：（通常安装在controller节点上）。">（3），安装Messaging服务：（通常安装在controller节点上）。</h2><pre><code><span class="number">1.</span> Openstack组件之间的通需要通过支持AMQP的Messaging的服务软件，Openstack支持的有RabbitMQ，Qpid，和ZeroMQ，这里安装的RabbitMQ，
 <span class="preprocessor"># apt-get install rabbitmq-server</span>
 <span class="number">2.</span> 安装RabbitMQ服务软件时，RabbitMQ默认用户guest的密码是guest，我们需要修改一下guest密码： 
 <span class="preprocessor"># rabbitmqctl change_password guest RABBIT_PASS   (替换成你用的密码)</span>
@@ -176,7 +179,7 @@ Status of node rabbit@controller ...
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://liyahua.github.io/2015/08/09/OpenStack-基础环境搭建二/" data-id="cid9o3yrt0006807bcb91pi10" class="article-share-link">Share</a>
+      <a data-url="http://liyahua.github.io/2015/08/09/OpenStack-基础环境搭建二/" data-id="cidcg4l140006wc7b20y9p49p" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/AMQP/">AMQP</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/NTP/">NTP</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/openstack/">openstack</a></li></ul>
@@ -199,7 +202,7 @@ Status of node rabbit@controller ...
   
     <a href="/2015/08/09/OpenStack-基础环境搭建一/" id="article-nav-older" class="article-nav-link-wrap">
       <strong class="article-nav-caption">Older</strong>
-      <div class="article-nav-title">OpenStack基础环境搭建</div>
+      <div class="article-nav-title">OpenStack基础环境搭建一</div>
     </a>
   
 </nav>
@@ -255,7 +258,7 @@ Status of node rabbit@controller ...
           </li>
         
           <li>
-            <a href="/2015/08/09/OpenStack-基础环境搭建一/">OpenStack基础环境搭建</a>
+            <a href="/2015/08/09/OpenStack-基础环境搭建一/">OpenStack基础环境搭建一</a>
           </li>
         
           <li>

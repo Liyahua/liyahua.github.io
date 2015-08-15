@@ -3,17 +3,17 @@
 <head>
   <meta charset="utf-8">
   
-  <title>OpenStack基础环境搭建 | Leoli&#39;s  blog</title>
+  <title>OpenStack基础环境搭建一 | Leoli&#39;s  blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="显示全文：">
 <meta property="og:type" content="article">
-<meta property="og:title" content="OpenStack基础环境搭建">
+<meta property="og:title" content="OpenStack基础环境搭建一">
 <meta property="og:url" content="http://liyahua.github.io/2015/08/09/OpenStack-基础环境搭建一/index.html">
 <meta property="og:site_name" content="Leoli's  blog">
 <meta property="og:description" content="显示全文：">
-<meta property="og:updated_time" content="2015-08-12T02:52:07.564Z">
+<meta property="og:updated_time" content="2015-08-15T03:29:20.084Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="OpenStack基础环境搭建">
+<meta name="twitter:title" content="OpenStack基础环境搭建一">
 <meta name="twitter:description" content="显示全文：">
   
     <link rel="alternative" href="/atom.xml" title="Leoli&#39;s  blog" type="application/atom+xml">
@@ -89,7 +89,7 @@ var _hmt = _hmt || [];
         
   
     <h1 class="article-title" itemprop="name">
-      OpenStack基础环境搭建
+      OpenStack基础环境搭建一
     </h1>
   
 
@@ -98,27 +98,103 @@ var _hmt = _hmt || [];
     <div class="article-entry" itemprop="articleBody">
       
         <p>显示全文：<br><a id="more"></a></p>
-<p>   <em>操作系统系统选择</em>：使用ubuntu server  ubuntu-14.04.2-server-amd64  作为服务器的操作系统。<br>   第一次给服务器安装操作系统，我很low的拿着个小U盘来安装，使用UltraISO制作系统镜像。安装系统前对磁盘做了RAID5。</p>
-<p>安装完操作系统之后，需要修改接口的ip地址，使服务器能够连得上外网。具体接口的配置如下：<br><em>controller</em>节点：<br>root@controller:~# cat /etc/network/interfaces<br># This file describes the network interfaces available on your system<br># and how to activate them. For more information, see interfaces(5).</p>
-<p># The loopback network interface<br>auto lo<br>iface lo inet loopback<br>auto eth0<br>iface eth0 inet static<br>address 192.168.3.10<br>netmask 255.255.255.0<br>gateway 192.168.3.254<br>auto eth1<br>iface eth1 inet static<br>address 10.0.0.11<br>netmask 255.255.255.0<br>root@controller:~#<br>\这里发生过一件很挫的事，居然在同一台服务器上配置了两个网关，导致有的时候网关是10.0.0.1一会儿又编程192.168.3.254.使得网络出现故障。</p>
-<p>修改/etc/hosts这个文件，地址和服务器名相关联，地址解析。<br>root@controller:~# cat /etc/hosts<br>#127.0.0.1    localhost<br>#127.0.1.1    controller</p>
-<p># controller    192.168.3.10<br>10.0.0.11       controller<br>#compute    192.168.3.12<br>10.0.0.31       compute<br>#compute1    192.168.3.11<br>10.0.0.41    compute1<br>#compute2    192.168.3.14<br>10.0.0.51    compute2</p>
-<p># The following lines are desirable for IPv6 capable hosts<br>#::1     localhost ip6-localhost ip6-loopback<br>#ff02::1 ip6-allnodes<br>#ff02::2 ip6-allrouters</p>
-<p>这里注释掉了127.0.0.1。这里使用hosts为以后网络环境发生变化提供了很高的可扩展性，比如我从公司的内网192.168.0.0/24迁移到192.168.3.0/24段，需要进行改变的内容就比较小(因为很多配置文件中用到ip地址进行彼此之间信息交互)目前的博客是在我迁移过后做的.</p>
-<p><em>compute</em>节点：<br>root@compute:~# cat /etc/network/interfaces<br># This file describes the network interfaces available on your system<br># and how to activate them. For more information, see interfaces(5).</p>
-<p># The loopback network interface<br>auto lo<br>iface lo inet loopback</p>
-<p>auto eth0<br>iface eth0 inet static<br>#address 192.168.0.142<br>address 192.168.3.12<br>netmask 255.255.255.0<br>gateway 192.168.3.254<br>#auto eth0<br>iface eth0 inet manual<br>        up ip link set dev $IFACE up<br>        down ip link set dev $IFACE down<br>auto eth1<br>iface eth1 inet static<br>address 10.0.0.31<br>netmask 255.255.255.0</p>
-<p>修改/etc/hosts配置文件，关联IP和name<br>root@compute:~# cat /etc/hosts<br>#127.0.0.1    localhost<br>#127.0.1.1    compute<br>#computel<br>10.0.0.31    compute<br>#controller<br>10.0.0.11    controller</p>
-<h1 id="The_following_lines_are_desirable_for_IPv6_capable_hosts">The following lines are desirable for IPv6 capable hosts</h1><p>::1     localhost ip6-localhost ip6-loopback<br>ff02::1 ip6-allnodes<br>ff02::2 ip6-allrouters<br>root@compute:~# </p>
-<p>同时修改两个节点的DNS配置文件为：/etc/resolv.conf<br>添加：  nameserver  114.114.114.114     //使用电信的DNS服务器。其实这样修改在ubuntu系统环境中时不对的，只能够暂时生效，如果想要永久生效，必须修改配置文件/etc/resolvconf/resolv.conf.d/base  每次开机都会从这个配置文件加载dns到/etc/resolv.conf这个配置文件中。</p>
-<p>基本的网络地址配置完成之后，能够实现：<br>    1），compute和controller之间相互ping通，包括10.0.0.0网段和192.168.3.0网段<br>    2），都能够访问外网。<br>    3），都能够进行地址解析。</p>
-<p>接着配置ubuntu的更新源：这里使用的是阿里云的更新源。 配置文件是：/etc/apt/source.list<br>root@controller:~# cat /etc/apt/sources.list<br>deb <a href="http://mirrors.aliyun.com/ubuntu/" target="_blank" rel="external">http://mirrors.aliyun.com/ubuntu/</a> trusty main restricted universe multiverse<br>deb <a href="http://mirrors.aliyun.com/ubuntu/" target="_blank" rel="external">http://mirrors.aliyun.com/ubuntu/</a> trusty-security main restricted universe multiverse<br>deb <a href="http://mirrors.aliyun.com/ubuntu/" target="_blank" rel="external">http://mirrors.aliyun.com/ubuntu/</a> trusty-updates main restricted universe multiverse<br>deb <a href="http://mirrors.aliyun.com/ubuntu/" target="_blank" rel="external">http://mirrors.aliyun.com/ubuntu/</a> trusty-proposed main restricted universe multiverse<br>deb <a href="http://mirrors.aliyun.com/ubuntu/" target="_blank" rel="external">http://mirrors.aliyun.com/ubuntu/</a> trusty-backports main restricted universe multiverse<br>deb-src <a href="http://mirrors.aliyun.com/ubuntu/" target="_blank" rel="external">http://mirrors.aliyun.com/ubuntu/</a> trusty main restricted universe multiverse<br>deb-src <a href="http://mirrors.aliyun.com/ubuntu/" target="_blank" rel="external">http://mirrors.aliyun.com/ubuntu/</a> trusty-security main restricted universe multiverse<br>deb-src <a href="http://mirrors.aliyun.com/ubuntu/" target="_blank" rel="external">http://mirrors.aliyun.com/ubuntu/</a> trusty-updates main restricted universe multiverse<br>deb-src <a href="http://mirrors.aliyun.com/ubuntu/" target="_blank" rel="external">http://mirrors.aliyun.com/ubuntu/</a> trusty-proposed main restricted universe multiverse<br>deb-src <a href="http://mirrors.aliyun.com/ubuntu/" target="_blank" rel="external">http://mirrors.aliyun.com/ubuntu/</a> trusty-backports main restricted universe multiverse<br>root@controller:~# </p>
-<p>配置完更新源之后进行更新：<br>#apt-get  update<br>然后安装ssh服务，实现远程访问：<br>#apt-get install  ssh  -y</p>
+<p> <strong>操作系统系统选择</strong>：使用ubuntu server  ubuntu-14.04.2-server-amd64  作为服务器的操作系统。<br> 第一次给服务器安装操作系统，我很low的拿着个小U盘来安装，使用UltraISO制作系统镜像。安装系统前对磁盘做了RAID5。</p>
+<p>安装完操作系统之后，需要修改接口的ip地址，使服务器能够连得上外网(不能简单的按照官方文档配置，必须切合实际，毕竟还需要安装组件),具体接口的配置如下：</p>
+<h3 id="controller节点：">controller节点：</h3><pre><code>root@controller:~<span class="preprocessor"># cat /etc/network/interfaces</span>
+\<span class="preprocessor"># This file describes the network interfaces available on your system</span>
+\<span class="preprocessor"># and how to activate them. For more information, see interfaces(<span class="number">5</span>).</span>
 
+\<span class="preprocessor"># The loopback network interface</span>
+<span class="keyword">auto</span> lo
+iface lo inet loopback
+<span class="keyword">auto</span> eth0
+iface eth0 inet <span class="keyword">static</span>
+address <span class="number">192.168</span><span class="number">.3</span><span class="number">.10</span>
+netmask <span class="number">255.255</span><span class="number">.255</span><span class="number">.0</span>
+gateway <span class="number">192.168</span><span class="number">.3</span><span class="number">.254</span>
+<span class="keyword">auto</span> eth1
+iface eth1 inet <span class="keyword">static</span>
+address <span class="number">10.0</span><span class="number">.0</span><span class="number">.11</span>
+netmask <span class="number">255.255</span><span class="number">.255</span><span class="number">.0</span> 
+</code></pre><p>(这里发生过一件很挫的事，居然在同一台服务器上配置了两个网关，导致有的时候网关是10.0.0.1一会儿又编程192.168.3.254.使得网络出现故障)。</p>
+<h3 id="修改/etc/hosts这个文件，地址和服务器名相关联，地址解析。">修改/etc/hosts这个文件，地址和服务器名相关联，地址解析。</h3><pre><code>root@controller:~<span class="preprocessor"># cat /etc/hosts</span>
+\<span class="preprocessor">#<span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span>    localhost</span>
+\<span class="preprocessor">#<span class="number">127.0</span><span class="number">.1</span><span class="number">.1</span>    controller</span>
+
+\<span class="preprocessor"># controller    <span class="number">192.168</span><span class="number">.3</span><span class="number">.10</span></span>
+<span class="number">10.0</span><span class="number">.0</span><span class="number">.11</span>       controller
+\<span class="preprocessor">#compute    <span class="number">192.168</span><span class="number">.3</span><span class="number">.12</span></span>
+<span class="number">10.0</span><span class="number">.0</span><span class="number">.31</span>       compute
+\<span class="preprocessor">#compute1    <span class="number">192.168</span><span class="number">.3</span><span class="number">.11</span></span>
+<span class="number">10.0</span><span class="number">.0</span><span class="number">.41</span>    compute1
+\<span class="preprocessor">#compute2    <span class="number">192.168</span><span class="number">.3</span><span class="number">.14</span></span>
+<span class="number">10.0</span><span class="number">.0</span><span class="number">.51</span>    compute2
+
+<span class="preprocessor"># The following lines are desirable for IPv6 capable hosts</span>
+<span class="preprocessor">#::<span class="number">1</span>     localhost ip6-localhost ip6-loopback</span>
+<span class="preprocessor">#ff02::<span class="number">1</span> ip6-allnodes</span>
+<span class="preprocessor">#ff02::<span class="number">2</span> ip6-allrouters</span>
+</code></pre><p>这里注释掉了127.0.0.1。这里使用hosts为以后网络环境发生变化提供了很高的可扩展性，比如我从公司的内网192.168.0.0/24迁移到192.168.3.0/24段，需要进行改变的内容就比较小(因为很多配置文件中用到ip地址进行彼此之间信息交互,而是用host则比较方便)目前的博客是在我迁移过后做的.</p>
+<h3 id="compute节点：">compute节点：</h3><pre><code>root@compute:~<span class="preprocessor"># cat /etc/network/interfaces</span>
+<span class="preprocessor"># This file describes the network interfaces available on your system</span>
+<span class="preprocessor"># and how to activate them. For more information, see interfaces(<span class="number">5</span>).</span>
+
+<span class="preprocessor"># The loopback network interfaces</span>
+<span class="keyword">auto</span> lo
+iface lo inet loopback
+
+<span class="keyword">auto</span> eth0
+iface eth0 inet <span class="keyword">static</span>
+<span class="preprocessor">#address <span class="number">192.168</span><span class="number">.0</span><span class="number">.142</span></span>
+address <span class="number">192.168</span><span class="number">.3</span><span class="number">.12</span>
+netmask <span class="number">255.255</span><span class="number">.255</span><span class="number">.0</span>
+gateway <span class="number">192.168</span><span class="number">.3</span><span class="number">.254</span>
+<span class="preprocessor">#auto eth0 </span>
+iface eth0 inet manual
+    up ip link <span class="built_in">set</span> dev $IFACE up
+    down ip link <span class="built_in">set</span> dev $IFACE down
+<span class="keyword">auto</span> eth1
+iface eth1 inet <span class="keyword">static</span>
+address <span class="number">10.0</span><span class="number">.0</span><span class="number">.31</span>
+netmask <span class="number">255.255</span><span class="number">.255</span><span class="number">.0</span>
+</code></pre><p>###　修改/etc/hosts配置文件，关联IP和name<br>    root@compute:~# cat /etc/hosts</p>
+<pre><code><span class="hexcolor">#127</span>.<span class="number">0.0</span>.<span class="number">1</span>    localhost
+<span class="hexcolor">#127</span>.<span class="number">0.1</span>.<span class="number">1</span>    compute
+<span class="id">#computel</span>
+<span class="number">10.0</span>.<span class="number">0.31</span>    compute
+<span class="id">#controller</span>
+<span class="number">10.0</span>.<span class="number">0.11</span>    controller
+<span class="id">#The</span> following lines are desirable <span class="keyword">for</span> IPv6 capable hosts
+::<span class="number">1</span>     localhost ip6-localhost ip6-loopback
+ff02::<span class="number">1</span> ip6-allnodes
+ff02::<span class="number">2</span> ip6-allrouters
+</code></pre><h4 id="同时修改两个节点的DNS配置文件为：/etc/resolv-conf">同时修改两个节点的DNS配置文件为：/etc/resolv.conf</h4><p>添加：<br>    nameserver  114.114.114.114<br>///使用电信的DNS服务器。其实这样修改在ubuntu系统环境中时不对的，只能够暂时生效，如果想要永久生效，必须修改配置文件/etc/resolvconf/resolv.conf.d/base  每次开机都会从这个配置文件加载dns到/etc/resolv.conf这个配置文件中,这一点和centos不同。</p>
+<p>基本的网络地址配置完成之后，能够实现：</p>
+<ul>
+<li>1），compute和controller之间相互ping通，包括10.0.0.0网段和192.168.3.0网段</li>
+<li>2），都能够访问外网。</li>
+<li>3），都能够进行地址解析。</li>
+</ul>
+<h3 id="接着配置ubuntu的更新源：这里使用的是阿里云的更新源。_配置文件是：/etc/apt/source-list">接着配置ubuntu的更新源：这里使用的是阿里云的更新源。 配置文件是：<strong>/etc/apt/source.list</strong></h3><pre><code>root<span class="property">@controller</span>:~<span class="comment"># cat /etc/apt/sources.list</span>
+deb <span class="attribute">http</span>:<span class="regexp">//mi</span>rrors.aliyun.com<span class="regexp">/ubuntu/</span> trusty main restricted universe multiverse
+deb <span class="attribute">http</span>:<span class="regexp">//mi</span>rrors.aliyun.com<span class="regexp">/ubuntu/</span> trusty-security main restricted universe multiverse
+deb <span class="attribute">http</span>:<span class="regexp">//mi</span>rrors.aliyun.com<span class="regexp">/ubuntu/</span> trusty-updates main restricted universe multiverse
+deb <span class="attribute">http</span>:<span class="regexp">//mi</span>rrors.aliyun.com<span class="regexp">/ubuntu/</span> trusty-proposed main restricted universe multiverse
+deb <span class="attribute">http</span>:<span class="regexp">//mi</span>rrors.aliyun.com<span class="regexp">/ubuntu/</span> trusty-backports main restricted universe multiverse
+deb-src <span class="attribute">http</span>:<span class="regexp">//mi</span>rrors.aliyun.com<span class="regexp">/ubuntu/</span> trusty main restricted universe multiverse
+deb-src <span class="attribute">http</span>:<span class="regexp">//mi</span>rrors.aliyun.com<span class="regexp">/ubuntu/</span> trusty-security main restricted universe multiverse
+deb-src <span class="attribute">http</span>:<span class="regexp">//mi</span>rrors.aliyun.com<span class="regexp">/ubuntu/</span> trusty-updates main restricted universe multiverse
+deb-src <span class="attribute">http</span>:<span class="regexp">//mi</span>rrors.aliyun.com<span class="regexp">/ubuntu/</span> trusty-proposed main restricted universe multiverse
+deb-src <span class="attribute">http</span>:<span class="regexp">//mi</span>rrors.aliyun.com<span class="regexp">/ubuntu/</span> trusty-backports main restricted universe multiverse
+</code></pre><p>配置完更新源之后进行更新：</p>
+<pre><code>#apt-<span class="built_in">get</span>  <span class="keyword">update</span>
+</code></pre><p>然后安装ssh服务，实现远程访问：</p>
+<pre><code><span class="id">#apt-get</span> install  ssh  -y
+</code></pre>
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://liyahua.github.io/2015/08/09/OpenStack-基础环境搭建一/" data-id="cid9o3ys0000c807b7j5f2cse" class="article-share-link">Share</a>
+      <a data-url="http://liyahua.github.io/2015/08/09/OpenStack-基础环境搭建一/" data-id="cidcg4l19000cwc7bb8064exf" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/openstack/">openstack</a></li></ul>
@@ -197,7 +273,7 @@ var _hmt = _hmt || [];
           </li>
         
           <li>
-            <a href="/2015/08/09/OpenStack-基础环境搭建一/">OpenStack基础环境搭建</a>
+            <a href="/2015/08/09/OpenStack-基础环境搭建一/">OpenStack基础环境搭建一</a>
           </li>
         
           <li>
