@@ -2,22 +2,27 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>http://liyahua.github.io/2015/08/09/OpenStack%E6%90%AD%E5%BB%BA%E6%96%87%E6%A1%A3/</loc>
+    <loc>http://www.stackops.info/2015/08/15/svn%E5%9B%BE%E5%BD%A2%E5%8C%96%E7%AE%A1%E7%90%86%E5%B7%A5%E5%85%B7submin%E6%90%AD%E5%BB%BA/</loc>
+    <lastmod>2015-08-15T04:32:49.780Z</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://www.stackops.info/2015/08/09/OpenStack%E6%90%AD%E5%BB%BA%E6%96%87%E6%A1%A3/</loc>
     <lastmod>2015-08-15T03:39:45.748Z</lastmod>
   </url>
   
   <url>
-    <loc>http://liyahua.github.io/2015/08/09/OpenStack-%E5%9F%BA%E7%A1%80%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E4%B8%80/</loc>
+    <loc>http://www.stackops.info/2015/08/09/OpenStack-%E5%9F%BA%E7%A1%80%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E4%B8%80/</loc>
     <lastmod>2015-08-15T03:29:20.084Z</lastmod>
   </url>
   
   <url>
-    <loc>http://liyahua.github.io/2015/08/09/OpenStack-%E5%9F%BA%E7%A1%80%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E4%BA%8C/</loc>
+    <loc>http://www.stackops.info/2015/08/09/OpenStack-%E5%9F%BA%E7%A1%80%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E4%BA%8C/</loc>
     <lastmod>2015-08-15T03:00:50.443Z</lastmod>
   </url>
   
   <url>
-    <loc>http://liyahua.github.io/2015/08/09/first/</loc>
+    <loc>http://www.stackops.info/2015/08/09/first/</loc>
     <lastmod>2015-08-12T02:57:16.322Z</lastmod>
   </url>
   
