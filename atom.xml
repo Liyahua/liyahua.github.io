@@ -5,7 +5,7 @@
   <subtitle><![CDATA[Follow your heart]]></subtitle>
   <link href="/atom.xml" rel="self"/>
   <link href="http://www.stackops.info//"/>
-  <updated>2015-08-15T10:40:43.717Z</updated>
+  <updated>2015-08-16T15:43:03.172Z</updated>
   <id>http://www.stackops.info//</id>
   
   <author>
@@ -14,6 +14,159 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title><![CDATA[机房网络优化]]></title>
+    <link href="http://www.stackops.info/2015/08/15/%E6%9C%BA%E6%88%BF%E7%BD%91%E7%BB%9C%E4%BC%98%E5%8C%96/"/>
+    <id>http://www.stackops.info/2015/08/15/机房网络优化/</id>
+    <published>2015-08-15T12:50:58.000Z</published>
+    <updated>2015-08-16T15:43:03.172Z</updated>
+    <content type="html"><![CDATA[<p>显示全文：<br><a id="more"></a></p>
+<h2 id="硬件介绍：">硬件介绍：</h2><p>cisco经典的接入层交换机：catalyst 2960</p>
+<h2 id="机房网络分析：">机房网络分析：</h2><p>网络拓扑比较简单，主要分为内网和外网两个环境。电信机房托管，外网几乎不用做太多改变。整个网络只需要一些二层的配置，网络层都由电信机房提供，我们只需要用交换机接入即可。因为服务器大概的角色分配是web应用服务器和DB，内网之间的数据读写比较平凡，相对来说对网络带宽要求比较高。据说之前有因为交换机带宽瓶颈带来过down机现象。本次改善主要是针对带宽扩展而做的。之前的交换机都是当傻瓜交换机用，无任何配置，无任何链路冗余。<br>需要改进的几点：</p>
+<ul>
+<li>1， 配置RSTP生成树协议，即快速生成树。</li>
+<li>2， 配置Etherchannel，以太信道，即链路聚合</li>
+<li>3， 连接服务器的端口配置portfast，即快速端口。</li>
+<li>4， (可选)配置端口安全，mac和ip地址绑定。</li>
+</ul>
+<hr>
+<h3 id="一，简单介绍STP：">一，简单介绍STP：</h3><p>STP即生成树协议。实现高可用性是企业网络的主要目标之一，确保高可用性的方法是通过网络来提供设备，模块和链路的二层冗余，但是提供二层网络冗余又可能会形成桥接环路，如果产生桥接环路，数据包就会永远在设备间循环，产生广播风暴，占用网络带宽。生成树协议就是用来防止二层环路的。</p>
+<p>STP只允许存在一条活动的路径，并同时阻塞其他冗余路径。在（active）活跃路径失效的情况下，冗余路径就会有一条路径成为活动路径。</p>
+<h3 id="STP的几个常用版本：">STP的几个常用版本：</h3><ul>
+<li><p>1， <strong>PVST+（每VLAN生成树增强版）</strong>：对stp进行增强后的版本，会为网络中配置的每个vlan提供一个独立的802.1D生成树实例。这个独立的实例支持很多增强特性：Portfast，BPUD guard，BPDU过滤，根防护（root guard）和环路保护（loop guard）。为每个vlan分别创建一个vlan会占用很多cpu和内存资源，但是这可以为每个vlan生成一个根桥。是STP树对每个VLAN的流量来说都是最优的。</p>
+</li>
+<li><p>2，    <strong>RSTP（快速STP）</strong>： STP的进化版本，它可以使STP更快速地收敛，这个版本可以解决很多手链的问题，不过由于这仍然是单实例的STP协议，因此它无法解决出现次优路径的问题。（次优路径的产生是因为当有多个vlan同时存在一台交换机上时，stp只会针对一个实例（vlan）进行路径选择，选出来的路径并不一定适合其他vlan故产生次优路由）。本拓扑中，两台交换机都直接连接的是内网，主要是由服务器内网接口和远程卡接口组成，之间需要互相通信，故不应该进行vlan划分。选择这种stp，收敛速度快，当发生网络故障，恢复速度相对较快。</p>
+</li>
+<li><p>3， <strong>MSTP(多生成树)</strong>：巨型交换网使用，cisco私有的，可以将多个拥有同样数据流量需求的VLAN映射进同一个生成树实例中。CISCO的实施方案可以提供最多16个RSTP实例，并将同一个物理和逻辑拓扑中的多个VLAN合进一个公共的RSTP实例中，每个实例都支持PortFast，BPDUguard，BPDU过滤和root guard。</p>
+</li>
+</ul>
+<p>选择RSTP的原因：二层网络拓扑简单，无复杂vlan划分。收敛速度上看，RSTP算法源比802.1D STP要优越的多，甚至比PVST+的速度更快，大大提高了任何一个vlan在链路建立起来时拓扑收敛的速度，同时它也大大减少了任何非直连链路出现故障时，BackboneFast的收敛时间。</p>
+<h3 id="RSTP的端口状态：">RSTP的端口状态：</h3><p>总共有三种端口状态：丢弃状态，学习状态和转发状态，丢弃状态，代表了802.1D STP的禁用，阻塞和监听状态</p>
+<ul>
+<li>丢弃（discarding）：15s，阻止传输数据帧的行为，可以阻断二层环路。</li>
+<li>学习（learning）：15s，接收数据帧，并用来填充MAC表，以对未知单播数据帧的泛洪行为进行限制</li>
+<li>转发（forwarding）：处于稳定状态，转发数据。</li>
+</ul>
+<h3 id="RSTP端口角色：">RSTP端口角色：</h3><ul>
+<li>根端口：非根网桥上选择出来与根网桥相连的端口，每台交换机只有一个根端口。端口标记是R，根端口稳定状态处于转发状态。</li>
+<li>指定端口：每个王端中至少有一个交换机端口作为该网段的指定端口。指定端口处于转发状态。端口标记为：D</li>
+<li>替代端口：用来提供去往根网桥替代路径的端口，在稳定工作状态处于丢弃状态。当指定端口出现故障的时候会过度为指定端口。替代端口标记为A。</li>
+<li>备份端口：交换机上一个额外的交换机端口，作用是为交换机充当指定交换机那个网段提供一条备份链路。备份端口处于丢弃状态。端口标记为B。</li>
+<li>禁用端口：不担当任何角色。</li>
+</ul>
+<p><strong>注意</strong>：那些直接连接到服务器的端口，通常不会在网络中产生桥接环路，可以直接允许他们直接过度到转发状态，而跳过监听和学习阶段。边缘端口（就是启用了portfast的端口）和点到点链路会快速过度到转发状态。注意不能将交换机和交换机相连的端口配置成快速端口。</p>
+<hr>
+<h2 id="二，介绍EtherChannel：">二，介绍EtherChannel：</h2><p>1），作用：链路捆绑，（最多8条物理链路捆绑，为什么是8条？据说是模拟双绞线的收发）多条链路被逻辑上捆绑成一条，提高带宽，同时可以对流量进行负载分担；提供一定的冗余性，只要交换机之间还有一条链路时正常工作的，那么Etherchannel就会照常工作，尽管他的吞吐量会相应的降低；</p>
+<p>2）cisco设备被捆绑的接口端号必须是连续的；华为的设备接口号可以不连续；</p>
+<p>3）被捆绑的接口的所有配置必须一致（trunk）端口的速率，双工模式，vlan信息的设置必须完全一致。如果有4个100M和4个10M，则只有4个100M的工作；（这里交换机是10/100/1000M自适应的，那就不做改变，让所有参与etherchannel的接口配置都相同）。</p>
+<p>2， EC的分类：<br>      1）二层EC，分为三类：<br>          a，8个access 模式捆绑；<br>          b，8个trunk link捆绑，<br>          c，access模式（接口加入某个vlan）<br>      2）三层EC：noswitchport  二层接口提升为三层<br>        portchannel 逻辑接口，IP地址加给portchannel；</p>
+<p>路由器不能做EC，而使用FRR：快速重路由；</p>
+<p>3，EC的配置分为两种<br>    1）手动配置：接口下：channel-group 《id》  mode on<br>2）协议协商：pagp/lacp<br>     <strong>PAGP(端口聚集协议）</strong>:cisco私有；<strong>自动创建EC链路</strong>，pagp数据包就会在启用了EC端口之间发送，以协商建立起来这条通道；<br>     <strong>LACP链路聚合控制协议</strong>：IEEE定义；可以将多个物理端口捆绑起来来建立一条EC通道；混合交换机环境中应该用这种协议来部署EC，在CISCO环境中，这两种协议都是支持的；</p>
+<hr>
+<p><strong>PAGP模式</strong>：<br>数据包每30s发送一次；PAGP会通过这些数据报来查看两端的配置是否一致，<br>模式：<br>AUTO：被动协商状态，会对PAGP数据包做出响应，但不会主动发起协商（此为默认模式）<br>Desirable：主动协商状态，接口会发送PAGP数据包来主动与其他接口进行协商；<br>ON：这种模式会强制端口不使用PAGP而形成EC，这种模式下，接口不会交换PAgp数据包；<br>Non-silent：non-silent是Auto和Desirable模式使用的关键字；这种模式会使用PAGP来进行操作，使接口连接到一个通道组中，并使用这个接口来进行数据传输；</p>
+<table>
+<thead>
+<tr>
+<th>模式</th>
+<th style="text-align:center">隧道</th>
+<th>模式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>on</td>
+<td style="text-align:center">可以建立</td>
+<td>on</td>
+</tr>
+<tr>
+<td>on/auto/desirable</td>
+<td style="text-align:center">无法建立</td>
+<td>off</td>
+</tr>
+<tr>
+<td>auto/desirable</td>
+<td style="text-align:center">可以建立</td>
+<td>Desirable</td>
+</tr>
+<tr>
+<td>auto/on</td>
+<td style="text-align:center">无法建立</td>
+<td>auto</td>
+</tr>
+</tbody>
+</table>
+<p>这里需要注意的是On模式，使用这条命令等于手动将接口设置为了EC，而无需进行任何的协商；不过，只有另一端也设置了on之后，这一设置才会有效；因为on模式不会进行协商；</p>
+<p><strong>LACP模式</strong>：<br>passive：被动协商模式，接口会对LACP数据包做出响应，但不会主动发起协商（默认模式）；<br>Active；主动协商状态，接口会通过发送LACP数据包主动与其他接口进行协商；<br>On：这种模式会强制端口形成EC，并且不需要PAGP或LACP；</p>
+<table>
+<thead>
+<tr>
+<th>模式</th>
+<th style="text-align:center">隧道</th>
+<th>模式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>on</td>
+<td style="text-align:center">可以建立</td>
+<td>on</td>
+</tr>
+<tr>
+<td>on/active/passive</td>
+<td style="text-align:center">无法建立</td>
+<td>off</td>
+</tr>
+<tr>
+<td>active/passive</td>
+<td style="text-align:center">可以建立</td>
+<td>active</td>
+</tr>
+<tr>
+<td>passive/on</td>
+<td style="text-align:center">无法建立</td>
+<td>passive</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="配置EC的指导方针：">配置EC的指导方针：</h2><ul>
+<li>1，支持EC，最大8个接口支持一个EC；</li>
+<li>2，速率及双工模式：所有接口必须工作在相同的速率和双攻模式下，如果一个接口处于关闭状态，那么这条链路就会失效，而流量就会通过EC捆绑的其他接口流向对端；</li>
+<li>3，交换多口分析器与EC：如果某个端口被配置为SPAN目标端口，那么EC就不会建立起来；</li>
+<li>4，三层EC：管理员应该为Portchannel逻辑接口分配三层地址，而不是为通道中的物理接口分配地址；</li>
+<li>5，vlan匹配：必须将EC内的所有端口划分进相同的VLAN中，或者将其配置为TRUNK。两台交换机所有链路的Native vlan 也必须匹配；</li>
+<li><ol>
+<li>vlan的取值范围：如果两边允许的vlan范畴不同，那么接口就不会建立起EC；</li>
+</ol>
+</li>
+<li>7，STP路径开销：管理员仅将STP端口路径开销设置为不同的值，不会使接口在建立EC的过程中出现不兼容的问题；</li>
+<li>8，端口通道与接口配置的对比：在配置好EC后，任何在port channel 接口上的配置都会对EC构成影响，而所有应用在物理接口上的配置却只会影响到其配置的那个特定接口；</li>
+</ul>
+<hr>
+<h2 id="EC负载分担选项：">EC负载分担选项：</h2><p>当EC建立起来之后，流量就会在多条链路之间负载分担；<br>如果负载分担基于目的IP地址的，那么大多数流量都会通过同一条物理链路进行转发，因为路由器只能通过一个IP地址去往EC束中对端接口，因此这个IP地址只会与第一个物理端口相关联，也就是说所有去往这个地址的流量都会通过同一条物理链路到达对端，而这会使负载分担机制变得很低，另一方面，如果负载分担是基于MAC地址执行的，那么流量就会相当好的在两条物理链路之间进行分担，因为每一台交换机上拥有每一台PC的MAC地址；</p>
+<pre><code><span class="keyword">port</span>-channel  load-balance [<span class="keyword">type</span>]
+<span class="keyword">type</span>: src-mac,dst-mac,src-dst-mac,src-ip,dst-ip,src-dst-ip,src-<span class="keyword">port</span>,dst-<span class="keyword">port</span>,src-dst-<span class="keyword">port</span>;
+</code></pre><p><strong>基于源MAC的负载分担</strong>：来自不同主机的数据包就会从通道的不同端口中转发出去，而来自同一台主机的数据包也会从通道的同一个端口中转发出去，这就是实现了负载分担（而交换机学到的MAC地址并不会变化）；</p>
+<p><strong>基于目的MAC的负载分担</strong>：设备会根据数据帧的目的MAC地址来判断应该将数据包通过通道的哪个端口转发出去，于是去往同一目的地的数据包就会从通道的同一个端口中转发出去，而去往不同主机的数据包则会从通道的不同端口中转发出去；</p>
+<p><strong>基于源ip</strong>：来自不同的ip的数据包就会从不同的端口中转发，而同一个ip的数据包也会从同一个端口转发出去。</p>
+<p><strong>基于目的ip</strong>：去往不同的ip地址的数据包慧聪不同的端口进行转发，而去往同一个ip的数据包会从同一个端口转发。</p>
+<p><strong>基于src-ip,dst-ip</strong>：针对来自不同ip，去往不同目的ip的数据包从不同的端口进行转发，而从同一个源ip出发，去往同一个目的ip的数据包会从同一个端口转发。</p>
+<p><strong>基于src-mac,dst-mac</strong>：针对来自不同的mac地址去网不同的目的mac地址的数据包从不同的端口转发，而从同一个源mac去往同一个目的mac的数据包会从同一个端口转发。</p>
+<p>当前的网络拓扑中，比较适合src-ip+dst-ip和src-mac+dst-mac这两种负载分担方式。同时可能存在虚拟mac和虚拟ip的现象，可以选择基于src-mac+dst-mac的方式。</p>
+]]></content>
+    <summary type="html">
+    <![CDATA[<p>显示全文：<br>]]>
+    
+    </summary>
+    
+      <category term="Etherchannel" scheme="http://www.stackops.info/tags/Etherchannel/"/>
+    
+      <category term="RSTP" scheme="http://www.stackops.info/tags/RSTP/"/>
+    
+      <category term="portfast" scheme="http://www.stackops.info/tags/portfast/"/>
+    
+  </entry>
   
   <entry>
     <title><![CDATA[使用submin搭建图形化svn管理工具]]></title>
@@ -167,7 +320,7 @@ Include /<span class="keyword">var</span>/lib/submin/conf/apache-svn.conf
 
 <span class="tag">&lt;/IfModule&gt;</span>
 <span class="tag">&lt;/VirtualHost&gt;</span>
-</code></pre><p>当通过浏览器访问web管理界面的时候：<a href="http://192.168.3.48/submin会提示你输入账户和密码，这时候你可以点击页面上的" target="_blank" rel="external">http://192.168.3.48/submin会提示你输入账户和密码，这时候你可以点击页面上的</a>  Forgot your  password , 然后会主动发一封邮件给root用户：<br>可以通过命令：# cat /var/spool/mail/root 查看发过来的重置密码的连接，我们可以通过该链接进行密码的修改：<br>    From: root@localhost.novalocal<br>    To: liyahua@xxx.com<br>    Subject: Submin password reset request<br>    Message-Id: <a href="&#109;&#x61;&#x69;&#x6c;&#116;&#111;&#58;&#50;&#x30;&#x31;&#x35;&#48;&#x38;&#x31;&#x33;&#48;&#x36;&#50;&#x37;&#x35;&#x35;&#x2e;&#x42;&#x36;&#56;&#x36;&#x46;&#54;&#x31;&#x46;&#55;&#x44;&#64;&#115;&#x76;&#110;&#97;&#x64;&#x6d;&#x69;&#x6e;&#46;&#x6e;&#x6f;&#118;&#97;&#x6c;&#111;&#x63;&#97;&#108;">&#50;&#x30;&#x31;&#x35;&#48;&#x38;&#x31;&#x33;&#48;&#x36;&#50;&#x37;&#x35;&#x35;&#x2e;&#x42;&#x36;&#56;&#x36;&#x46;&#54;&#x31;&#x46;&#55;&#x44;&#64;&#115;&#x76;&#110;&#97;&#x64;&#x6d;&#x69;&#x6e;&#46;&#x6e;&#x6f;&#118;&#97;&#x6c;&#111;&#x63;&#97;&#108;</a><br>    Date: Thu, 13 Aug 2015 06:27:55 +0000 (UTC)</p>
+</code></pre><p>当通过浏览器访问web管理界面的时候：<a href="http://192.168.3.48/submin会提示你输入账户和密码，这时候你可以点击页面上的" target="_blank" rel="external">http://192.168.3.48/submin会提示你输入账户和密码，这时候你可以点击页面上的</a>  Forgot your  password , 然后会主动发一封邮件给root用户：<br>可以通过命令：# cat /var/spool/mail/root 查看发过来的重置密码的连接，我们可以通过该链接进行密码的修改：<br>    From: root@localhost.novalocal<br>    To: liyahua@xxx.com<br>    Subject: Submin password reset request<br>    Message-Id: <a href="&#109;&#97;&#x69;&#x6c;&#x74;&#x6f;&#x3a;&#50;&#48;&#x31;&#x35;&#x30;&#x38;&#49;&#51;&#48;&#54;&#x32;&#55;&#x35;&#53;&#46;&#x42;&#54;&#x38;&#x36;&#70;&#x36;&#x31;&#x46;&#x37;&#x44;&#x40;&#115;&#x76;&#x6e;&#x61;&#100;&#x6d;&#105;&#x6e;&#46;&#x6e;&#111;&#118;&#x61;&#x6c;&#x6f;&#x63;&#x61;&#108;">&#50;&#48;&#x31;&#x35;&#x30;&#x38;&#49;&#51;&#48;&#54;&#x32;&#55;&#x35;&#53;&#46;&#x42;&#54;&#x38;&#x36;&#70;&#x36;&#x31;&#x46;&#x37;&#x44;&#x40;&#115;&#x76;&#x6e;&#x61;&#100;&#x6d;&#105;&#x6e;&#46;&#x6e;&#111;&#118;&#x61;&#x6c;&#x6f;&#x63;&#x61;&#108;</a><br>    Date: Thu, 13 Aug 2015 06:27:55 +0000 (UTC)</p>
 <pre><code>You <span class="keyword">are</span> receiving this email because someone requested a password reset for
 your account. If you don't know what this <span class="keyword">is</span> about, you can safely ignore it,
 the reset request will expire automatically.
