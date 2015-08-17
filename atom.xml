@@ -5,7 +5,7 @@
   <subtitle><![CDATA[Follow your heart]]></subtitle>
   <link href="/atom.xml" rel="self"/>
   <link href="http://www.stackops.info//"/>
-  <updated>2015-08-16T15:43:03.172Z</updated>
+  <updated>2015-08-17T16:10:00.706Z</updated>
   <id>http://www.stackops.info//</id>
   
   <author>
@@ -16,11 +16,142 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
+    <title><![CDATA[Cisco-2960交换机配置]]></title>
+    <link href="http://www.stackops.info/2015/08/17/Cisco-2960%E4%BA%A4%E6%8D%A2%E6%9C%BA%E9%85%8D%E7%BD%AE/"/>
+    <id>http://www.stackops.info/2015/08/17/Cisco-2960交换机配置/</id>
+    <published>2015-08-17T12:32:58.000Z</published>
+    <updated>2015-08-17T16:10:00.706Z</updated>
+    <content type="html"><![CDATA[<p>显示全文：<br><a id="more"></a></p>
+<p><em>接上一篇blog，这次补充具体的配置命令</em>：</p>
+<p>网络大概拓扑：<br><img src="http://7xl5dz.com1.z0.glb.clouddn.com/EC拓扑.jpg" alt="topo"></p>
+<h2 id="具体的配置思路：">具体的配置思路：</h2><ul>
+<li>1 配置交换机基本功能</li>
+<li>2 配置RSTP协议</li>
+<li>3 配置Portfast</li>
+<li>4 配置Etherchannel</li>
+<li>5 配置端口安全（可选）</li>
+<li>6 校验检查</li>
+</ul>
+<h3 id="步骤一：配置交换机的基本环境：">步骤一：配置交换机的基本环境：</h3><p>cisco交换机开机的时间可能会有点长，和一般的系统一样也都会执行post加电自检等行为，需等待几秒钟。</p>
+<h4 id="交换机的基本状态：">交换机的基本状态：</h4><pre><code>rommon&gt;   ROM状态
+hostname&gt;    用户模式
+hostname<span class="comment">#    特权模式</span>
+hostname(config)<span class="comment">#    全局配置模式</span>
+hostname(config-<span class="keyword">if</span>)<span class="comment">#    接口状态</span>
+</code></pre><h4 id="switch基础配置：">switch基础配置：</h4><pre><code><span class="keyword">switch</span>&gt; enable  ：进入特权模式
+<span class="keyword">switch</span><span class="preprocessor">#config terminal    :进入全局配置模式</span>
+<span class="keyword">switch</span>(config)<span class="preprocessor"># enable password *yourpasswd*  :配置你的特权密码。</span>
+不过使用 enable password  *yourpasswd*  ，你的密码会明文存储，可以使用命令：
+<span class="preprocessor">#service passwd-encryption  对密码进行加密。也可以直接配置密文密码：</span>
+<span class="keyword">switch</span>(config)<span class="preprocessor"># enable secret  *yourpasswd*   </span>
+这样在使用<span class="preprocessor">#show run 看配置的时候你的密码就会加密存放。</span>
+
+sw2(config)<span class="preprocessor">#<span class="keyword">line</span> console <span class="number">0</span>  ： 进入console控制台</span>
+sw2(config-line)<span class="preprocessor">#no exec-timeout  ：关掉超时时间</span>
+sw2(config-line)<span class="preprocessor">#logging synchronous  ：光标同步，再输入命令的时候不会因为控制台的消息而打断。</span>
+sw2(config-line)<span class="preprocessor">#exit  ： 退出console控制台</span>
+sw2(config)<span class="preprocessor">#hostname sw2  ：将交换机的名字改为sw2</span>
+sw2(config)<span class="preprocessor">#no ip domain lookup  ： 关闭域名查询，如果不关掉的话，错误的命令可能引起查询而卡在</span>
+Translating <span class="string">"sw2"</span>...<span class="function">domain <span class="title">server</span> <span class="params">(<span class="number">255.255</span><span class="number">.255</span><span class="number">.255</span>)</span> 这个状态， 这时候就需要等待。（大多数卡住的情况可以使用ctrl+shift+6来终止）。</span>
+</code></pre><h5 id="给vlan配置ip地址：">给vlan配置ip地址：</h5><pre><code>sw1<span class="preprocessor">#conf terminal </span>
+Enter configuration commands, one per line.  End with CNTL/Z.
+sw1(config)<span class="preprocessor">#interface vlan1</span>
+sw1(config-<span class="keyword">if</span>)<span class="preprocessor">#ip add <span class="number">10.0</span><span class="number">.0</span><span class="number">.1</span> <span class="number">255.255</span><span class="number">.255</span><span class="number">.0</span> </span>
+sw1(config-<span class="keyword">if</span>)<span class="preprocessor">#no shut</span>
+
+sw2<span class="preprocessor">#configure terminal </span>
+Enter configuration commands, one per line.  End with CNTL/Z.
+sw2(config)<span class="preprocessor">#interface vlan1</span>
+sw2(config-<span class="keyword">if</span>)<span class="preprocessor">#ip add <span class="number">10.0</span><span class="number">.0</span><span class="number">.2</span> <span class="number">255.255</span><span class="number">.255</span><span class="number">.0</span></span>
+sw2(config-<span class="keyword">if</span>)<span class="preprocessor">#no shut</span>
+</code></pre><h5 id="配置过ip地址后，要验证连通性，否则后面的ssh服务无法完成。">配置过ip地址后，要验证连通性，否则后面的ssh服务无法完成。</h5><pre><code>sw2<span class="preprocessor">#ping <span class="number">10.0</span><span class="number">.0</span><span class="number">.1</span> source <span class="number">10.0</span><span class="number">.0</span><span class="number">.2</span></span>
+
+Type escape sequence to <span class="built_in">abort</span>.
+Sending <span class="number">5</span>, <span class="number">100</span>-byte ICMP Echos to <span class="number">10.0</span><span class="number">.0</span><span class="number">.1</span>, timeout is <span class="number">2</span> seconds:
+Packet sent with a source address of <span class="number">10.0</span><span class="number">.0</span><span class="number">.2</span> 
+!!!!!
+Success rate is <span class="number">100</span> percent (<span class="number">5</span>/<span class="number">5</span>), round-trip min/avg/max = <span class="number">8</span>/<span class="number">48</span>/<span class="number">68</span> ms
+</code></pre><h4 id="配置ssh功能">配置ssh功能</h4><p>因为telnet在网络中时明文传输的，不安全，而ssh也正在被众多企业所应用，所以这里演示配置ssh服务：<br>全局模式下配置：</p>
+<pre><code><span class="function"><span class="title">sw2</span><span class="params">(config)</span></span><span class="id">#ip</span> domain name sw2<span class="class">.com</span>   ：配置域名
+<span class="id">#crypto</span> key generate rsa  modulus <span class="number">1024</span>   :生成ssh的key
+<span class="id">#username</span> sw2 pass xxx  ：创建用户和密码
+<span class="id">#ip</span> ssh logging events  : 开启 ssh的控制台信息。如果有人登录，会报信息。
+<span class="id">#ip</span> ssh max <span class="number">5</span> ：定义同时最多多少人同时ssh登录。
+<span class="hexcolor">#acc</span>ess-list  <span class="number">1</span> permit  <span class="number">10.0</span>.<span class="number">0.0</span> <span class="number">0.0</span>.<span class="number">0.255</span>  ：设置访问控制列表，只允许指定的网段ipssh登录。（注意掩码使用的是反掩码）
+<span class="hexcolor">#acc</span>ess-list <span class="number">1</span> deny any ：access-list的默认行为，除了放行的网段，其他都拒绝。
+<span class="id">#line</span> vty <span class="number">0</span> <span class="number">4</span>  ：指定<span class="number">0</span>-<span class="number">4</span> 总共<span class="number">5</span>个vty可同时登录。
+<span class="id">#login</span> local   ： 将本地的认证信息加载。
+<span class="hexcolor">#acc</span>ess-class <span class="number">1</span> <span class="keyword">in</span> ： 将访问控制列表放在入口方向。
+<span class="function"><span class="title">sw1</span><span class="params">(config-line)</span></span><span class="id">#transport</span> <span class="tag">input</span> ssh  : 定义使用ssh进行传输。
+<span class="function"><span class="title">sw1</span><span class="params">(config)</span></span><span class="id">#ip</span> ssh source-interface  vlan <span class="number">1</span>   ：定义使用ssh的源接口。交换机上使用的是vlan1
+</code></pre><h4 id="加上banner信息：">加上banner信息：</h4><pre><code><span class="function"><span class="title">sw1</span><span class="params">(config)</span></span><span class="id">#banner</span> login @
+“输入文本信息并以@作为结束符”
+WARNNING! ACCESS RESTRICTED!
+@
+</code></pre><p>这样当用户ssh登录这台交换机的时候就会看到banner的信息。</p>
+<p>两台交换机ssh配置相类似，配置完后，分别在两台交换机上尝试登录对方：</p>
+<pre><code>sw1<span class="preprocessor">#ssh -l sw2 <span class="number">10.0</span><span class="number">.0</span><span class="number">.2</span>   ：-l 指定用户名， 后面加ip地址。</span>
+
+Password:                输入之前设置的密码后即可登录
+
+sw2&gt;en
+% No password <span class="built_in">set</span>            这里需要注意，必须配置了特权密码的情况下才能进入特权模式。否则会像这里一样报错。
+sw2&gt;
+
+sw2&gt;en
+Password:     添加特权密码后即可正常登录。 
+sw2<span class="preprocessor">#</span>
+</code></pre><hr>
+<h3 id="步骤二：配置RSTP协议：">步骤二：配置RSTP协议：</h3><pre><code><span class="function"><span class="title">sw1</span><span class="params">(config)</span></span><span class="id">#spanning-tree</span> mode rapid-pvst  全局配置模式下启用RSTP协议。
+</code></pre><p>这里就是简单启用RSTP协议，只有两台交换机，没必要指定根桥等特性。</p>
+<p>当RSTP配置完成之后，我们可以查看RSTP协议是否起效。</p>
+<pre><code>Switch#<span class="operator"><span class="keyword">show</span> spanning-tree summery    检测vlan生成树配置    可以看到交换机端口角色变换。
+<span class="keyword">Switch</span>#<span class="keyword">show</span> spanning-tree vlan&lt;vlan-<span class="keyword">id</span>&gt; detail    浏览详细生成树配置信息  
+<span class="keyword">Switch</span>#<span class="keyword">show</span> spanning-tree <span class="keyword">interface</span> &lt;<span class="built_in">int</span>-<span class="keyword">id</span>&gt; detail    浏览详细生成树端口配置信息</span>
+</code></pre><p>注意RSTP协议是相对于vlan来说的。</p>
+<p>我们在没配置etherchannel的时候会发现，当我们在交换机之间用两个网线连接的时候，会有一个接口处于blk（block）状态，不会进行数据的转发。这是正常的，说明RSTP协议起作用了，防止环路的出现。</p>
+<hr>
+<h3 id="步骤三：配置portfast：">步骤三：配置portfast：</h3><p>在一些准备用于连接服务器的接口，进行快速端口的配置portfast。这样连接服务器的端口会直接跳过状态变化，直接变为forwarding状态。</p>
+<pre><code><span class="function"><span class="title">sw2</span><span class="params">(config-if)</span></span><span class="id">#spanning-tree</span> portfast   ：开启快速端口，加快接口收敛速度。
+</code></pre><p>同时也可以使用宏命令：</p>
+<pre><code><span class="function"><span class="title">sw2</span><span class="params">(config-if)</span></span><span class="id">#switchport</span>  host
+</code></pre><p>提供终端设备访问的端口可以配置一条宏命令：#switchport  host，在指定的交换机端口上执行了这条命令后，交换机会执行以下行为：把交换机端口置于Access模式，启用生成树Portfast特性并禁用通道组（channel group)。相当于一条命令执行多个动作，如果想撤销这个命令，不能简单的使用#no switchport host ，必须在全局模式中使用 #default interface  interface-id命令。这个命令会将所有接口恢复默认配置。</p>
+<hr>
+<h3 id="步骤四：配置Etherchannel：">步骤四：配置Etherchannel：</h3><p><strong>注意</strong>：配置成etherchannel的接口配置必须相同，无论双工模式还是速率，接口模式access|trunk，必须相同。在这里不做改变即可。</p>
+<pre><code><span class="keyword">switch</span>(config)<span class="preprocessor">#interface range fasternet0/<span class="number">1</span> - <span class="number">2</span>    将fasternet0/<span class="number">1</span>和<span class="number">0</span>/<span class="number">2</span> 口捆绑，注意最多不能够超过<span class="number">8</span>根，且接口号必须连续。 </span>
+<span class="keyword">switch</span>(config-<span class="keyword">if</span>)<span class="preprocessor">#channel-group <span class="number">1</span> mode on    配置以太通道模式 直接使用on模式，不用协议自动创建。 </span>
+<span class="keyword">switch</span>(config-<span class="keyword">if</span>)<span class="preprocessor">#port-channel load-balance {dst-mac | src-mac}在链路间实现负载均衡 这里可以选择基于src-dst-mac 源和目的mac进行负载分担。</span>
+<span class="keyword">switch</span><span class="preprocessor">#show etherchannel  <span class="number">1</span>  summary    查看通道信息  ，可以查看捆绑的链路有哪些，以及接口的状态。</span>
+<span class="keyword">switch</span><span class="preprocessor">#show  etherchannel  load-balance    查看通道负载均衡信息</span>
+
+<span class="keyword">switch</span><span class="preprocessor">#show ip interface brief   查看接口的时候，我们会看到通过etherchannel捆绑产生的一个逻辑接口portchannel，并且处于up状态。</span>
+</code></pre><hr>
+<h3 id="步骤五：配置端口安全（可选）">步骤五：配置端口安全（可选）</h3><pre><code><span class="function"><span class="title">sw2</span><span class="params">(config)</span></span><span class="id">#int</span> fa1/<span class="number">1</span>  进入你要配置端口安全的接口
+<span class="function"><span class="title">sw2</span><span class="params">(config-if)</span></span><span class="id">#switchport</span> port-security   启用端口安全。
+<span class="function"><span class="title">sw2</span><span class="params">(config-if)</span></span><span class="id">#switchport</span> port-security  mac-add sticky  ：进行端口mac地址绑定，一个端口只能绑定一个mac地址，意味着只能连接服务器，不能连接交换机，并且服务器使用虚拟化的时候，虚拟出来的mac可能会被误杀。所以慎用，否则可能会导致接口进入down状态。
+
+
+<span class="id">#show</span>  port-security  <span class="tag">address</span> ：这个一定要看到输出画面。
+</code></pre><hr>
+<h3 id="步骤六：校验">步骤六：校验</h3><p>可以拿服务器进行测试，看负载分担是否生效，还有从etherchannel中拔掉一根网线是否会造成整个portchannel都down掉。</p>
+]]></content>
+    <summary type="html">
+    <![CDATA[<p>显示全文：<br>]]>
+    
+    </summary>
+    
+      <category term="Cisco" scheme="http://www.stackops.info/tags/Cisco/"/>
+    
+      <category term="switch" scheme="http://www.stackops.info/tags/switch/"/>
+    
+  </entry>
+  
+  <entry>
     <title><![CDATA[机房网络优化]]></title>
     <link href="http://www.stackops.info/2015/08/15/%E6%9C%BA%E6%88%BF%E7%BD%91%E7%BB%9C%E4%BC%98%E5%8C%96/"/>
     <id>http://www.stackops.info/2015/08/15/机房网络优化/</id>
     <published>2015-08-15T12:50:58.000Z</published>
-    <updated>2015-08-16T15:43:03.172Z</updated>
+    <updated>2015-08-16T15:56:16.154Z</updated>
     <content type="html"><![CDATA[<p>显示全文：<br><a id="more"></a></p>
 <h2 id="硬件介绍：">硬件介绍：</h2><p>cisco经典的接入层交换机：catalyst 2960</p>
 <h2 id="机房网络分析：">机房网络分析：</h2><p>网络拓扑比较简单，主要分为内网和外网两个环境。电信机房托管，外网几乎不用做太多改变。整个网络只需要一些二层的配置，网络层都由电信机房提供，我们只需要用交换机接入即可。因为服务器大概的角色分配是web应用服务器和DB，内网之间的数据读写比较平凡，相对来说对网络带宽要求比较高。据说之前有因为交换机带宽瓶颈带来过down机现象。本次改善主要是针对带宽扩展而做的。之前的交换机都是当傻瓜交换机用，无任何配置，无任何链路冗余。<br>需要改进的几点：</p>
@@ -320,7 +451,7 @@ Include /<span class="keyword">var</span>/lib/submin/conf/apache-svn.conf
 
 <span class="tag">&lt;/IfModule&gt;</span>
 <span class="tag">&lt;/VirtualHost&gt;</span>
-</code></pre><p>当通过浏览器访问web管理界面的时候：<a href="http://192.168.3.48/submin会提示你输入账户和密码，这时候你可以点击页面上的" target="_blank" rel="external">http://192.168.3.48/submin会提示你输入账户和密码，这时候你可以点击页面上的</a>  Forgot your  password , 然后会主动发一封邮件给root用户：<br>可以通过命令：# cat /var/spool/mail/root 查看发过来的重置密码的连接，我们可以通过该链接进行密码的修改：<br>    From: root@localhost.novalocal<br>    To: liyahua@xxx.com<br>    Subject: Submin password reset request<br>    Message-Id: <a href="&#109;&#97;&#x69;&#x6c;&#x74;&#x6f;&#x3a;&#50;&#48;&#x31;&#x35;&#x30;&#x38;&#49;&#51;&#48;&#54;&#x32;&#55;&#x35;&#53;&#46;&#x42;&#54;&#x38;&#x36;&#70;&#x36;&#x31;&#x46;&#x37;&#x44;&#x40;&#115;&#x76;&#x6e;&#x61;&#100;&#x6d;&#105;&#x6e;&#46;&#x6e;&#111;&#118;&#x61;&#x6c;&#x6f;&#x63;&#x61;&#108;">&#50;&#48;&#x31;&#x35;&#x30;&#x38;&#49;&#51;&#48;&#54;&#x32;&#55;&#x35;&#53;&#46;&#x42;&#54;&#x38;&#x36;&#70;&#x36;&#x31;&#x46;&#x37;&#x44;&#x40;&#115;&#x76;&#x6e;&#x61;&#100;&#x6d;&#105;&#x6e;&#46;&#x6e;&#111;&#118;&#x61;&#x6c;&#x6f;&#x63;&#x61;&#108;</a><br>    Date: Thu, 13 Aug 2015 06:27:55 +0000 (UTC)</p>
+</code></pre><p>当通过浏览器访问web管理界面的时候：<a href="http://192.168.3.48/submin会提示你输入账户和密码，这时候你可以点击页面上的" target="_blank" rel="external">http://192.168.3.48/submin会提示你输入账户和密码，这时候你可以点击页面上的</a>  Forgot your  password , 然后会主动发一封邮件给root用户：<br>可以通过命令：# cat /var/spool/mail/root 查看发过来的重置密码的连接，我们可以通过该链接进行密码的修改：<br>    From: root@localhost.novalocal<br>    To: liyahua@xxx.com<br>    Subject: Submin password reset request<br>    Message-Id: <a href="&#109;&#97;&#x69;&#108;&#x74;&#x6f;&#x3a;&#x32;&#x30;&#49;&#53;&#48;&#56;&#49;&#51;&#48;&#x36;&#50;&#55;&#x35;&#x35;&#x2e;&#x42;&#54;&#56;&#x36;&#x46;&#54;&#x31;&#70;&#55;&#68;&#x40;&#115;&#x76;&#x6e;&#97;&#x64;&#109;&#105;&#x6e;&#46;&#110;&#111;&#118;&#x61;&#108;&#111;&#99;&#97;&#x6c;">&#x32;&#x30;&#49;&#53;&#48;&#56;&#49;&#51;&#48;&#x36;&#50;&#55;&#x35;&#x35;&#x2e;&#x42;&#54;&#56;&#x36;&#x46;&#54;&#x31;&#70;&#55;&#68;&#x40;&#115;&#x76;&#x6e;&#97;&#x64;&#109;&#105;&#x6e;&#46;&#110;&#111;&#118;&#x61;&#108;&#111;&#99;&#97;&#x6c;</a><br>    Date: Thu, 13 Aug 2015 06:27:55 +0000 (UTC)</p>
 <pre><code>You <span class="keyword">are</span> receiving this email because someone requested a password reset for
 your account. If you don't know what this <span class="keyword">is</span> about, you can safely ignore it,
 the reset request will expire automatically.
