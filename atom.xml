@@ -5,7 +5,7 @@
   <subtitle><![CDATA[Follow your heart]]></subtitle>
   <link href="/atom.xml" rel="self"/>
   <link href="http://www.stackops.info//"/>
-  <updated>2015-08-19T13:37:26.851Z</updated>
+  <updated>2015-08-19T15:11:40.689Z</updated>
   <id>http://www.stackops.info//</id>
   
   <author>
@@ -14,6 +14,187 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title><![CDATA[OpenStack搭建-Glance]]></title>
+    <link href="http://www.stackops.info/2015/08/19/OpenStack%E6%90%AD%E5%BB%BA-Glance/"/>
+    <id>http://www.stackops.info/2015/08/19/OpenStack搭建-Glance/</id>
+    <published>2015-08-19T13:41:14.000Z</published>
+    <updated>2015-08-19T15:11:40.689Z</updated>
+    <content type="html"><![CDATA[<p>显示全文：<br><a id="more"></a></p>
+<h2 id="OpenStack_镜像服务">OpenStack 镜像服务</h2><p>openstack是Iaas的核心，它接受用户和opentack组件请求磁盘或则镜像服务和镜像元数据。它支持多种存储类型，包括openstack对象存储（ Object Storage）。</p>
+<p>运行在OpenStack Image Service 的进程支持缓存。通过集群的备份确保一致性和可用性。其它周期性进程包括：<br>auditors, updaters, and reapers。</p>
+<p>Glance组件完成镜像模板snapshot的存储工作，例如我们新创的一台实例，给他配置LANMP环境，然后做一个快照之后，以后再想创建一个实例并运行LANMP环境，就可以直接从快照启动一个实例，非常方便。并且对实例的备份工作也可以这么实现。从整体上看，为了保证数据的安全性与可用性，应该采用分布式存储来存储镜像文件，不仅可以实现高速存储读取，对安全性也有很大提高，例如openstack的swift组件就是提供分布式存储的功能。</p>
+<h3 id="openstack_glance（_Image_Service_）包含下面组件">openstack glance（ Image Service ）包含下面组件</h3><p><strong>glance-api</strong>：接受api请求，并提供相应操作，包括显示，检索，存储<br><strong>glance-registry</strong>：存储、处理、检索镜像的元数据，元数据包括例如镜像大小、类型等</p>
+<p>注意：<br><em>glance-registry</em>是<em>OpenStack Image Service</em> 内部服务，不对用户开放</p>
+<p>数据库可以选择自己喜欢的数据库存储镜像元数据，大多数使用 MySQL 或则 SQLite.<br>图像文件存储库不同类型的库支持包括文件系统、对象存储、RADOS block devices、HTTP, 和 Amazon S3<br>注意：<br>    一些库只支持只读</p>
+<h3 id="安装Glance组件的步骤分为如下几步：">安装Glance组件的步骤分为如下几步：</h3><ul>
+<li>安装软件包，编辑配置文件</li>
+<li>创建Glance的数据库</li>
+<li>在keystone中，创建glance的用户，服务，Endpoint</li>
+<li>初始化Glance数据库，启动服务，确认服务正常运行。</li>
+<li>在Glance中添加虚拟机镜像。</li>
+</ul>
+<h4 id="1，安装配置glance服务：">1，安装配置glance服务：</h4><p>1），创建数据库：</p>
+<pre><code>a,  进入数据库，并输入密码
+
+$ mysql -u root -p
+
+b,  创建glance数据库
+
+<span class="operator"><span class="keyword">CREATE</span> <span class="keyword">DATABASE</span> glance;</span>
+
+c,授权给glance。.授权glance数据库，使得本地及远程都能访问  
+
+<span class="operator"><span class="keyword">GRANT</span> ALL <span class="keyword">PRIVILEGES</span> <span class="keyword">ON</span> glance.* <span class="keyword">TO</span> <span class="string">'glance'</span>@<span class="string">'localhost'</span> \
+<span class="keyword">IDENTIFIED</span> <span class="keyword">BY</span> <span class="string">'GLANCE_DBPASS'</span>;</span>        
+<span class="operator"><span class="keyword">GRANT</span> ALL <span class="keyword">PRIVILEGES</span> <span class="keyword">ON</span> glance.* <span class="keyword">TO</span> <span class="string">'glance'</span>@<span class="string">'%'</span> \
+<span class="keyword">IDENTIFIED</span> <span class="keyword">BY</span> <span class="string">'GLANCE_DBPASS'</span>;</span>
+
+d, 退出数据库。
+</code></pre><p>2，环境变量生效：</p>
+<pre><code>$ <span class="keyword">source</span> admin-openrc.<span class="keyword">sh</span>
+</code></pre><p>3，创建glance（凭据）用户<br>a.创建glance用户</p>
+<pre><code><span class="header">$ keystone user-create --name glance --pass GLANCE_PASS
++----------+----------------------------------+</span>
+<span class="header">| Property | Value |
++----------+----------------------------------+</span>
+| email | |
+| enabled | True |
+| id | f89cca5865dc42b18e2421fa5f5cce66 |
+| name | glance |
+<span class="header">| username | glance |
++----------+----------------------------------+</span>
+</code></pre><p>b.给glance用户授予admin role（角色）</p>
+<pre><code><span class="comment">$</span> <span class="comment">keystone</span> <span class="comment">user</span><span class="literal">-</span><span class="comment">role</span><span class="literal">-</span><span class="comment">add</span> <span class="literal">-</span><span class="literal">-</span><span class="comment">user</span> <span class="comment">glance</span> <span class="literal">-</span><span class="literal">-</span><span class="comment">tenant</span> <span class="comment">service</span> <span class="literal">-</span><span class="literal">-</span><span class="comment">role</span> <span class="comment">admin</span>
+</code></pre><p>c.创建  glance service 实例:</p>
+<pre><code>$ keystone service-create --name glance --type image \
+<span class="header">--description "OpenStack Image Service"
++-------------+----------------------------------+</span>
+<span class="header">| Property | Value |
++-------------+----------------------------------+</span>
+| description | OpenStack Image Service |
+| enabled | True |    
+| id | 23f409c4e79f4c9e9d23d809c50fbacf |
+| name | glance |
+<span class="header">| type | image |
++-------------+----------------------------------+</span>
+</code></pre><p>d, 创建   Image 服务 API endpoints</p>
+<pre><code>$ keystone endpoint-create \
+--service-id $(keystone service-list |<span class="string"> awk '/ image / {print $2}') \
+--publicurl http://controller:9292 \
+--internalurl http://controller:9292 \
+--adminurl http://controller:9292 \
+--region regionOne
++-------------+----------------------------------+
+</span>|<span class="string"> Property </span>|<span class="string"> Value </span>|
++-------------+----------------------------------+
+|<span class="string"> adminurl </span>|<span class="string"> http://controller:9292 </span>|
+|<span class="string"> id </span>|<span class="string"> a2ee818c69cb475199a1ca108332eb35 </span>|
+|<span class="string"> internalurl </span>|<span class="string"> http://controller:9292 </span>|
+|<span class="string"> publicurl </span>|<span class="string"> http://controller:9292 </span>|
+|<span class="string"> region </span>|<span class="string"> regionOne </span>|
+|<span class="string"> service_id </span>|<span class="string"> 23f409c4e79f4c9e9d23d809c50fbacf </span>|
++-------------+----------------------------------+  
+</code></pre><p>2,安装配置Image  Service 组成部分。<br>    1），安装包</p>
+<pre><code><span class="comment"># apt-get install glance python-glanceclient</span>
+
+2），修改配置文件: /etc/glance/glance-api.conf
+
+[database]
+...
+<span class="constant">connection</span> = mysql://glance:GLANCE_DBPASS@controller/glance
+[keystone_authtoken]
+...
+<span class="constant">auth_uri</span> = http://controller:5000/v2.0
+<span class="constant">identity_uri</span> = http://controller:35357
+<span class="constant">admin_tenant_name</span> = service
+<span class="constant">admin_user</span> = glance
+<span class="constant">admin_password</span> = GLANCE_PASS
+</code></pre><p>注意：这里使用auth_uri 替换掉了auth_port等。所以要注释掉原来的认证：</p>
+<pre><code>[<span class="atom">paste_deploy</span>]
+...
+<span class="atom">flavor</span> = <span class="atom">keystone</span>
+[<span class="atom">glance_store</span>]
+...
+<span class="atom">default_store</span> = <span class="atom">file</span>
+<span class="atom">filesystem_store_datadir</span> = /<span class="atom">var</span>/<span class="atom">lib</span>/<span class="atom">glance</span>/<span class="atom">images</span>/
+</code></pre><p>配置本地文件存储及存储路径</p>
+<pre><code>[DEFAULT]
+...
+<span class="constant">notification_driver</span> = noop
+[DEFAULT]
+...
+<span class="constant">verbose</span> = True
+
+3），修改/etc/glance/glance-registry.conf配置文件。
+
+[database]
+...
+<span class="constant">connection</span> = mysql://glance:GLANCE_DBPASS@controller/glance
+[keystone_authtoken]
+...
+<span class="constant">auth_uri</span> = http://controller:5000/v2.0
+<span class="constant">identity_uri</span> = http://controller:35357
+<span class="constant">admin_tenant_name</span> = service
+<span class="constant">admin_user</span> = glance
+<span class="constant">admin_password</span> = GLANCE_PASS
+</code></pre><p>同上，注视掉auth_port等内容。</p>
+<pre><code><span class="title">[paste_deploy]</span>
+<span class="setting">flavor = <span class="value">keystone</span></span>
+<span class="title">[DEFAULT]</span>
+<span class="setting">notification_driver = <span class="value">noop    </span></span>
+<span class="setting">verbose = <span class="value"><span class="keyword">True</span></span></span>
+</code></pre><p>配置 noop通知驱动</p>
+<pre><code><span class="number">4</span>），同步数据库；
+
+<span class="preprocessor"># su -s /bin/sh -c <span class="string">"glance-manage db_sync"</span> glance</span>
+</code></pre><p>注意：如果配置文件有什么语法上的错位，同步的时候会提示，根据提示来修改。</p>
+<pre><code><span class="number">5</span>），重启服务：
+
+<span class="preprocessor"># service glance-registry restart</span>
+<span class="preprocessor"># service glance-api restart</span>
+
+<span class="number">6</span>），删掉ubuntu有安装的SQLite 数据库
+
+<span class="preprocessor"># rm -f /var/lib/glance/glance.sqlite</span>
+</code></pre><p>3，下载镜像文件：<br>1），创建一个零时文件：</p>
+<pre><code>$ <span class="built_in">mkdir</span> /tmp/images
+</code></pre><p>2），从网上下载镜像到零时文件中：</p>
+<pre><code><span class="variable">$ </span>wget  <span class="symbol">http:</span>/<span class="regexp">/download.cirros-cloud.net/</span><span class="number">0</span>.<span class="number">3.3</span>/cirros-<span class="number">0</span>.<span class="number">3.3</span>-x86_64-disk.img
+</code></pre><p>注意：官方文档给的链接不能用。这里使用的是一个小镜像，用于测试。</p>
+<p>提供官网找到的链接，里面包含centos，ubuntu，windows server2012等的镜像：</p>
+<p><a href="http://docs.openstack.org/image-guide/content/ch_obtaining_images.html" target="_blank" rel="external">官网链接</a></p>
+<p>3），source 环境变量</p>
+<pre><code>$ <span class="keyword">source</span> admin-openrc.<span class="keyword">sh</span>
+</code></pre><p>4)，上传镜像文件到glance的Image服务中：</p>
+<pre><code><span class="comment">$</span> <span class="comment">glance</span> <span class="comment">image</span><span class="literal">-</span><span class="comment">create</span> <span class="literal">-</span><span class="literal">-</span><span class="comment">name</span> <span class="comment">"cirros</span><span class="literal">-</span><span class="comment">0</span><span class="string">.</span><span class="comment">3</span><span class="string">.</span><span class="comment">3</span><span class="literal">-</span><span class="comment">x86_64"</span> <span class="literal">-</span><span class="literal">-</span><span class="comment">file</span> <span class="comment">/tmp/images/cirros</span><span class="literal">-</span><span class="comment">0</span><span class="string">.</span><span class="comment">3</span><span class="string">.</span><span class="comment">3</span><span class="literal">-</span><span class="comment">x86_64</span><span class="literal">-</span><span class="comment">disk</span><span class="string">.</span><span class="comment">img</span> <span class="comment">\</span>
+<span class="literal">-</span><span class="literal">-</span><span class="comment">disk</span><span class="literal">-</span><span class="comment">format</span> <span class="comment">qcow2</span> <span class="literal">-</span><span class="literal">-</span><span class="comment">container</span><span class="literal">-</span><span class="comment">format</span> <span class="comment">bare</span> <span class="literal">-</span><span class="literal">-</span><span class="comment">is</span><span class="literal">-</span><span class="comment">public</span> <span class="comment">True</span> <span class="literal">-</span><span class="literal">-</span><span class="comment">progress</span>
+</code></pre><p>附上镜像文件下载的地址：<a href="http://download.cirros-cloud.net/0.3.3/cirros-0.3.3-x86_64-disk.img" target="_blank" rel="external">http://download.cirros-cloud.net/0.3.3/cirros-0.3.3-x86_64-disk.img</a></p>
+<p>5），校验上传的镜像：</p>
+<pre><code>root<span class="comment">@controller:~# glance image-list</span>
++--------------------------------------+---------------------+-------------+------------------+-----------+--------+
+|<span class="string"> ID                                   </span>|<span class="string"> Name                </span>|<span class="string"> Disk Format </span>|<span class="string"> Container Format </span>|<span class="string"> Size      </span>|<span class="string"> Status </span>|
++--------------------------------------+---------------------+-------------+------------------+-----------+--------+
+|<span class="string"> e60963d5-fcb3-4ebb-b41e-51aa100adfcb </span>|<span class="string"> centos6.6x64        </span>|<span class="string"> iso         </span>|<span class="string"> bare             </span>|<span class="string"> 401604608 </span>|<span class="string"> active </span>|
+|<span class="string"> 0eb0e87c-450f-4a68-b4d0-d8f6abf26449 </span>|<span class="string"> cirros-0.3.3-x86_64 </span>|<span class="string"> qcow2       </span>|<span class="string"> bare             </span>|<span class="string"> 13200896  </span>|<span class="string"> active </span>|
+|<span class="string"> c4b8af42-dea4-42e8-bb2a-daaa3d18117f </span>|<span class="string"> ubuntu server       </span>|<span class="string"> iso         </span>|<span class="string"> bare             </span>|<span class="string"> 623902720 </span>|<span class="string"> active </span>|
++--------------------------------------+---------------------+-------------+------------------+-----------+--------+
+</code></pre><p>6），上传成功后，删除掉零时文件：</p>
+<pre><code><span class="variable">$ </span>rm -r /tmp/images
+</code></pre>]]></content>
+    <summary type="html">
+    <![CDATA[<p>显示全文：<br>]]>
+    
+    </summary>
+    
+      <category term="glance" scheme="http://www.stackops.info/tags/glance/"/>
+    
+      <category term="image" scheme="http://www.stackops.info/tags/image/"/>
+    
+      <category term="openstack" scheme="http://www.stackops.info/tags/openstack/"/>
+    
+  </entry>
   
   <entry>
     <title><![CDATA[OpenStack搭建-Keystone]]></title>
@@ -755,7 +936,7 @@ Include /<span class="keyword">var</span>/lib/submin/conf/apache-svn.conf
 
 <span class="tag">&lt;/IfModule&gt;</span>
 <span class="tag">&lt;/VirtualHost&gt;</span>
-</code></pre><p>当通过浏览器访问web管理界面的时候：<a href="http://192.168.3.48/submin会提示你输入账户和密码，这时候你可以点击页面上的" target="_blank" rel="external">http://192.168.3.48/submin会提示你输入账户和密码，这时候你可以点击页面上的</a>  Forgot your  password , 然后会主动发一封邮件给root用户：<br>可以通过命令：# cat /var/spool/mail/root 查看发过来的重置密码的连接，我们可以通过该链接进行密码的修改：<br>    From: root@localhost.novalocal<br>    To: liyahua@xxx.com<br>    Subject: Submin password reset request<br>    Message-Id: <a href="&#109;&#x61;&#x69;&#x6c;&#116;&#111;&#x3a;&#50;&#x30;&#49;&#53;&#x30;&#x38;&#49;&#x33;&#x30;&#54;&#x32;&#x37;&#x35;&#53;&#x2e;&#x42;&#x36;&#56;&#54;&#x46;&#54;&#49;&#x46;&#55;&#x44;&#x40;&#x73;&#118;&#110;&#97;&#100;&#109;&#x69;&#x6e;&#x2e;&#x6e;&#x6f;&#x76;&#x61;&#x6c;&#x6f;&#x63;&#x61;&#x6c;">&#50;&#x30;&#49;&#53;&#x30;&#x38;&#49;&#x33;&#x30;&#54;&#x32;&#x37;&#x35;&#53;&#x2e;&#x42;&#x36;&#56;&#54;&#x46;&#54;&#49;&#x46;&#55;&#x44;&#x40;&#x73;&#118;&#110;&#97;&#100;&#109;&#x69;&#x6e;&#x2e;&#x6e;&#x6f;&#x76;&#x61;&#x6c;&#x6f;&#x63;&#x61;&#x6c;</a><br>    Date: Thu, 13 Aug 2015 06:27:55 +0000 (UTC)</p>
+</code></pre><p>当通过浏览器访问web管理界面的时候：<a href="http://192.168.3.48/submin会提示你输入账户和密码，这时候你可以点击页面上的" target="_blank" rel="external">http://192.168.3.48/submin会提示你输入账户和密码，这时候你可以点击页面上的</a>  Forgot your  password , 然后会主动发一封邮件给root用户：<br>可以通过命令：# cat /var/spool/mail/root 查看发过来的重置密码的连接，我们可以通过该链接进行密码的修改：<br>    From: root@localhost.novalocal<br>    To: liyahua@xxx.com<br>    Subject: Submin password reset request<br>    Message-Id: <a href="&#109;&#x61;&#x69;&#x6c;&#x74;&#x6f;&#x3a;&#x32;&#48;&#49;&#x35;&#48;&#56;&#x31;&#x33;&#48;&#x36;&#50;&#55;&#x35;&#53;&#46;&#x42;&#x36;&#x38;&#x36;&#x46;&#x36;&#49;&#70;&#55;&#x44;&#x40;&#x73;&#118;&#110;&#97;&#100;&#x6d;&#105;&#110;&#x2e;&#x6e;&#111;&#x76;&#97;&#x6c;&#111;&#99;&#97;&#108;">&#x32;&#48;&#49;&#x35;&#48;&#56;&#x31;&#x33;&#48;&#x36;&#50;&#55;&#x35;&#53;&#46;&#x42;&#x36;&#x38;&#x36;&#x46;&#x36;&#49;&#70;&#55;&#x44;&#x40;&#x73;&#118;&#110;&#97;&#100;&#x6d;&#105;&#110;&#x2e;&#x6e;&#111;&#x76;&#97;&#x6c;&#111;&#99;&#97;&#108;</a><br>    Date: Thu, 13 Aug 2015 06:27:55 +0000 (UTC)</p>
 <pre><code>You <span class="keyword">are</span> receiving this email because someone requested a password reset for
 your account. If you don't know what this <span class="keyword">is</span> about, you can safely ignore it,
 the reset request will expire automatically.
