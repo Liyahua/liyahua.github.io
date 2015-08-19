@@ -14,7 +14,7 @@
 <meta property="og:image" content="http://7xl5dz.com1.z0.glb.clouddn.com/12a90e46-b7dd-4480-8fc5-490ee586bbd5.png">
 <meta property="og:image" content="http://7xl5dz.com1.z0.glb.clouddn.com/5eede493-8e20-429e-95e6-eff22784e4f5.png">
 <meta property="og:image" content="http://7xl5dz.com1.z0.glb.clouddn.com/2b2576d2-5dc5-4e31-b3bb-3b4cbdfff49b.jpg">
-<meta property="og:updated_time" content="2015-08-15T10:40:43.717Z">
+<meta property="og:updated_time" content="2015-08-19T08:43:51.166Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="使用submin搭建图形化svn管理工具">
 <meta name="twitter:description" content="显示全文：">
@@ -184,11 +184,11 @@ lrwxrwxrwx. <span class="number">1</span> root root    <span class="number">13</
 </code></pre><h2 id="3-_安装submin">3. 安装submin</h2><hr>
 <p>安装submin过程比较简单的，直接使用python执行安装包中的安装脚本。</p>
 <pre><code>wget http:<span class="comment">//supermind.nl/submin/current/submin-2.1.0-1.tar.gz</span>
-tar -zxvf submin-<span class="number">2.1</span><span class="number">.0</span>-<span class="number">1.</span>tar.gz
-cd submin-<span class="number">2.1</span><span class="number">.0</span>-<span class="number">1</span>
-python setup.py install  <span class="comment">//还是使用的python2.6安装。使用python2.7安装可能会报错：</span>
+tar -zxvf submin-<span class="number">2.1</span>.<span class="number">0</span>-<span class="number">1</span><span class="class">.tar</span><span class="class">.gz</span>
+cd submin-<span class="number">2.1</span>.<span class="number">0</span>-<span class="number">1</span>
+python setup<span class="class">.py</span> install  <span class="comment">//还是使用的python2.6安装。使用python2.7安装可能会报错：</span>
 
-submin2-admin /var/lib/submin initenv liyahua@xxx.com
+submin2-admin /var/lib/submin initenv liyahua@xxx<span class="class">.com</span>   <span class="comment">//这里是初始化submin的安装环境，指定submin的安装路径，根据自己的实际情况来选择，例如我们可以将svn的repository存放在/opt/svnroot目录下，就在这里进行修改。</span>
 </code></pre><h2 id="4-_配置apache">4. 配置apache</h2><hr>
 <p>配置apache的过程中需要修改submin的配置文件。默认安装路径是/var/lib/submin/，需要安装相应的模块：</p>
 <h3 id="例如报错：">例如报错：</h3><p><img src="http://7xl5dz.com1.z0.glb.clouddn.com/12a90e46-b7dd-4480-8fc5-490ee586bbd5.png" alt="error"><br>报错有  <strong>mod_dbd</strong>和<strong>mod_auth_dbd</strong>两个模块没有加载。只需要在/etc/httpd/conf/httpd.conf中加载相关的模块就可以了。</p>
@@ -246,7 +246,7 @@ Include /<span class="keyword">var</span>/lib/submin/conf/apache-svn.conf
 
 <span class="tag">&lt;/IfModule&gt;</span>
 <span class="tag">&lt;/VirtualHost&gt;</span>
-</code></pre><p>当通过浏览器访问web管理界面的时候：<a href="http://192.168.3.48/submin会提示你输入账户和密码，这时候你可以点击页面上的" target="_blank" rel="external">http://192.168.3.48/submin会提示你输入账户和密码，这时候你可以点击页面上的</a>  Forgot your  password , 然后会主动发一封邮件给root用户：<br>可以通过命令：# cat /var/spool/mail/root 查看发过来的重置密码的连接，我们可以通过该链接进行密码的修改：<br>    From: root@localhost.novalocal<br>    To: liyahua@xxx.com<br>    Subject: Submin password reset request<br>    Message-Id: <a href="&#109;&#97;&#x69;&#108;&#x74;&#x6f;&#x3a;&#x32;&#x30;&#49;&#53;&#48;&#56;&#49;&#51;&#48;&#x36;&#50;&#55;&#x35;&#x35;&#x2e;&#x42;&#54;&#56;&#x36;&#x46;&#54;&#x31;&#70;&#55;&#68;&#x40;&#115;&#x76;&#x6e;&#97;&#x64;&#109;&#105;&#x6e;&#46;&#110;&#111;&#118;&#x61;&#108;&#111;&#99;&#97;&#x6c;">&#x32;&#x30;&#49;&#53;&#48;&#56;&#49;&#51;&#48;&#x36;&#50;&#55;&#x35;&#x35;&#x2e;&#x42;&#54;&#56;&#x36;&#x46;&#54;&#x31;&#70;&#55;&#68;&#x40;&#115;&#x76;&#x6e;&#97;&#x64;&#109;&#105;&#x6e;&#46;&#110;&#111;&#118;&#x61;&#108;&#111;&#99;&#97;&#x6c;</a><br>    Date: Thu, 13 Aug 2015 06:27:55 +0000 (UTC)</p>
+</code></pre><p>当通过浏览器访问web管理界面的时候：<a href="http://192.168.3.48/submin会提示你输入账户和密码，这时候你可以点击页面上的" target="_blank" rel="external">http://192.168.3.48/submin会提示你输入账户和密码，这时候你可以点击页面上的</a>  Forgot your  password , 然后会主动发一封邮件给root用户：<br>可以通过命令：# cat /var/spool/mail/root 查看发过来的重置密码的连接，我们可以通过该链接进行密码的修改：<br>    From: root@localhost.novalocal<br>    To: liyahua@xxx.com<br>    Subject: Submin password reset request<br>    Message-Id: <a href="&#x6d;&#97;&#x69;&#x6c;&#x74;&#x6f;&#58;&#50;&#x30;&#49;&#53;&#48;&#56;&#49;&#x33;&#48;&#54;&#x32;&#x37;&#x35;&#x35;&#x2e;&#66;&#x36;&#56;&#54;&#70;&#x36;&#49;&#70;&#x37;&#68;&#64;&#x73;&#118;&#x6e;&#x61;&#100;&#x6d;&#x69;&#110;&#x2e;&#110;&#x6f;&#x76;&#97;&#108;&#111;&#x63;&#x61;&#x6c;">&#50;&#x30;&#49;&#53;&#48;&#56;&#49;&#x33;&#48;&#54;&#x32;&#x37;&#x35;&#x35;&#x2e;&#66;&#x36;&#56;&#54;&#70;&#x36;&#49;&#70;&#x37;&#68;&#64;&#x73;&#118;&#x6e;&#x61;&#100;&#x6d;&#x69;&#110;&#x2e;&#110;&#x6f;&#x76;&#97;&#108;&#111;&#x63;&#x61;&#x6c;</a><br>    Date: Thu, 13 Aug 2015 06:27:55 +0000 (UTC)</p>
 <pre><code>You <span class="keyword">are</span> receiving this email because someone requested a password reset for
 your account. If you don't know what this <span class="keyword">is</span> about, you can safely ignore it,
 the reset request will expire automatically.
@@ -262,7 +262,13 @@ Submin
 PS. The request was sent from submin2-admin
 
 --B686F61F7D.1439447277/svnadmin.novalocal--
-</code></pre><p>可以看到链接，在浏览器中打开链接，输入账户之后会再发一封邮件给你，里面包含了重置之后的密码。可以使用密码重新登陆submin。<br><img src="http://7xl5dz.com1.z0.glb.clouddn.com/5eede493-8e20-429e-95e6-eff22784e4f5.png" alt="login"><br>可以在这个图形化的界面中进行密码修改，用户，组，repository创建删除，权限的授予等svn账户管理,比较方便直观.</p>
+</code></pre><p>可以看到链接，在浏览器中打开链接，输入账户之后会再发一封邮件给你，里面包含了重置之后的密码。可以使用密码重新登陆submin。<br>如果没有收到邮件，在/var/spool/mail/目录下没有root这个用户，说明postfix没有正常启动。查看错误日志：<br>    [Tue Aug 18 14:05:21 2015] [error] [client 192.168.1.124] postdrop: warning: unable to look up public/pickup: No such file or directory, referer: <a href="http://svnadmin.ci.com/submin/password/" target="_blank" rel="external">http://svnadmin.ci.com/submin/password/</a><br>    [Tue Aug 18 14:06:38 2015] [error] [client 192.168.1.124] postdrop: warning: unable to look up public/pickup: No such file or directory, referer: <a href="http://svnadmin.ci.com/submin/password/" target="_blank" rel="external">http://svnadmin.ci.com/submin/password/</a></p>
+<h4 id="解决方法是：">解决方法是：</h4><pre><code>mkfifo /<span class="keyword">var</span>/spool/<span class="keyword">postfix</span>/public/pickup
+ps aux | grep mail
+kill  掉运行的进程。
+sudo /etc/<span class="keyword">init</span>.d/<span class="keyword">postfix</span> restart
+重新启动<span class="keyword">postfix</span>即可
+</code></pre><p>修改过密码后即可正常登录<br><img src="http://7xl5dz.com1.z0.glb.clouddn.com/5eede493-8e20-429e-95e6-eff22784e4f5.png" alt="login"><br>可以在这个图形化的界面中进行密码修改，用户，组，repository创建删除，权限的授予等svn账户管理,比较方便直观.</p>
 <p>当所有的环境都安装完成之后，可以使用tortoise svn这个windows下的客户端连接svn库。<br><img src="http://7xl5dz.com1.z0.glb.clouddn.com/2b2576d2-5dc5-4e31-b3bb-3b4cbdfff49b.jpg" alt="tortois svn"><br>至此，svn的图形化管理工具submin已经安装完成了。<br>这里还是有必要提一下，submin几个比较重要的目录：</p>
 <ul>
 <li>1   /var/lib/submin/svn : 这个目录相当于svn仓库，存放了所有svn的repository，至关重要。</li>
@@ -270,11 +276,55 @@ PS. The request was sent from submin2-admin
 <li>3   /var/lib/conf/submin.db  ：这是一个sqlite数据库文件，里面存放的是svn的用户名和密码</li>
 <li>4   /var/lib/conf/authz  ：这个文件里面存放了每个svn用户对应的权限。</li>
 </ul>
+<hr>
+<h3 id="nginx反向代理：">nginx反向代理：</h3><p>当submin配置在内网的服务器时，我们无法通过外网打开submin进行svn的管理。这时候就需要用到nginx的反向代理特性。</p>
+<p>这个功能的主要思想是（个人理解）：<br>    在nginx建立虚拟主机，根据用户请求的内容进行处理，当用户请求的内容匹配到nginx中虚拟主机定义的location之时，将会由nginx将请求转交给配置的nginx的虚拟主机。（工作中应该大多会使用nginx做前端代理，将请求负载分担给后端不同的apache服务器）。通常nginx启用80端口对外开放，httpd启用8080（自己定义的端口），将对80端口的请求代理到8080端口。</p>
+<h4 id="首先nginx的安装：">首先nginx的安装：</h4><p>简单起见，使用yum安装，不过这里必须先使用nginx的源：</p>
+<pre><code>rpm -ivh <span class="string">http:</span><span class="comment">//nginx.org/packages/centos/6/noarch/RPMS/nginx-release-centos-6-0.el6.ngx.noarch.rpm</span>
+yum info  nginx  ： 查看nginx包的信息。
+yum install <span class="string">nginx    :</span>安装nginx
+</code></pre><p>安装过nginx之后，其配置文件都在它的默认路径下，/etc/nginx/  </p>
+<p>nginx的主要修改的配置文件有这么几个：nginx.conf  conf.d/default.conf  …等。我主要修改了default.conf这个配置文件，并加了一个svnadmin.ci.com.conf（nginx.conf 会include  conf.d/*.conf）</p>
+<h4 id="简单default-conf配置文件：">简单default.conf配置文件：</h4><pre><code>server {
+    listen       <span class="number">80</span>;
+    server_name _;
+    <span class="keyword">return</span> <span class="number">404</span>;
+}    
+    access_log  /var/<span class="built_in">log</span>/nginx/access.<span class="built_in">log</span>  main;
+    error_page  <span class="number">404</span>            /usr/share/nginx/html/<span class="number">404.</span>html;
+</code></pre><h4 id="svnadmin-ci-com-conf配置文件：（很简陋，小白手笔。）">svnadmin.ci.com.conf配置文件：（很简陋，小白手笔。）</h4><pre><code>server {
+        listen       <span class="number">80</span>;
+        server_name  <span class="number">192.168</span>.<span class="number">3.47</span>;
+        location /        {
+                proxy_pass  http://<span class="number">127.0</span>.<span class="number">0</span>.<span class="number">1</span>:<span class="number">88</span>;
+                proxy_set_header   Host   <span class="variable">$host</span>;
+                proxy_set_header   X-Real-IP        <span class="variable">$remote</span>_addr;
+                proxy_set_header   X-Forwarded-For  <span class="variable">$proxy</span>_add_x_forwarded_for;
+                proxy_hide_header X-Powered-By;
+                client_max_body_size <span class="number">200</span>M;
+
+        }
+        location /submin/       {
+            proxy_pass  http://<span class="number">127.0</span>.<span class="number">0</span>.<span class="number">1</span>:<span class="number">88</span>;
+            proxy_set_header   Host   <span class="variable">$host</span>;
+            proxy_set_header   X-Real-IP        <span class="variable">$remote</span>_addr;
+            proxy_set_header   X-Forwarded-For  <span class="variable">$proxy</span>_add_x_forwarded_for;
+            proxy_hide_header X-Powered-By;
+        }
+}
+</code></pre><p>然后重启nginx服务即可，在浏览器中输入 192.168.3.47/submin将会代理到192.168.3.47:88/submin这里。</p>
+<hr>
+<h3 id="使用submin进行submin库的迁移备份。">使用submin进行submin库的迁移备份。</h3><pre><code>当前线上已经有一台运行<span class="keyword">submin </span> svn的服务器，可以再配置一台作为备用，并且同步原来的svn库。
+</code></pre><p>使用submin进行svn库的同步，关键的主要有三个文件：</p>
+<pre><code><span class="regexp">/var/</span>lib<span class="regexp">/submin/</span>conf/authz  这个文件存放的是用户对应的权限信息。
+<span class="regexp">/var/</span>lib<span class="regexp">/submin/</span>conf/submindb   ：这个存放的是用户的用户名和密码。
+<span class="regexp">/opt/</span>svnroot  ：个人指定的用于存储svn代码库。
+</code></pre><p>迁移主要是把这三个文件拷贝到对应的位置。如果作为从库，则需要定期对数据库进行同步。个人想法是使用crontab在每天晚上12点左右使用rsync脚本实现增量备份的功能。</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://www.stackops.info/2015/08/09/使用submin搭建图形化svn管理工具/" data-id="cidg4b3pk0007n07bh7hym9jx" class="article-share-link">Share</a>
+      <a data-url="http://www.stackops.info/2015/08/09/使用submin搭建图形化svn管理工具/" data-id="cidijagf80007647bxpa1foun" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/submin/">submin</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/svn/">svn</a></li></ul>
