@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>OpenStack搭建-Keystone | Leoli&#39;s  blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="显示全文：">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OpenStack搭建-Keystone">
+<meta property="og:url" content="http://www.stackops.info/2015/08/19/OpenStack搭建-Keystone/index.html">
+<meta property="og:site_name" content="Leoli's  blog">
+<meta property="og:description" content="显示全文：">
+<meta property="og:updated_time" content="2015-08-19T13:37:26.851Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="OpenStack搭建-Keystone">
+<meta name="twitter:description" content="显示全文：">
+  
+    <link rel="alternative" href="/atom.xml" title="Leoli&#39;s  blog" type="application/atom+xml">
+  
+  
+  <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" type="text/css">
+  
+<script type="text/javascript">
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?d1a0120d84ac9dc6082c5423dec3ef3d";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+</script>
+
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Leoli&#39;s  blog</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">Follow your heart</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://www.stackops.info"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-OpenStack搭建-Keystone" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2015/08/19/OpenStack搭建-Keystone/" class="article-date">
+  <time datetime="2015-08-19T09:10:02.000Z" itemprop="datePublished">2015-08-19</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      OpenStack搭建-Keystone
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>显示全文：</p>
+<a id="more"></a>
+<h2 id="安装验证服务Keystone">安装验证服务Keystone</h2><p>Keystone是Openstack的认证系统，负责Openstack的用户管理，只有创建了用户，才能以这个用户的身份执行。每一个Openstack的组件都需要现在keystone创建用户，并给用户授予角色和权限。包括后来如果采用swift分布式存储，也可以使用keystone组件作为认证节点，</p>
+<h3 id="安装keystone的过程主要分为一下几步：">安装keystone的过程主要分为一下几步：</h3><ul>
+<li>安装软件包和修改配置文件</li>
+<li>创建Keystone的数据库，并建立Keystone的表结构</li>
+<li>启动服务，确认服务正常运行。验证keystone可以使用</li>
+<li>创建keystone的管理员用户</li>
+<li>定义keystone使用的services和API Endpoints</li>
+<li>以创建的用户来使用Keystone客户端命令行。</li>
+</ul>
+<h4 id="安装步骤：">安装步骤：</h4><ul>
+<li>1，创建数据库，创建一个用户，赋予其对keystone数据库的操作权限：</li>
+</ul>
+<pre><code>$ mysql -u root -p*pass*
+<span class="operator"><span class="keyword">CREATE</span> <span class="keyword">DATABASE</span> keystone;</span> 
+<span class="operator"><span class="keyword">GRANT</span> ALL <span class="keyword">PRIVILEGES</span> <span class="keyword">ON</span> keystone.* <span class="keyword">TO</span> <span class="string">'keystone'</span>@<span class="string">'localhost'</span> \
+<span class="keyword">IDENTIFIED</span> <span class="keyword">BY</span> <span class="string">'KEYSTONE_DBPASS'</span>;</span>                                                    
+<span class="operator"><span class="keyword">GRANT</span> ALL <span class="keyword">PRIVILEGES</span> <span class="keyword">ON</span> keystone.* <span class="keyword">TO</span> <span class="string">'keystone'</span>@<span class="string">'%'</span> \
+<span class="keyword">IDENTIFIED</span> <span class="keyword">BY</span> <span class="string">'KEYSTONE_DBPASS'</span>;</span>  
+exit或者 \q  退出数据库。
+</code></pre><p>刚建立好的数据库时空的，需要初始化keystone数据库的表结构，可以使用keystone提供命令：</p>
+<pre><code><span class="variable">$ </span>keystone-manage db_sync
+</code></pre><ul>
+<li>2，安装keystone</li>
+</ul>
+<pre><code>apt-<span class="built_in">get</span> install keystone <span class="keyword">python</span>-keystoneclientne：
+</code></pre><ul>
+<li>3，修改配置文件：/etc/keystone/keystone.conf</li>
+</ul>
+<pre><code>[<span class="name">DEFAULT</span>]
+...
+<span class="atom">admin_token</span> = <span class="name">ADMIN_TOKEN</span>
+注释：<span class="atom">admin_token</span>：这个选项很重要，可以将它比喻称获取<span class="name">Keystone</span>管理权限的钥匙。
+
+[<span class="atom">database</span>]
+...
+<span class="atom">connection</span> = <span class="atom">mysql</span>://<span class="atom">keystone</span>:<span class="name">KEYSTONE_DBPASS</span>@<span class="atom">controller</span>/<span class="atom">keystone</span>  
+注释：<span class="atom">connection</span>：这个选项定义了<span class="name">Keystone</span>使用数据库的<span class="name">URL</span>，这里使用了<span class="atom">mysql</span>的<span class="atom">keystone</span>用户，密码是你自己设置的密码，数据库的地址是在<span class="atom">controller</span>上面。数据库的名字是<span class="atom">keystone</span>。
+注意：需要注视掉原来自带的<span class="atom">connection</span>，否则会报错）
+[<span class="atom">revoke</span>]
+...
+<span class="atom">driver</span> = <span class="atom">keystone</span>.<span class="atom">contrib</span>.<span class="atom">revoke</span>.<span class="atom">backends</span>.<span class="atom">sql</span>.<span class="name">Revoke</span>
+[<span class="name">DEFAULT</span>]
+...
+<span class="atom">verbose</span> = <span class="name">True</span>
+用于测试时查看详细的输出信息。输出信息回保存在<span class="atom">log_dir</span>和<span class="atom">log_file</span>的目录文件中，开启日志功能非常重要，调试过程中遇到问题可以根据日志信息来分析。
+</code></pre><p>每次修改过配置文件之后都要进行重启服务：</p>
+<pre><code><span class="id">#service</span> keystone restart
+</code></pre><ul>
+<li>4，同步数据库：</li>
+</ul>
+<pre><code>su <span class="operator">-s</span> /bin/sh -c <span class="string">"keystone-manage db_sync"</span> keystone
+
+  <span class="comment">## 接下来验证安装效果：</span>
+</code></pre><ul>
+<li>1，重启keystone服务：</li>
+</ul>
+<pre><code><span class="variable">$ </span>service keystone restart
+</code></pre><ul>
+<li>2，删除Ubuntu安装包默认安装的SQLite database.</li>
+</ul>
+<pre><code>$ <span class="keyword">rm</span> -f /<span class="keyword">var</span>/lib/keystone/keystone.<span class="keyword">db</span>
+</code></pre><ul>
+<li>3，为了效率设定定期清理过期token</li>
+</ul>
+<pre><code>$ (crontab -<span class="keyword">l</span> -<span class="keyword">u</span> keystone 2&gt;&amp;1 | grep -q token_flush) || \
+echo '@hourly /usr/bin/keystone-manage token_flush &gt;/<span class="keyword">var</span>/<span class="keyword">log</span>/keystone/
+keystone-tokenflush.<span class="keyword">log</span> 2&gt;&amp;1' \
+&gt;&gt; /<span class="keyword">var</span>/spool/cron/crontabs/keystone  
+</code></pre><h5 id="配置环境变量：">配置环境变量：</h5><pre><code>$ <span class="preprocessor">export</span> OS_SERVICE_TOKEN<span class="label">=ADMIN_TOKEN</span>                
+$ <span class="preprocessor">export</span> OS_SERVICE_ENDPOINT<span class="label">=http</span>://controller:<span class="number">35357</span>/<span class="literal">v2</span>.<span class="number">0</span>
+</code></pre><h3 id="1，这里将创建一个用户，一个tenant（租户）和一个role(角色），他们之间的关系使用户属于tenant，用户在tenant中可以有不同的角色。">1，这里将创建一个用户，一个tenant（租户）和一个role(角色），他们之间的关系使用户属于tenant，用户在tenant中可以有不同的角色。</h3><p>首先，创建一个具有管理权限的tenant，称为admin：</p>
+<pre><code><span class="header">$ keystone tenant-create --name admin --description "Admin Tenant" 
++-------------+----------------------------------+</span>
+<span class="header">| Property | Value |
++-------------+----------------------------------+</span>
+| description | Admin Tenant |
+| enabled | True |
+| id | 365c70b767824a49862f937a888a4f8e |
+<span class="header">|    name | admin |
++-------------+----------------------------------+</span>
+</code></pre><p>然后，创建一个用户，命名为admin，密码设置为<em>yourpass</em>，其代码如下：</p>
+<pre><code>$  keystone user-create --name admin --pass ADMIN<span class="emphasis">_PASS --email EMAIL_</span>ADDRESS     /这里email地址我没有配置。
+<span class="header">$ keystone user-create --name admin --pass *yourpass*
++----------+----------------------------------+</span>
+<span class="header">| Property | Value |
++----------+----------------------------------+</span>
+| email | admin@example.com |
+| enabled | True |
+| id | 5ae84085a6c345d7a70ccb90b63c41c9 |
+| name | admin |
+<span class="header">| username | admin |
++----------+----------------------------------+</span>
+</code></pre><p>接着，创建一个称为admin的角色。</p>
+<pre><code><span class="header">$ keystone role-create --name admin  
++----------+----------------------------------+</span>
+<span class="header">| Property |              Value               |
++----------+----------------------------------+</span>
+|    id    | c2958a4cc98a4e5b997e87e3971d2569 |
+<span class="header">|   name   |              admin               |
++----------+----------------------------------+</span>
+</code></pre><p>最后，将前面创建的tenant，用户和role组合起来，在admin的tenant中分配admin角色给用户admin：</p>
+<pre><code>$ keystone <span class="literal">user</span>-role-add --<span class="literal">user</span> <span class="literal">admin</span> --tenant <span class="literal">admin</span> --role <span class="literal">admin</span>
+（该命令没有输出结果）。
+</code></pre><h3 id="2，创建Demo租户，用户，角色：">2，创建Demo租户，用户，角色：</h3><pre><code>a,创建demo租户：
+$ keystone tenant-create --name demo --description "Demo Tenant"  
+<span class="header">$ keystone tenant-create --name demo --description "Demo Tenant"
++-------------+----------------------------------+</span>
+<span class="header">| Property | Value |
++-------------+----------------------------------+</span>
+| description | Demo Tenant |
+| enabled | True |
+| id | 2508931360da4b9b887ef7dae0dcea71 |
+<span class="header">| name | demo |
++-------------+----------------------------------+</span>
+</code></pre><p>b，创建demo租户下的用户：</p>
+<pre><code>$ keystone user-create --name demo --tenant demo --pass DEMO_PASS --email EMAIL_ADDRESS  
+$ keystone user-create --name demo --tenant demo --pass <span class="keyword">*</span>yourpass<span class="keyword">*</span> [--email EMAIL_ADDRESS]  / 暂时不用指定emai地址。
++----------+----------------------------------+
+|<span class="string"> Property </span>|<span class="string"> Value </span>|
++----------+----------------------------------+
+|<span class="string"> email </span>|<span class="string"> demo@example.com </span>|
+|<span class="string"> enabled </span>|<span class="string"> True </span>|
+|<span class="string"> id </span>|<span class="string"> 7004dfa0dda84d63aef81cf7f100af01 </span>|
+|<span class="string"> name </span>|<span class="string"> demo </span>|
+|<span class="string"> tenantId </span>|<span class="string"> 4aa51bb942be4dd0ac0555d7591f80a6 </span>|
+|<span class="string"> username </span>|<span class="string"> demo </span>|
++----------+----------------------------------+
+</code></pre><p>使用–tenant选项的时候，会自动为member的角色给用户，如果不存在member这个角色，也会自动创建。</p>
+<p>c，到这里，demo租户就创建完成了。（全部完成之后截的图，和做到这一步截图会有所不同，具体参照官方文档）。</p>
+<h3 id="3，创建service用户：">3，创建service用户：</h3><pre><code><span class="header">$ keystone tenant-create --name service --description "Service Tenant"
++-------------+----------------------------------+</span>
+<span class="header">| Property | Value |
++-------------+----------------------------------+</span>
+| description | Service Tenant |
+| enabled | True |
+| id | 6b69202e1bf846a4ae50d65bc4789122 |
+<span class="header">| name | service |
++-------------+----------------------------------+</span>
+</code></pre><p>（注意创建的时候要通过export环境变量来通过验证，否则会提示报错：</p>
+<pre><code>root<span class="variable">@controller</span><span class="symbol">:~</span><span class="comment"># keystone user-list</span>
+<span class="constant">Expecting </span>an auth <span class="constant">URL </span>via either --os-auth-url <span class="keyword">or</span> env[<span class="constant">OS_AUTH_URL]</span>）
+</code></pre><h3 id="4，定义Services和API_Endpoints：">4，定义Services和API Endpoints：</h3><p>为了使用Keystone来扔正用户使用的Openstack中的其他组件，需要在keystone中创建组件的服务和相应的API Endpoints，组件服务的API  Endpoints是一组URL加端口号，用来也提供组件服务的API接口。<br>这里需要创建一个Keystone的服务和Keystone的API  Endpoints。</p>
+<pre><code>$ keystone service-create --name keystone --type identity \
+--description <span class="string">"OpenStack Identity"</span>
++-------------+----------------------------------+
+|<span class="string"> Property </span>|<span class="string"> Value </span>|
++-------------+----------------------------------+    
+|<span class="string"> description </span>|<span class="string"> OpenStack Identity </span>|
+|<span class="string"> enabled </span>|<span class="string"> True </span>|
+|<span class="string"> id </span>|<span class="string"> 15c11a23667e427e91bc31335b45f4bd </span>|
+|<span class="string"> name </span>|<span class="string"> keystone </span>|
+|<span class="string"> type </span>|<span class="string"> identity </span>|
++-------------+----------------------------------+  
+</code></pre><p>查看创建的服务：</p>
+<pre><code><span class="id">#keystone</span>  service-list
+</code></pre><p>删除创建的服务：</p>
+<pre><code>#keystone  service-<span class="operator"><span class="keyword">delete</span> <span class="keyword">id</span></span>
+</code></pre><p>创建endpoint：</p>
+<pre><code>$ keystone endpoint-create \
+--service-id $(keystone service-list |<span class="string"> awk '/ identity / {print $2}') \
+--publicurl http://controller:5000/v2.0 \
+--internalurl http://controller:5000/v2.0 \
+--adminurl http://controller:35357/v2.0 \
+--region regionOne
++-------------+----------------------------------+
+</span>|<span class="string"> Property </span>|<span class="string"> Value </span>|
++-------------+----------------------------------+
+|<span class="string"> adminurl </span>|<span class="string"> http://controller:35357/v2.0 </span>|
+|<span class="string"> id </span>|<span class="string"> 11f9c625a3b94a3f8e66bf4e5de2679f </span>|
+|<span class="string"> internalurl </span>|<span class="string"> http://controller:5000/v2.0 </span>|
+|<span class="string"> publicurl </span>|<span class="string"> http://controller:5000/v2.0 </span>|
+|<span class="string"> region </span>|<span class="string"> regionOne </span>|
+|<span class="string"> service_id </span>|<span class="string"> 15c11a23667e427e91bc31335b45f4bd </span>|
++-------------+----------------------------------+  
+</code></pre><p>注意：service-id是service-create命令得到的ID号，使用的是‘/ identity / ‘ 匹配到带有identity那一行，并且取出第二列。所以前面创建服务的时候不能够重复创建。否则awk取出的就不是一个id了。<br>例如问题：</p>
+<pre><code><span class="comment">keystone</span> <span class="comment">endpoint</span><span class="literal">-</span><span class="comment">create</span> <span class="comment">\</span>
+    &gt;   <span class="literal">-</span><span class="literal">-</span><span class="comment">service</span><span class="literal">-</span><span class="comment">id</span> <span class="comment">$(keystone</span> <span class="comment">service</span><span class="literal">-</span><span class="comment">list</span> <span class="comment">|</span> <span class="comment">awk</span> <span class="comment">'/</span> <span class="comment">identity</span> <span class="comment">/</span> <span class="comment">{print</span> <span class="comment">$2}')</span> <span class="comment">\</span>    
+    &gt;   <span class="literal">-</span><span class="literal">-</span><span class="comment">publicurl</span> <span class="comment">http://controller:5000/v2</span><span class="string">.</span><span class="comment">0</span> <span class="comment">\</span>
+    &gt;   <span class="literal">-</span><span class="literal">-</span><span class="comment">internalurl</span> <span class="comment">http://controller:5000/v2</span><span class="string">.</span><span class="comment">0</span> <span class="comment">\</span>
+    &gt;   <span class="literal">-</span><span class="literal">-</span><span class="comment">adminurl</span> <span class="comment">http://controller:35357/v2</span><span class="string">.</span><span class="comment">0</span> <span class="comment">\</span>
+    &gt;   <span class="literal">-</span><span class="literal">-</span><span class="comment">region</span> <span class="comment">regionOne</span>
+    <span class="comment">usage:</span> <span class="comment">keystone</span> <span class="title">[</span><span class="literal">-</span><span class="literal">-</span><span class="comment">version</span><span class="title">]</span> <span class="title">[</span><span class="literal">-</span><span class="literal">-</span><span class="comment">debug</span><span class="title">]</span> <span class="title">[</span><span class="literal">-</span><span class="literal">-</span><span class="comment">os</span><span class="literal">-</span><span class="comment">username</span> &lt;<span class="comment">auth</span><span class="literal">-</span><span class="comment">user</span><span class="literal">-</span><span class="comment">name</span>&gt;<span class="title">]</span>
+                <span class="title">[</span><span class="literal">-</span><span class="literal">-</span><span class="comment">os</span><span class="literal">-</span><span class="comment">password</span> &lt;<span class="comment">auth</span><span class="literal">-</span><span class="comment">password</span>&gt;<span class="title">]</span>
+                <span class="title">[</span><span class="literal">-</span><span class="literal">-</span><span class="comment">os</span><span class="literal">-</span><span class="comment">tenant</span><span class="literal">-</span><span class="comment">name</span> &lt;<span class="comment">auth</span><span class="literal">-</span><span class="comment">tenant</span><span class="literal">-</span><span class="comment">name</span>&gt;<span class="title">]</span>
+                <span class="title">[</span><span class="literal">-</span><span class="literal">-</span><span class="comment">os</span><span class="literal">-</span><span class="comment">tenant</span><span class="literal">-</span><span class="comment">id</span> &lt;<span class="comment">tenant</span><span class="literal">-</span><span class="comment">id</span>&gt;<span class="title">]</span> <span class="title">[</span><span class="literal">-</span><span class="literal">-</span><span class="comment">os</span><span class="literal">-</span><span class="comment">auth</span><span class="literal">-</span><span class="comment">url</span> &lt;<span class="comment">auth</span><span class="literal">-</span><span class="comment">url</span>&gt;<span class="title">]</span>
+                <span class="title">[</span><span class="literal">-</span><span class="literal">-</span><span class="comment">os</span><span class="literal">-</span><span class="comment">region</span><span class="literal">-</span><span class="comment">name</span> &lt;<span class="comment">region</span><span class="literal">-</span><span class="comment">name</span>&gt;<span class="title">]</span>
+                <span class="title">[</span><span class="literal">-</span><span class="literal">-</span><span class="comment">os</span><span class="literal">-</span><span class="comment">identity</span><span class="literal">-</span><span class="comment">api</span><span class="literal">-</span><span class="comment">version</span> &lt;<span class="comment">identity</span><span class="literal">-</span><span class="comment">api</span><span class="literal">-</span><span class="comment">version</span>&gt;<span class="title">]</span>
+                <span class="title">[</span><span class="literal">-</span><span class="literal">-</span><span class="comment">os</span><span class="literal">-</span><span class="comment">token</span> &lt;<span class="comment">service</span><span class="literal">-</span><span class="comment">token</span>&gt;<span class="title">]</span>
+                <span class="title">[</span><span class="literal">-</span><span class="literal">-</span><span class="comment">os</span><span class="literal">-</span><span class="comment">endpoint</span> &lt;<span class="comment">service</span><span class="literal">-</span><span class="comment">endpoint</span>&gt;<span class="title">]</span> <span class="title">[</span><span class="literal">-</span><span class="literal">-</span><span class="comment">os</span><span class="literal">-</span><span class="comment">cache</span><span class="title">]</span>
+                <span class="title">[</span><span class="literal">-</span><span class="literal">-</span><span class="comment">force</span><span class="literal">-</span><span class="comment">new</span><span class="literal">-</span><span class="comment">token</span><span class="title">]</span> <span class="title">[</span><span class="literal">-</span><span class="literal">-</span><span class="comment">stale</span><span class="literal">-</span><span class="comment">duration</span> &lt;<span class="comment">seconds</span>&gt;<span class="title">]</span> <span class="title">[</span><span class="literal">-</span><span class="literal">-</span><span class="comment">insecure</span><span class="title">]</span>
+                <span class="title">[</span><span class="literal">-</span><span class="literal">-</span><span class="comment">os</span><span class="literal">-</span><span class="comment">cacert</span> &lt;<span class="comment">ca</span><span class="literal">-</span><span class="comment">certificate</span>&gt;<span class="title">]</span> <span class="title">[</span><span class="literal">-</span><span class="literal">-</span><span class="comment">os</span><span class="literal">-</span><span class="comment">cert</span> &lt;<span class="comment">certificate</span>&gt;<span class="title">]</span>
+                <span class="title">[</span><span class="literal">-</span><span class="literal">-</span><span class="comment">os</span><span class="literal">-</span><span class="comment">key</span> &lt;<span class="comment">key</span>&gt;<span class="title">]</span> <span class="title">[</span><span class="literal">-</span><span class="literal">-</span><span class="comment">timeout</span> &lt;<span class="comment">seconds</span>&gt;<span class="title">]</span>
+                &lt;<span class="comment">subcommand</span>&gt; <span class="string">.</span><span class="string">.</span><span class="string">.</span>
+    <span class="comment">keystone:</span> <span class="comment">error:</span> <span class="comment">unrecognized</span> <span class="comment">arguments:</span> <span class="comment">cf4399b85ab14cfb81beb3bb9d53b8dd</span>
+</code></pre><p>解决方法是：</p>
+<pre><code><span class="header">keystone service-list
++----------------------------------+----------+----------+--------------------+</span>
+<span class="header">| id | name | type | description |
++----------------------------------+----------+----------+--------------------+</span>
+| 0fb9984647124844b9c94be934318b95 | keystone | identity | OpenStack Identity |
+<span class="header">| cf4399b85ab14cfb81beb3bb9d53b8dd | keystone | identity | OpenStack Identity |
++----------------------------------+----------+----------+--------------------+</span>
+删除掉重复的id
+root@controller:~# keystone service-delete cf4399b85ab14cfb81beb3bb9d53b8dd
+</code></pre><h3 id="5，验证：">5，验证：</h3><p>1），unset环境变量：</p>
+<pre><code>$ <span class="built_in">unset</span> OS_SERVICE_TOKEN OS_SERVICE_ENDPOINT
+</code></pre><p>2），以admin租户，admin用户申请认证口令。</p>
+<pre><code>$ keystone --os-tenant-name admin --os-username admin --ospassword
+ADMIN_PASS \    
+--os-auth-url http://controller:35357/v2.0 token-get
++-----------+----------------------------------+
+|<span class="string"> Property </span>|<span class="string"> Value </span>|
++-----------+----------------------------------+
+|<span class="string"> expires </span>|<span class="string"> 2014-10-10T12:50:12Z </span>|
+|<span class="string"> id </span>|<span class="string"> 8963eb5ccd864769a894ec316ef8f7d4 </span>|
+|<span class="string"> tenant_id </span>|<span class="string"> 6f4c1e4cbfef4d5a8a1345882fbca110 </span>|
+|<span class="string"> user_id </span>|<span class="string"> ea8c352d253443118041c9c8b8416040 </span>|
++-----------+----------------------------------+  
+</code></pre><p>（用之前设置的密码替换掉ADMIN_PASS，如果有特殊字符，用’’括起来）。</p>
+<p>3），以admin租户的admin用户查看租户列表：</p>
+<pre><code>$ keystone --os-tenant-name admin --os-username admin --ospassword
+ADMIN_PASS \
+--os-auth-url http://controller:35357/v2.0 tenant-list
++----------------------------------+----------+---------+
+|<span class="string"> id </span>|<span class="string"> name </span>|<span class="string"> enabled </span>|
++----------------------------------+----------+---------+
+|<span class="string"> 6f4c1e4cbfef4d5a8a1345882fbca110 </span>|<span class="string"> admin </span>|<span class="string"> True </span>|
+|<span class="string"> 4aa51bb942be4dd0ac0555d7591f80a6 </span>|<span class="string"> demo </span>|<span class="string"> True </span>|
+|<span class="string"> 6b69202e1bf846a4ae50d65bc4789122 </span>|<span class="string"> service </span>|<span class="string"> True </span>|
++----------------------------------+----------+---------+
+</code></pre><p>4），申请用户列表：</p>
+<pre><code>$ keystone --os-tenant-name admin --os-username admin --ospassword
+ADMIN_PASS \
+--os-auth-url http://controller:35357/v2.0 user-list
++----------------------------------+---------+---------
++---------------------+
+|<span class="string"> id </span>|<span class="string"> name </span>|<span class="string"> enabled </span>|<span class="string"> email
+</span>|
++----------------------------------+---------+---------
++---------------------+
+|<span class="string"> ea8c352d253443118041c9c8b8416040 </span>|<span class="string"> admin </span>|<span class="string"> True </span>|<span class="string"> admin@example.com </span>|
+|<span class="string"> 7004dfa0dda84d63aef81cf7f100af01 </span>|<span class="string"> demo </span>|<span class="string"> True </span>|<span class="string"> demo@example.com
+</span>|<span class="string">+----------------------------------+---------+---------+---------------------+ </span>
+</code></pre><p>5），申请角色列表：</p>
+<pre><code><span class="code"> $ keystone --os-tenant-name admin --os-username admin --ospassword</span>
+ADMIN<span class="emphasis">_PASS \
+--os-auth-url http://controller:35357/v2.0 role-list
++----------------------------------+----------+
+| id | name |
++----------------------------------+----------+
+| 9fe2ff9ee4384b1894a90878d3e92bab | _</span>member_ |
+<span class="header">| bff3a6083b714fa29c9344bf8930d199 | admin |
++----------------------------------+----------+</span>
+</code></pre><p>6），以demo租户的demo用户获取token：</p>
+<pre><code>$ keystone --os-tenant-name demo --os-username demo --ospassword
+DEMO_PASS \
+--os-auth-url http://controller:35357/v2.0 token-get    
++-----------+----------------------------------+
+|<span class="string"> Property </span>|<span class="string"> Value </span>|
++-----------+----------------------------------+
+|<span class="string"> expires </span>|<span class="string"> 2014-10-10T12:51:33Z </span>|
+|<span class="string"> id </span>|<span class="string"> 1b87ceae9e08411ba4a16e4dada04802 </span>|
+|<span class="string"> tenant_id </span>|<span class="string"> 4aa51bb942be4dd0ac0555d7591f80a6 </span>|
+|<span class="string"> user_id </span>|<span class="string"> 7004dfa0dda84d63aef81cf7f100af01 </span>|
++-----------+----------------------------------+  
+</code></pre><p>7），申请用户列表：</p>
+<pre><code>$ keystone <span class="comment">--os-tenant-name demo --os-username demo --ospassword</span>
+DEMO_PASS \
+<span class="comment">--os-auth-url http://controller:35357/v2.0 user-list</span>
+You are <span class="operator">not</span> authorized <span class="built_in">to</span> perform <span class="operator">the</span> requested action, admin_required.
+(HTTP <span class="number">403</span>)
+</code></pre><p>6，创建openstack客户环境变量脚本：<br>1），创建一个叫做admin_openrc.sh的文件内容如下：</p>
+<pre><code><span class="keyword">export</span> OS_TENANT_NAME=admin
+<span class="keyword">export</span> OS_USERNAME=admin
+<span class="keyword">export</span> OS_PASSWORD=ADMIN_PASS
+<span class="keyword">export</span> OS_AUTH_URL=http:<span class="comment">//controller:35357/v2.0</span>
+</code></pre><p>替换掉ADMIN_PASS</p>
+<p>2),创建demo-openrc.sh的脚本文件，内容如下：</p>
+<pre><code><span class="keyword">export</span> OS_TENANT_NAME=demo
+<span class="keyword">export</span> OS_USERNAME=demo
+<span class="keyword">export</span> OS_PASSWORD=DEMO_PASS
+<span class="keyword">export</span> OS_AUTH_URL=http:<span class="comment">//controller:5000/v2.0</span>
+</code></pre><p>注释：端口说明： 端口35357仅用作管理端口，而5000是给普通用户功能使用的。<br>使用source来引用脚本。<br>例如：</p>
+<pre><code>$ <span class="keyword">source</span> admin-openrc.<span class="keyword">sh</span>
+</code></pre>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://www.stackops.info/2015/08/19/OpenStack搭建-Keystone/" data-id="ciditqnkd000i387bc02bzhc3" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Keystone/">Keystone</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/OpenStack/">OpenStack</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2015/08/17/Cisco-2960交换机配置/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Cisco-2960交换机配置</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/AMQP/">AMQP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Cisco/">Cisco</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Etherchannel/">Etherchannel</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Keystone/">Keystone</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NTP/">NTP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/OpenStack/">OpenStack</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RSTP/">RSTP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/">hexo</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/openstack/">openstack</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/portfast/">portfast</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/submin/">submin</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/svn/">svn</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/switch/">switch</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/AMQP/" style="font-size: 10px;">AMQP</a> <a href="/tags/Cisco/" style="font-size: 10px;">Cisco</a> <a href="/tags/Etherchannel/" style="font-size: 10px;">Etherchannel</a> <a href="/tags/Keystone/" style="font-size: 10px;">Keystone</a> <a href="/tags/NTP/" style="font-size: 10px;">NTP</a> <a href="/tags/OpenStack/" style="font-size: 10px;">OpenStack</a> <a href="/tags/RSTP/" style="font-size: 10px;">RSTP</a> <a href="/tags/hexo/" style="font-size: 10px;">hexo</a> <a href="/tags/openstack/" style="font-size: 20px;">openstack</a> <a href="/tags/portfast/" style="font-size: 10px;">portfast</a> <a href="/tags/submin/" style="font-size: 10px;">submin</a> <a href="/tags/svn/" style="font-size: 10px;">svn</a> <a href="/tags/switch/" style="font-size: 10px;">switch</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">8</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recents</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2015/08/19/OpenStack搭建-Keystone/">OpenStack搭建-Keystone</a>
+          </li>
+        
+          <li>
+            <a href="/2015/08/17/Cisco-2960交换机配置/">Cisco-2960交换机配置</a>
+          </li>
+        
+          <li>
+            <a href="/2015/08/15/机房网络优化/">机房网络优化</a>
+          </li>
+        
+          <li>
+            <a href="/2015/08/09/使用submin搭建图形化svn管理工具/">使用submin搭建图形化svn管理工具</a>
+          </li>
+        
+          <li>
+            <a href="/2015/08/09/OpenStack搭建文档/">OpenStack搭建文档</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2015 liyahua<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css" type="text/css">
+  <script src="/fancybox/jquery.fancybox.pack.js" type="text/javascript"></script>
+
+
+<script src="/js/script.js" type="text/javascript"></script>
+
+  </div>
+</body>
+</html>
