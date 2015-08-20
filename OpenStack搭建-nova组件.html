@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>OpenStack搭建-nova组件 | Leoli&#39;s  blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="显示全文：">
+<meta property="og:type" content="website">
+<meta property="og:title" content="OpenStack搭建-nova组件">
+<meta property="og:url" content="http://www.stackops.info/OpenStack搭建-nova组件.html">
+<meta property="og:site_name" content="Leoli's  blog">
+<meta property="og:description" content="显示全文：">
+<meta property="og:updated_time" content="2015-08-20T02:42:46.555Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="OpenStack搭建-nova组件">
+<meta name="twitter:description" content="显示全文：">
+  
+    <link rel="alternative" href="/atom.xml" title="Leoli&#39;s  blog" type="application/atom+xml">
+  
+  
+  <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" type="text/css">
+  
+<script type="text/javascript">
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?d1a0120d84ac9dc6082c5423dec3ef3d";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+</script>
+
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Leoli&#39;s  blog</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">Follow your heart</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://www.stackops.info"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="page-undefined" class="article article-type-page" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/OpenStack搭建-nova组件.html" class="article-date">
+  <time datetime="2015-08-20T01:14:43.000Z" itemprop="datePublished">2015-08-20</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      OpenStack搭建-nova组件
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>显示全文：</p>
+<a id="more"></a>
+<h3 id="添加compute服务">添加compute服务</h3><p>使用OpenStack Compute管理云计算操作系统， OpenStack Compute 是iaas系统的主要部分。这一部分是用python来实现的。<br> OpenStackCompute  包括以下几个方面及其组件：</p>
+<p>API</p>
+<p><strong>nova-api</strong> 服务 ：接受并响应最终用户compute API调用。服务支持 OpenStack Compute API, the Amazon EC2 API, 和Admin API执行的权限. 它执行一些策略和一些初始化操作，比如运行一个实例</p>
+<p><strong>nova-api-metadata</strong> 服务 ：接受实例元数据请求，  </p>
+<p><strong>nova-api-metadata 服务</strong> ：一般使用在安装nova-network多节点。更多细节查看Metadata service<br>在Debian 系统，它被包含在 nova-api包中，可以通过debconf选择。</p>
+<p><strong>Compute corenova-compute</strong> 服务：一个工作虚拟机实例进程，通过hypervisor APIs创建和终止。例如<br>•XenAPI for XenServer/XCP<br>•libvirt for KVM or QEMU<br>•VMwareAPI for VMware<br>处理是相当复杂的，最基本的，守护进程从队列和一系列系统命令操作，比如创建KVM 实例，更新数据库状态</p>
+<p><strong>nova-scheduler</strong> 服务 ：决定实例运行在哪个节点上</p>
+<p><strong>nova-conductor</strong> 模块 ：nova-conductor在 nova-compute 服务 和 the database之间，它使 nova-compute 服务无需直接访问云数据库（cloud database）。尽管如此，不要将nova-conductor部署在运行nova-compute 服务的节点上</p>
+<p>Networking for VMs：<strong>nova-network</strong> 工作进程。类似 nova-compute 服务，从队列中接受网络任务，执行任务，如设置网桥、改变防火墙规则<br>控制台界面，还包含下面进程<br><strong>nova-consoleauth daemon</strong><br><strong>nova-consoleauth daemon</strong><br><strong>nova-novncproxy daemon</strong><br><strong>nova-spicehtml5proxy daemon</strong><br><strong>nova-xvpnvncproxy daemon</strong><br><strong>nova-cert daemon</strong><br><strong>Image management (EC2 scenario)</strong><br><strong>nova-objectstore daemon</strong><br><strong>euca2ools client</strong></p>
+<p>命令行客户端和其它接口<br><strong>nova client</strong> : 作为管理员或则最终用户提交命令<br>其它组件:<br>队列<br>进程之间通信，通常由RabbitMQ，但可以用一个AMQP消息队列实现的，如Apache Qpid orZero MQ<br>SQL 数据库<br>存储云基础设施的状态，包括<br>•可用的类型。<br>•中使用的实例。<br>•可用网络<br>•项目</p>
+<h3 id="具体安装步骤：">具体安装步骤：</h3><h4 id="1，安装配置控制节点：">1，安装配置控制节点：</h4><p>1），创建数据库：</p>
+<pre><code>$ mysql -u root -p
+<span class="operator"><span class="keyword">CREATE</span> <span class="keyword">DATABASE</span> nova;</span>
+<span class="operator"><span class="keyword">GRANT</span> ALL <span class="keyword">PRIVILEGES</span> <span class="keyword">ON</span> nova.* <span class="keyword">TO</span> <span class="string">'nova'</span>@<span class="string">'localhost'</span> \
+<span class="keyword">IDENTIFIED</span> <span class="keyword">BY</span> <span class="string">'NOVA_DBPASS'</span>;</span>
+<span class="operator"><span class="keyword">GRANT</span> ALL <span class="keyword">PRIVILEGES</span> <span class="keyword">ON</span> nova.* <span class="keyword">TO</span> <span class="string">'nova'</span>@<span class="string">'%'</span> \
+<span class="keyword">IDENTIFIED</span> <span class="keyword">BY</span> <span class="string">'NOVA_DBPASS'</span>;</span>
+exit
+</code></pre><p>2)，设置环境变量：</p>
+<pre><code>$ <span class="keyword">source</span> admin-openrc.<span class="keyword">sh</span>
+</code></pre><p>3），创建服务：</p>
+<p>a，在keystone中创建nova  user</p>
+<pre><code><span class="header">$ keystone user-create --name nova --pass NOVA_PASS
++----------+----------------------------------+</span>
+<span class="header">| Property | Value |
++----------+----------------------------------+</span>
+| email | |
+| enabled | True |
+| id | 387dd4f7e46d4f72965ee99c76ae748c |
+| name | nova |
+| username | nova |
+<span class="code">+----------+</span>----------------------------------+  
+</code></pre><p>b，添加admin角色给nova用户：</p>
+<pre><code><span class="comment">$</span> <span class="comment">keystone</span> <span class="comment">user</span><span class="literal">-</span><span class="comment">role</span><span class="literal">-</span><span class="comment">add</span> <span class="literal">-</span><span class="literal">-</span><span class="comment">user</span> <span class="comment">nova</span> <span class="literal">-</span><span class="literal">-</span><span class="comment">tenant</span> <span class="comment">service</span> <span class="literal">-</span><span class="literal">-</span><span class="comment">role</span> <span class="comment">admin</span>
+</code></pre><p>c，创建nova 的服务实例：</p>
+<pre><code>$ keystone service-create --name nova --type compute \
+<span class="header">--description "OpenStack Compute"
++-------------+----------------------------------+</span>
+<span class="header">| Property | Value |
++-------------+----------------------------------+</span>
+| description | OpenStack Compute |
+| enabled | True |
+| id | 6c7854f52ce84db795557ebc0373f6b9 |
+| name | nova |
+<span class="header">| type | compute |
++-------------+----------------------------------</span>
+</code></pre><p>4），创建计算服务的endpoints：</p>
+<pre><code>$ keystone endpoint-create \
+--service-id $(keystone service-list |<span class="string"> awk '/ compute / {print $2}') \
+--publicurl http://controller:8774/v2/%\(tenant_id\)s \
+--internalurl http://controller:8774/v2/%\(tenant_id\)s \
+--adminurl http://controller:8774/v2/%\(tenant_id\)s \
+--region regionOne
++-------------+-----------------------------------------+
+</span>|<span class="string"> Property </span>|<span class="string"> Value </span>|
++-------------+-----------------------------------------+
+|<span class="string"> adminurl </span>|<span class="string"> http://controller:8774/v2/%(tenant_id)s </span>|
+|<span class="string"> id </span>|<span class="string"> c397438bd82c41198ec1a9d85cb7cc74 </span>|
+|<span class="string"> internalurl </span>|<span class="string"> http://controller:8774/v2/%(tenant_id)s </span>|
+|<span class="string"> publicurl </span>|<span class="string"> http://controller:8774/v2/%(tenant_id)s </span>|
+|<span class="string"> region </span>|<span class="string"> regionOne </span>|
+|<span class="string"> service_id </span>|<span class="string"> 6c7854f52ce84db795557ebc0373f6b9 </span>|
++-------------+-----------------------------------------+
+</code></pre><h3 id="安装配置计算控制组件">安装配置计算控制组件</h3><p>1），安装包：</p>
+<pre><code><span class="preprocessor"># apt-get install nova-api nova-cert nova-conductor nova-consoleauth \</span>
+nova-novncproxy nova-scheduler python-novaclient  
+</code></pre><p>2），修改nova的配置文件：/etc/nova/nova.conf(按照官方文档上面，nova的配置文件应该包含了各个功能组件的调用配置，但是我装完之后仅有default一小部分，在经历千辛万苦之后，自己通过网上的配置文件一点点拼凑出来两个配置文件：</p>
+<p>官方讲解配置文件各参数含义的链接：<a href="http://docs.openstack.org/juno/config-reference/content/section_compute-config-samples.html" target="_blank" rel="external">http://docs.openstack.org/juno/config-reference/content/section_compute-config-samples.html</a></p>
+<h4 id="官方文档要求修改的地方：">官方文档要求修改的地方：</h4><p>注释：10.0.0.0/24是内网，192.168.3.0/24是能够连接外网的。</p>
+<pre><code>[database]
+...
+connection = <span class="string">mysql:</span><span class="comment">//nova:NOVA_DBPASS@controller/nova</span>
+</code></pre><p>配置数据库连接</p>
+<pre><code>[DEFAULT]
+...
+<span class="constant">rpc_backend</span> = rabbit
+<span class="constant">rabbit_host</span> = controller
+<span class="constant">rabbit_password</span> = RABBIT_PASS
+</code></pre><p>配置RabbitMQ 消息代理访问</p>
+<pre><code>[DEFAULT]
+...
+<span class="constant">auth_strategy</span> = keystone
+[keystone_authtoken]
+...
+<span class="constant">auth_uri</span> = http://controller:5000/v2.0
+<span class="constant">identity_uri</span> = http://controller:35357
+<span class="constant">admin_tenant_name</span> = service
+<span class="constant">admin_user</span> = nova
+<span class="constant">admin_password</span> = NOVA_PASS
+</code></pre><p>配置认证访问</p>
+<p>注释掉 auth_host, auth_port, 和 auth_protocol，因为identity_uri 已经含有这些配置</p>
+<pre><code>[DEFAULT]
+...
+my_ip = <span class="number">10.0</span><span class="number">.0</span><span class="number">.11</span>
+</code></pre><p>配置控制节点，管理网络的ip地址my_ip 选项</p>
+<pre><code>[DEFAULT]
+...
+vncserver_listen = <span class="number">10.0</span><span class="number">.0</span><span class="number">.11</span>
+vncserver_proxyclient_address = <span class="number">10.0</span><span class="number">.0</span><span class="number">.11</span>
+</code></pre><p>配置VNC 代理，使用控制节点管理网络ip地址</p>
+<pre><code>[<span class="atom">glance</span>]
+...
+<span class="atom">host</span> = <span class="atom">controller</span>
+</code></pre><p>配置image服务</p>
+<pre><code>[<span class="keyword">DEFAULT</span>]
+...
+verbose = <span class="literal">True</span>
+</code></pre><p>为排除故障，在[DEFAULT]部分，启用详细日志<br>注释：后面会配上调试好的nova.conf的配置文件。</p>
+<p>3）.同步数据库</p>
+<pre><code># <span class="keyword">su</span> -s /bin/<span class="keyword">sh</span> -c <span class="string">"nova-manage db sync"</span> nova
+</code></pre><p>如果配置文件中有什么语法上的错误，可以在这里看到。</p>
+<p>4），安装完成之后，重启所有nova的服务：</p>
+<pre><code><span class="preprocessor"># service nova-api restart</span>
+<span class="preprocessor"># service nova-cert restart</span>
+<span class="preprocessor"># service nova-consoleauth restart</span>
+<span class="preprocessor"># service nova-scheduler restart</span>
+<span class="preprocessor"># service nova-conductor restart</span>
+<span class="preprocessor"># service nova-novncproxy restart</span>
+注释：因为经常要用到重启服务，而且，nova的服务，太多了，我就简单写了个脚本，实现重启：
+root@controller:~# cat /usr/bin/restart.sh
+<span class="keyword">for</span><span class="constant"> SVC </span>in api cert consoleauth scheduler conductor  novncproxy ; <span class="keyword">do</span>
+     service nova-$SVC restart ;
+done
+</code></pre><p>然后把这个脚本拷贝到/usr/bin目录下</p>
+<p>以后再用到重启服务的时候，就可以直接执行restart.sh就可以了。</p>
+<p>5），删除SQLite的数据库。</p>
+<pre><code># rm -f <span class="regexp">/var/</span>lib<span class="regexp">/nova/</span>nova.sqlite
+</code></pre><h3 id="2，安装配置计算节点：">2，安装配置计算节点：</h3><p>1），安装包：</p>
+<pre><code># apt-get <span class="operator"><span class="keyword">install</span> nova-<span class="keyword">compute</span> sysfsutils</span>
+</code></pre><p>2），修改配置文件/etc/nova/nova.conf  （刚装好的nova，配置文件也只有default小部分内容）。</p>
+<pre><code>[DEFAULT]
+...
+<span class="constant">rpc_backend</span> = rabbit
+<span class="constant">rabbit_host</span> = controller
+<span class="constant">rabbit_password</span> = RABBIT_PASS
+[DEFAULT]
+...
+<span class="constant">auth_strategy</span> = keystone
+[keystone_authtoken]
+...
+<span class="constant">auth_uri</span> = http://controller:5000/v2.0
+<span class="constant">identity_uri</span> = http://controller:35357
+<span class="constant">admin_tenant_name</span> = service
+<span class="constant">admin_user</span> = nova
+<span class="constant">admin_password</span> = NOVA_PASS
+</code></pre><p>注视掉auth_port等。。</p>
+<pre><code>[<span class="name">DEFAULT</span>]
+...
+<span class="atom">my_ip</span> = <span class="name">MANAGEMENT_INTERFACE_IP_ADDRESS</span>
+</code></pre><p>管理接口的地址，按照官方文档上的配置是10.0.0.31</p>
+<pre><code>[DEFAULT]
+...
+vnc_enabled = True
+vncserver_listen = <span class="number">0.0</span><span class="number">.0</span><span class="number">.0</span>
+vncserver_proxyclient_address = MANAGEMENT_INTERFACE_IP_ADDRESS
+novncproxy_base_url = http:<span class="comment">//controller:6080/vnc_auto.html</span>
+</code></pre><p>注意这里配置了dashboard中vnc控制台打开的地址，如果是从自己的windows浏览器上面打开，不能够解析controller，我们需要修改为controller的物理地址，这里我使用的是和我主机在同一个网段的controller节点的地址。192.168.3.10，具体看我的配置文件。</p>
+<pre><code>[<span class="atom">glance</span>]
+...
+<span class="atom">host</span> = <span class="atom">controller</span>  
+[<span class="name">DEFAULT</span>]
+...
+<span class="atom">verbose</span> = <span class="name">True</span>
+</code></pre><p>3），修改过配置文件之后，我们要检验一下我们的计算节点的硬件是否支持虚拟机硬件加速。</p>
+<pre><code>$ egrep -c '(vmx|svm)' /<span class="keyword">proc</span>/cpuinfo 
+</code></pre><p>如果输出结果不是0，就不需要额外的配置，表示cpu支持硬件加速。硬件虚拟化。<br>如果输出是0，则使用QEMU代替KVM，（如果是使用虚拟机来进行openstack的安装的话，应该是需要修改为QEMU的。）<br>输出是0的情况下：</p>
+<p>1）， 编辑文件/etc/nova/nova-compute.conf，在 [libvirt]部分，修改如下</p>
+<pre><code>[<span class="atom">libvirt</span>]
+...
+<span class="atom">virt_type</span> = <span class="atom">qemu</span>
+</code></pre><p>2），重启计算服务；</p>
+<pre><code><span class="preprocessor"># service nova-compute restart</span>
+</code></pre><p>3），删掉SQLite的数据库：</p>
+<pre><code># rm -f <span class="regexp">/var/</span>lib<span class="regexp">/nova/</span>nova.sqlite
+</code></pre><p>controller节点的/etc/nova/nova.conf配置文件的模版：</p>
+<pre><code><span class="title">[DEFAULT]</span>
+<span class="comment"># LOGS/STATE</span>
+<span class="setting">verbose=<span class="value"><span class="keyword">True</span></span></span>
+<span class="setting">logdir=<span class="value">/var/log/nova</span></span>
+<span class="setting">state_path=<span class="value">/var/lib/nova</span></span>
+<span class="setting">lock_path=<span class="value">/var/lock/nova</span></span>
+<span class="setting">rootwrap_config=<span class="value">/etc/nova/rootwrap.conf</span></span>
+<span class="setting">network_api_class = <span class="value">nova.network.api.API</span></span>
+<span class="setting">security_group_api = <span class="value">nova</span></span>
+
+<span class="comment"># SCHEDULER</span>
+<span class="comment">#compute_scheduler_driver=nova.scheduler.filter_scheduler.FilterScheduler</span>
+
+<span class="comment"># VOLUMES</span>
+<span class="comment"># configured in cinder.conf</span>
+
+<span class="comment"># COMPUTE</span>
+<span class="setting">compute_driver=<span class="value">libvirt.LibvirtDriver</span></span>
+<span class="setting">instance_name_template=<span class="value">instance-%<span class="number">08</span>x</span></span>
+<span class="setting">api_paste_config=<span class="value">/etc/nova/api-paste.ini</span></span>
+
+<span class="comment">#COMPUTE/APIS: if you have separate configs for separate services</span>
+<span class="comment"># this flag is required for both nova-api and nova-compute</span>
+<span class="setting">allow_resize_to_same_host=<span class="value"><span class="keyword">True</span></span></span>
+
+<span class="comment"># APIS</span>
+<span class="setting">osapi_compute_extension=<span class="value">nova.api.openstack.compute.contrib.standard_extensions</span></span>
+<span class="setting">ec2_dmz_host=<span class="value"><span class="number">192.168</span>.<span class="number">0.146</span></span></span>
+<span class="setting">s3_host=<span class="value"><span class="number">192.168</span>.<span class="number">0.146</span></span></span>
+
+<span class="comment"># RABBITMQ</span>
+<span class="setting">rabbit_host=<span class="value">controller</span></span>
+<span class="setting">rpc_backend = <span class="value">rabbit</span></span>
+<span class="setting">rabbit_host = <span class="value">controller</span></span>
+<span class="setting">rabbit_password = <span class="value">*yourpass*</span></span>
+<span class="comment"># GLANCE</span>
+<span class="setting">image_service=<span class="value">nova.image.glance.GlanceImageService</span></span>
+
+<span class="comment"># NETWORK</span>
+<span class="setting">network_manager=<span class="value">nova.network.manager.FlatDHCPManager</span></span>
+<span class="setting">force_dhcp_release=<span class="value"><span class="keyword">True</span></span></span>
+<span class="setting">dhcpbridge_flagfile=<span class="value">/etc/nova/nova.conf</span></span>
+<span class="setting">firewall_driver=<span class="value">nova.virt.libvirt.firewall.IptablesFirewallDriver</span></span>
+<span class="comment"># Change my_ip to match each host</span>
+<span class="setting">my_ip=<span class="value"><span class="number">10.0</span>.<span class="number">0.11</span></span></span>
+<span class="setting">public_interface=<span class="value">eth0</span></span>
+<span class="comment">#vlan_interface=eth0</span>
+<span class="setting">flat_network_bridge=<span class="value">br100</span></span>
+<span class="setting">flat_interface=<span class="value">eth1</span></span>
+
+<span class="comment"># NOVNC CONSOLE</span>
+<span class="setting">novncproxy_base_url=<span class="value">http://<span class="number">192.168</span>.<span class="number">0.146</span>:<span class="number">6080</span>/vnc_auto.html</span></span>
+<span class="comment"># Change vncserver_proxyclient_address and vncserver_listen to match each compute host</span>
+<span class="setting">vncserver_proxyclient_address=<span class="value"><span class="number">10.0</span>.<span class="number">0.11</span></span></span>
+<span class="setting">vncserver_listen=<span class="value"><span class="number">10.0</span>.<span class="number">0.11</span></span></span>
+
+<span class="comment"># AUTHENTICATION</span>
+<span class="setting">auth_strategy=<span class="value">keystone</span></span>
+<span class="title">[keystone_authtoken]</span>
+<span class="comment">#auth_host = 127.0.0.1</span>
+<span class="comment">#auth_port = 35357</span>
+<span class="comment">#auth_protocol = http</span>
+<span class="comment">#admin_tenant_name = service</span>
+<span class="comment">#admin_user = nova</span>
+<span class="comment">#admin_password = nova</span>
+<span class="setting">auth_uri = <span class="value">http://controller:<span class="number">5000</span>/v2.<span class="number">0</span></span></span>
+<span class="setting">identity_uri = <span class="value">http://controller:<span class="number">35357</span></span></span>
+<span class="setting">admin_tenant_name = <span class="value">service</span></span>
+<span class="setting">admin_user = <span class="value">nova</span></span>
+<span class="setting">admin_password = <span class="value">*yourpass*</span></span>
+<span class="comment">#signing_dirname = /tmp/keystone-signing-nova</span>
+<span class="comment"># GLANCE</span>
+<span class="title">[glance]</span>
+<span class="comment">#api_servers=192.168.206.130:9292    </span>
+<span class="setting">api_servers=<span class="value"><span class="number">10.0</span>.<span class="number">0.11</span>:<span class="number">9292</span></span></span>
+<span class="setting">host = <span class="value"><span class="number">10.0</span>.<span class="number">0.11</span></span></span>
+<span class="comment"># DATABASE</span>
+<span class="title">[database]</span>
+<span class="setting">connection=<span class="value">mysql://nova:*novapass*@controller/nova</span></span>
+
+<span class="comment"># LIBVIRT</span>
+<span class="title">[libvirt]</span>
+<span class="setting">virt_type=<span class="value">kvm</span></span>
+</code></pre><p>有些内容重复或者没有使用到。没关系，这样配置能够正常使用。</p>
+<p>compute节点的/etc/nova/nova.conf配置文件样板：</p>
+<pre><code><span class="title">[DEFAULT]</span>
+<span class="comment"># LOGS/STATE</span>
+<span class="setting">verbose=<span class="value"><span class="keyword">True</span></span></span>
+<span class="setting">logdir=<span class="value">/var/log/nova</span></span>
+<span class="setting">state_path=<span class="value">/var/lib/nova</span></span>
+<span class="setting">lock_path=<span class="value">/var/lock/nova</span></span>
+<span class="setting">rootwrap_config=<span class="value">/etc/nova/rootwrap.conf</span></span>
+
+<span class="setting">rpc_backend = <span class="value">rabbit</span></span>
+<span class="setting">rabbit_host = <span class="value">controller</span></span>
+<span class="setting">rabbit_password = <span class="value">*yourpass*</span></span>
+<span class="comment"># SCHEDULER</span>
+<span class="setting">compute_scheduler_driver=<span class="value">nova.scheduler.filter_scheduler.FilterScheduler</span></span>
+
+<span class="comment"># VOLUMES</span>
+<span class="comment"># configured in cinder.conf</span>
+
+<span class="comment"># COMPUTE</span>
+<span class="setting">compute_driver=<span class="value">libvirt.LibvirtDriver</span></span>
+<span class="setting">instance_name_template=<span class="value">instance-%<span class="number">08</span>x</span></span>
+<span class="setting">api_paste_config=<span class="value">/etc/nova/api-paste.ini</span></span>
+
+<span class="comment"># COMPUTE/APIS: if you have separate configs for separate services</span>
+<span class="comment"># this flag is required for both nova-api and nova-compute</span>
+<span class="setting">allow_resize_to_same_host=<span class="value"><span class="keyword">True</span></span></span>
+
+<span class="comment"># APIS</span>
+<span class="setting">osapi_compute_extension=<span class="value">nova.api.openstack.compute.contrib.standard_extensions</span></span>
+<span class="setting">ec2_dmz_host=<span class="value"><span class="number">192.168</span>.<span class="number">0.146</span></span></span>
+<span class="setting">s3_host=<span class="value"><span class="number">192.168</span>.<span class="number">0.146</span></span></span>
+
+<span class="comment"># RABBITMQ</span>
+<span class="comment">#rabbit_host=192.168.0.146</span>
+
+<span class="comment"># GLANCE</span>
+<span class="setting">image_service=<span class="value">nova.image.glance.GlanceImageService</span></span>
+<span class="comment"># NETWORK</span>
+<span class="comment">#network_manager=nova.network.manager.FlatDHCPManager</span>
+<span class="setting">force_dhcp_release=<span class="value"><span class="keyword">True</span></span></span>
+<span class="comment">#dhcpbridge_flagfile=/etc/nova/nova.conf</span>
+<span class="comment">#firewall_driver=nova.virt.libvirt.firewall.IptablesFirewallDriver</span>
+<span class="setting">network_api_class = <span class="value">nova.network.api.API</span></span>
+<span class="setting">security_group_api = <span class="value">nova</span></span>
+<span class="setting">firewall_driver = <span class="value">nova.virt.libvirt.firewall.IptablesFirewallDriver</span></span>
+<span class="setting">network_manager = <span class="value">nova.network.manager.FlatDHCPManager</span></span>
+<span class="setting">network_size = <span class="value"><span class="number">254</span></span></span>
+<span class="setting">allow_same_net_traffic = <span class="value"><span class="keyword">False</span></span></span>
+<span class="setting">multi_host = <span class="value"><span class="keyword">True</span></span></span>
+<span class="setting">send_arp_for_ha = <span class="value"><span class="keyword">True</span></span></span>
+<span class="setting">share_dhcp_address = <span class="value"><span class="keyword">True</span></span></span>
+<span class="setting">force_dhcp_release = <span class="value"><span class="keyword">True</span></span></span>
+<span class="setting">flat_network_bridge = <span class="value">br100</span></span>
+<span class="setting">flat_interface = <span class="value">eth1</span></span>
+<span class="setting">public_interface = <span class="value">eth0</span></span>
+<span class="comment"># Change my_ip to match each host</span>
+<span class="setting">my_ip=<span class="value"><span class="number">10.0</span>.<span class="number">0.31</span></span></span>
+<span class="setting">public_interface=<span class="value">eth0</span></span>
+<span class="setting">vlan_interface=<span class="value">eth0</span></span>
+<span class="setting">flat_network_bridge=<span class="value">br100</span></span>
+<span class="setting">flat_interface=<span class="value">eth0</span></span>
+
+<span class="comment"># NOVNC CONSOLE</span>
+<span class="comment">#novncproxy_base_url=http://192.168.0.146:6080/vnc_auto.html</span>
+<span class="comment"># Change vncserver_proxyclient_address and vncserver_listen to match each compute host</span>
+<span class="comment">#vncserver_proxyclient_address=192.168.0.146</span>
+<span class="comment">#vncserver_listen=192.168.0.146</span>
+<span class="setting">vnc_enabled = <span class="value"><span class="keyword">True</span></span></span>
+<span class="setting">vncserver_listen = <span class="value"><span class="number">0.0</span>.<span class="number">0.0</span></span></span>
+<span class="setting">vncserver_proxyclient_address = <span class="value"><span class="number">10.0</span>.<span class="number">0.31</span></span></span>
+<span class="setting">novncproxy_base_url = <span class="value">http://<span class="number">192.168</span>.<span class="number">0.146</span>:<span class="number">6080</span>/vnc_auto.html</span></span>
+
+<span class="comment"># AUTHENTICATION</span>
+<span class="setting">auth_strategy=<span class="value">keystone</span></span>
+<span class="title">[keystone_authtoken]</span>
+<span class="comment">#auth_host = 127.0.0.1</span>
+<span class="comment">#auth_port = 35357</span>
+<span class="comment">#auth_protocol = http</span>
+<span class="comment">#admin_tenant_name = service</span>
+<span class="comment">#admin_user = nova</span>
+<span class="comment">#admin_password = novapass</span>
+<span class="comment">#signing_dirname = /tmp/keystone-signing-nova</span>
+<span class="setting">auth_uri = <span class="value">http://controller:<span class="number">5000</span>/v2.<span class="number">0</span></span></span>
+<span class="setting">identity_uri = <span class="value">http://controller:<span class="number">35357</span></span></span>
+<span class="setting">admin_tenant_name = <span class="value">service</span></span>
+<span class="setting">admin_user = <span class="value">nova</span></span>
+<span class="setting">admin_password = <span class="value">*yourpass*</span></span>
+<span class="comment"># GLANCE</span>
+<span class="title">[glance]</span>
+<span class="setting">api_servers=<span class="value"><span class="number">10.0</span>.<span class="number">0.11</span>:<span class="number">9292</span></span></span>
+<span class="setting">host = <span class="value"><span class="number">10.0</span>.<span class="number">0.11</span></span></span>
+<span class="comment"># DATABASE</span>
+<span class="title">[database]</span>
+<span class="comment">#connection=mysql://nova:*yourpass*@controller/nova</span>
+
+<span class="comment"># LIBVIRT</span>
+<span class="title">[libvirt]</span>
+<span class="setting">virt_type=<span class="value">kvm</span></span>
+</code></pre><p>暂且使用这两个，这里网络模式选择的是legacy那个，如果使用neutron，还是要进行修改的。配置文件依据自己的实际拓扑环境进行修改。</p>
+<p>两个节点的compute服务都安装完成后，进行以下验证：</p>
+<p>在controller节点上面执行以下命令：</p>
+<p>1），设置环境变量：</p>
+<pre><code>$ <span class="keyword">source</span> admin-openrc.<span class="keyword">sh</span>
+</code></pre><p>2），查看nova开启的服务有几个：</p>
+<pre><code>root<span class="comment">@controller:~# nova service-list</span>
++----+------------------+------------+----------+---------+-------+----------------------------+-----------------+
+|<span class="string"> Id </span>|<span class="string"> Binary           </span>|<span class="string"> Host       </span>|<span class="string"> Zone     </span>|<span class="string"> Status  </span>|<span class="string"> State </span>|<span class="string"> Updated_at                 </span>|<span class="string"> Disabled Reason </span>|
++----+------------------+------------+----------+---------+-------+----------------------------+-----------------+
+|<span class="string"> 1  </span>|<span class="string"> nova-cert        </span>|<span class="string"> controller </span>|<span class="string"> internal </span>|<span class="string"> enabled </span>|<span class="string"> up    </span>|<span class="string"> 2015-05-20T03:58:58.000000 </span>|<span class="string"> -               </span>|
+|<span class="string"> 2  </span>|<span class="string"> nova-consoleauth </span>|<span class="string"> controller </span>|<span class="string"> internal </span>|<span class="string"> enabled </span>|<span class="string"> up    </span>|<span class="string"> 2015-05-20T03:58:58.000000 </span>|<span class="string"> -               </span>|
+|<span class="string"> 3  </span>|<span class="string"> nova-conductor   </span>|<span class="string"> controller </span>|<span class="string"> internal </span>|<span class="string"> enabled </span>|<span class="string"> up    </span>|<span class="string"> 2015-05-20T03:59:03.000000 </span>|<span class="string"> -               </span>|
+|<span class="string"> 4  </span>|<span class="string"> nova-scheduler   </span>|<span class="string"> controller </span>|<span class="string"> internal </span>|<span class="string"> enabled </span>|<span class="string"> up    </span>|<span class="string"> 2015-05-20T03:59:04.000000 </span>|<span class="string"> -               </span>|
+|<span class="string"> 5  </span>|<span class="string"> nova-compute     </span>|<span class="string"> 10.0.0.11  </span>|<span class="string"> nova     </span>|<span class="string"> enabled </span>|<span class="string"> down  </span>|<span class="string"> 2015-05-18T14:23:34.000000 </span>|<span class="string"> -               </span>|
+|<span class="string"> 6  </span>|<span class="string"> nova-compute     </span>|<span class="string"> compute    </span>|<span class="string"> nova     </span>|<span class="string"> enabled </span>|<span class="string"> up    </span>|<span class="string"> 2015-05-20T03:59:02.000000 </span>|<span class="string"> -               </span>|
+|<span class="string"> 7  </span>|<span class="string"> nova-network     </span>|<span class="string"> compute    </span>|<span class="string"> internal </span>|<span class="string"> enabled </span>|<span class="string"> up    </span>|<span class="string"> 2015-05-20T03:59:07.000000 </span>|<span class="string"> -               </span>|
++----+------------------+------------+----------+---------+-------+----------------------------+-----------------+
+</code></pre><p>问题：可能你有时候会查看nova的服务列表时候会报以下错误：</p>
+<pre><code>root@controller:~# nova service-list
+ERROR (Forbidden): Policy doesn't allow compute_extension:services to be performed. (HTTP 403) (Request-ID: req-<span class="number">7c66e2a1</span>-<span class="number">87e0-4552</span>-bae<span class="number">0-9f89700</span>96bb1)
+</code></pre><p>这是因为认证没通过，策略不允许。具体的策略是由/etc/nova/policy.json这个文件定义的（JSON(JavaScript Object Notation) 是一种轻量级的数据交换格式。）<br>解决方法：</p>
+<pre><code># <span class="keyword">source</span> admin-openrc.<span class="keyword">sh</span>  //<span class="keyword">source</span>环境变量
+</code></pre><p>3），查看nova的可用的镜像列</p>
+<pre><code>root<span class="comment">@controller:~# nova image-list</span>
++--------------------------------------+---------------------+--------+--------+
+|<span class="string"> ID                                   </span>|<span class="string"> Name                </span>|<span class="string"> Status </span>|<span class="string"> Server </span>|
++--------------------------------------+---------------------+--------+--------+
+|<span class="string"> e60963d5-fcb3-4ebb-b41e-51aa100adfcb </span>|<span class="string"> centos6.6x64        </span>|<span class="string"> ACTIVE </span>|<span class="string">        </span>|
+|<span class="string"> 0eb0e87c-450f-4a68-b4d0-d8f6abf26449 </span>|<span class="string"> cirros-0.3.3-x86_64 </span>|<span class="string"> ACTIVE </span>|<span class="string">        </span>|
+|<span class="string"> c4b8af42-dea4-42e8-bb2a-daaa3d18117f </span>|<span class="string"> ubuntu server       </span>|<span class="string"> ACTIVE </span>|<span class="string">        </span>|
++--------------------------------------+---------------------+--------+--------+
+</code></pre><p>（第一和第三个是我后来上传的，但是格式不对，不能使用）。<br> 至此，compute组件基本安装完成。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://www.stackops.info/OpenStack搭建-nova组件.html" data-id="cidjpzlnu001ch87bbx635ndk" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/">undefined</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/">undefined</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/">undefined</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/AMQP/">AMQP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Cisco/">Cisco</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Etherchannel/">Etherchannel</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Keystone/">Keystone</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NTP/">NTP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/OpenStack/">OpenStack</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RSTP/">RSTP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/compute/">compute</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/glance/">glance</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/">hexo</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/image/">image</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nova/">nova</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/openstack/">openstack</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/portfast/">portfast</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/submin/">submin</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/svn/">svn</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/switch/">switch</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/AMQP/" style="font-size: 10px;">AMQP</a> <a href="/tags/Cisco/" style="font-size: 10px;">Cisco</a> <a href="/tags/Etherchannel/" style="font-size: 10px;">Etherchannel</a> <a href="/tags/Keystone/" style="font-size: 10px;">Keystone</a> <a href="/tags/NTP/" style="font-size: 10px;">NTP</a> <a href="/tags/OpenStack/" style="font-size: 10px;">OpenStack</a> <a href="/tags/RSTP/" style="font-size: 10px;">RSTP</a> <a href="/tags/compute/" style="font-size: 10px;">compute</a> <a href="/tags/glance/" style="font-size: 10px;">glance</a> <a href="/tags/hexo/" style="font-size: 10px;">hexo</a> <a href="/tags/image/" style="font-size: 10px;">image</a> <a href="/tags/nova/" style="font-size: 10px;">nova</a> <a href="/tags/openstack/" style="font-size: 20px;">openstack</a> <a href="/tags/portfast/" style="font-size: 10px;">portfast</a> <a href="/tags/submin/" style="font-size: 10px;">submin</a> <a href="/tags/svn/" style="font-size: 10px;">svn</a> <a href="/tags/switch/" style="font-size: 10px;">switch</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">10</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recents</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2015/08/20/OpenStack搭建-nova组件/">OpenStack搭建-nova组件</a>
+          </li>
+        
+          <li>
+            <a href="/2015/08/19/OpenStack搭建-Glance组件/">OpenStack搭建-Glance组件</a>
+          </li>
+        
+          <li>
+            <a href="/2015/08/19/OpenStack搭建-Keystone组件/">OpenStack搭建-Keystone组件</a>
+          </li>
+        
+          <li>
+            <a href="/2015/08/17/Cisco-2960交换机配置/">Cisco-2960交换机配置</a>
+          </li>
+        
+          <li>
+            <a href="/2015/08/15/机房网络优化/">机房网络优化</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2015 liyahua<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css" type="text/css">
+  <script src="/fancybox/jquery.fancybox.pack.js" type="text/javascript"></script>
+
+
+<script src="/js/script.js" type="text/javascript"></script>
+
+  </div>
+</body>
+</html>
