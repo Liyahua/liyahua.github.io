@@ -2,6 +2,16 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://www.stackops.info/2015/08/20/OpenStack%E6%90%AD%E5%BB%BA-%E5%AE%9E%E4%BE%8B%E5%88%9B%E5%BB%BA/</loc>
+    <lastmod>2015-08-20T07:38:12.686Z</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://www.stackops.info/2015/08/20/OpenStack%E6%90%AD%E5%BB%BA-dashboar%E7%BB%84%E4%BB%B6/</loc>
+    <lastmod>2015-08-20T07:19:36.142Z</lastmod>
+  </url>
+  
+  <url>
     <loc>http://www.stackops.info/2015/08/20/OpenStackd%E6%90%AD%E5%BB%BA-%E7%BD%91%E7%BB%9C%E7%BB%84%E4%BB%B6/</loc>
     <lastmod>2015-08-20T06:24:37.575Z</lastmod>
   </url>

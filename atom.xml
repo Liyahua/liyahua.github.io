@@ -5,7 +5,7 @@
   <subtitle><![CDATA[Follow your heart]]></subtitle>
   <link href="/atom.xml" rel="self"/>
   <link href="http://www.stackops.info//"/>
-  <updated>2015-08-20T06:24:37.575Z</updated>
+  <updated>2015-08-20T07:38:12.686Z</updated>
   <id>http://www.stackops.info//</id>
   
   <author>
@@ -14,6 +14,250 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title><![CDATA[OpenStack搭建-实例创建]]></title>
+    <link href="http://www.stackops.info/2015/08/20/OpenStack%E6%90%AD%E5%BB%BA-%E5%AE%9E%E4%BE%8B%E5%88%9B%E5%BB%BA/"/>
+    <id>http://www.stackops.info/2015/08/20/OpenStack搭建-实例创建/</id>
+    <published>2015-08-20T07:20:21.000Z</published>
+    <updated>2015-08-20T07:38:12.686Z</updated>
+    <content type="html"><![CDATA[<p>显示全文：</p>
+<a id="more"></a>
+<h3 id="使用legacy_networking_创建实例：">使用legacy networking  创建实例：</h3><p> 略去中间的存储节点配置，先测试以下实例的创建是否能够成功·。</p>
+<h4 id="1，创建一对密钥对：">1，创建一对密钥对：</h4><ul>
+<li>1），生效demo用户凭据：</li>
+</ul>
+<pre><code><span class="built_in">source</span> demo-openrc.sh
+<span class="comment">#demo_openrc.sh内容如下：</span>
+root@controller:~<span class="comment"># cat demo-openrc.sh </span>
+<span class="built_in">export</span> OS_TENANT_NAME=demo
+<span class="built_in">export</span> OS_USERNAME=demo
+<span class="built_in">export</span> OS_PASSWORD=*yourpass*
+<span class="built_in">export</span> OS_AUTH_URL=http://controller:<span class="number">5000</span>/v2.<span class="number">0</span>
+</code></pre><p>主要是一些keystone的认证信息。</p>
+<ul>
+<li>2），生成密钥对：</li>
+</ul>
+<pre><code><span class="variable">$ </span>ssh-keygen   （生成随机数）。
+</code></pre><ul>
+<li><p>3），添加公钥到openstack环境：</p>
+<p>$ nova keypair-add –pub-key ~/.ssh/id_rsa.pub demo-key</p>
+</li>
+<li><p>4），查看公钥：</p>
+</li>
+</ul>
+<pre><code><span class="header">root@controller:~# nova keypair-list
++----------+-------------------------------------------------+</span>
+<span class="header">| Name     | Fingerprint                                     |
++----------+-------------------------------------------------+</span>
+<span class="header">| demo-key | e8:b2:f8:2b:c1:e8:9d:a8:a8:21:69:94:08:a6:f1:c0 |
++----------+-------------------------------------------------+</span>
+</code></pre><h5 id="创建实例：">创建实例：</h5><ul>
+<li>1），先查看flavor列表，各种实例类型。</li>
+</ul>
+<pre><code>root<span class="comment">@controller:~# nova flavor-list</span>
++----+-----------+-----------+------+-----------+------+-------+-------------+-----------+
+|<span class="string"> ID </span>|<span class="string"> Name      </span>|<span class="string"> Memory_MB </span>|<span class="string"> Disk </span>|<span class="string"> Ephemeral </span>|<span class="string"> Swap </span>|<span class="string"> VCPUs </span>|<span class="string"> RXTX_Factor </span>|<span class="string"> Is_Public </span>|<span class="string">    
++----+-----------+-----------+------+-----------+------+-------+-------------+-----------+
+</span>|<span class="string"> 1  </span>|<span class="string"> m1.tiny   </span>|<span class="string"> 512       </span>|<span class="string"> 1    </span>|<span class="string"> 0         </span>|<span class="string">      </span>|<span class="string"> 1     </span>|<span class="string"> 1.0         </span>|<span class="string"> True      </span>|
+|<span class="string"> 2  </span>|<span class="string"> m1.small  </span>|<span class="string"> 2048      </span>|<span class="string"> 20   </span>|<span class="string"> 0         </span>|<span class="string">      </span>|<span class="string"> 1     </span>|<span class="string"> 1.0         </span>|<span class="string"> True      </span>|
+|<span class="string"> 3  </span>|<span class="string"> m1.medium </span>|<span class="string"> 4096      </span>|<span class="string"> 40   </span>|<span class="string"> 0         </span>|<span class="string">      </span>|<span class="string"> 2     </span>|<span class="string"> 1.0         </span>|<span class="string"> True      </span>|
+|<span class="string"> 4  </span>|<span class="string"> m1.large  </span>|<span class="string"> 8192      </span>|<span class="string"> 80   </span>|<span class="string"> 0         </span>|<span class="string">      </span>|<span class="string"> 4     </span>|<span class="string"> 1.0         </span>|<span class="string"> True      </span>|
+|<span class="string"> 5  </span>|<span class="string"> m1.xlarge </span>|<span class="string"> 16384     </span>|<span class="string"> 160  </span>|<span class="string"> 0         </span>|<span class="string">      </span>|<span class="string"> 8     </span>|<span class="string"> 1.0         </span>|<span class="string"> True      </span>|
++----+-----------+-----------+------+-----------+------+-------+-------------+-----------+
+</code></pre><p>可以看到各种可以创建的虚拟机的类型。我们创建的第一个实例采用m1.tiny这个vm类型。</p>
+<ul>
+<li>2），查看当前可用的vm镜像：</li>
+</ul>
+<pre><code>root<span class="comment">@controller:~# nova image-list</span>
++--------------------------------------+---------------------+--------+--------+
+|<span class="string"> ID                                   </span>|<span class="string"> Name                </span>|<span class="string"> Status </span>|<span class="string"> Server </span>|
++--------------------------------------+---------------------+--------+--------+
+|<span class="string"> e60963d5-fcb3-4ebb-b41e-51aa100adfcb </span>|<span class="string"> centos6.6x64        </span>|<span class="string"> ACTIVE </span>|<span class="string">        </span>|
+|<span class="string"> 0eb0e87c-450f-4a68-b4d0-d8f6abf26449 </span>|<span class="string"> cirros-0.3.3-x86_64 </span>|<span class="string"> ACTIVE </span>|<span class="string">        </span>|
+|<span class="string"> c4b8af42-dea4-42e8-bb2a-daaa3d18117f </span>|<span class="string"> ubuntu server       </span>|<span class="string"> ACTIVE </span>|<span class="string">        </span>|
++--------------------------------------+---------------------+--------+--------+
+</code></pre><p>我使用cirros-0.3.3-x86_64这个镜像创建第一个实例。</p>
+<ul>
+<li>3），查看当前可用的网络：（在控制节点上）</li>
+</ul>
+<pre><code>root@controller:~# source admin-openrc.sh
+<span class="header">root@controller:~# nova net-list
++--------------------------------------+----------+------------------+</span>
+<span class="header">| ID                                   | Label    | CIDR             |
++--------------------------------------+----------+------------------+</span>
+<span class="header">| e7972845-3a38-49bb-ae53-56c4f71dc837 | demo-net | 192.168.0.176/28 |
++--------------------------------------+----------+------------------+</span>
+</code></pre><ul>
+<li>4），列出有效的安全组：</li>
+</ul>
+<pre><code><span class="header">root@controller:~# nova secgroup-list
++----+---------+-------------+</span>
+<span class="header">| Id | Name    | Description |
++----+---------+-------------+</span>
+<span class="header">| 2  | default | default     |
++----+---------+-------------+</span>
+</code></pre><ul>
+<li>5），创建一个实例：</li>
+</ul>
+<pre><code><span class="comment">$</span> <span class="comment">nova</span> <span class="comment">boot</span> <span class="literal">-</span><span class="literal">-</span><span class="comment">flavor</span> <span class="comment">m1</span><span class="string">.</span><span class="comment">tiny</span> <span class="literal">-</span><span class="literal">-</span><span class="comment">image</span> <span class="comment">cirros</span><span class="literal">-</span><span class="comment">0</span><span class="string">.</span><span class="comment">3</span><span class="string">.</span><span class="comment">3</span><span class="literal">-</span><span class="comment">x86_64</span> <span class="literal">-</span><span class="literal">-</span><span class="comment">nic</span> <span class="comment">net</span><span class="literal">-</span><span class="comment">id=</span>
+<span class="comment">DEMO_NET_ID</span> <span class="comment">\</span>
+<span class="literal">-</span><span class="literal">-</span><span class="comment">security</span><span class="literal">-</span><span class="comment">group</span> <span class="comment">default</span> <span class="literal">-</span><span class="literal">-</span><span class="comment">key</span><span class="literal">-</span><span class="comment">name</span> <span class="comment">demo</span><span class="literal">-</span><span class="comment">key</span> <span class="comment">demo</span><span class="literal">-</span><span class="comment">instance1</span>
+</code></pre><p>需要为其指定网卡，实例大小模型，镜像，安全组，公钥信息等。</p>
+<pre><code>root<span class="comment">@controller:~# nova boot --flavor m1.tiny --image cirros-0.3.3-x86_64 --nic net-id=e7972845-3a38-49bb-ae53-56c4f71dc837 \</span>
+&gt; --security-group default --key-name demo-key demo-instance2
++--------------------------------------+------------------------------------------------------------+
+|<span class="string"> Property                             </span>|<span class="string"> Value                                                      </span>|
++--------------------------------------+------------------------------------------------------------+
+|<span class="string"> OS-DCF:diskConfig                    </span>|<span class="string"> MANUAL                                                     </span>|
+|<span class="string"> OS-EXT-AZ:availability_zone          </span>|<span class="string"> nova                                                       </span>|
+|<span class="string"> OS-EXT-SRV-ATTR:host                 </span>|<span class="string"> -                                                          </span>|
+|<span class="string"> OS-EXT-SRV-ATTR:hypervisor_hostname  </span>|<span class="string"> -                                                          </span>|
+|<span class="string"> OS-EXT-SRV-ATTR:instance_name        </span>|<span class="string"> instance-00000012                                          </span>|
+|<span class="string"> OS-EXT-STS:power_state               </span>|<span class="string"> 0                                                          </span>|
+|<span class="string"> OS-EXT-STS:task_state                </span>|<span class="string"> scheduling                                                 </span>|
+|<span class="string"> OS-EXT-STS:vm_state                  </span>|<span class="string"> building                                                   </span>|
+|<span class="string"> OS-SRV-USG:launched_at               </span>|<span class="string"> -                                                          </span>|
+|<span class="string"> OS-SRV-USG:terminated_at             </span>|<span class="string"> -                                                          </span>|
+|<span class="string"> accessIPv4                           </span>|<span class="string">                                                            </span>|
+|<span class="string"> accessIPv6                           </span>|<span class="string">                                                            </span>|
+|<span class="string"> adminPass                            </span>|<span class="string"> wfTZg7pi6G5w                                               </span>|
+|<span class="string"> config_drive                         </span>|<span class="string">                                                            </span>|
+|<span class="string"> created                              </span>|<span class="string"> 2015-05-20T07:15:16Z                                       </span>|
+|<span class="string"> flavor                               </span>|<span class="string"> m1.tiny (1)                                                </span>|
+|<span class="string"> hostId                               </span>|<span class="string">                                                            </span>|
+|<span class="string"> id                                   </span>|<span class="string"> 2b6ce589-b316-42e1-a49c-68ff08d854c3                       </span>|
+|<span class="string"> image                                </span>|<span class="string"> cirros-0.3.3-x86_64 (0eb0e87c-450f-4a68-b4d0-d8f6abf26449) </span>|
+|<span class="string"> key_name                             </span>|<span class="string"> demo-key                                                   </span>|
+|<span class="string"> metadata                             </span>|<span class="string"> {}                                                         </span>|
+|<span class="string"> name                                 </span>|<span class="string"> demo-instance2                                             </span>|
+|<span class="string"> os-extended-volumes:volumes_attached </span>|<span class="string"> []                                                         </span>|
+|<span class="string"> progress                             </span>|<span class="string"> 0                                                          </span>|
+|<span class="string"> security_groups                      </span>|<span class="string"> default                                                    </span>|
+|<span class="string"> status                               </span>|<span class="string"> BUILD                                                      </span>|
+|<span class="string"> tenant_id                            </span>|<span class="string"> 8e03709a24154d9d99f7a3e16a1da53f                           </span>|
+|<span class="string"> updated                              </span>|<span class="string"> 2015-05-20T07:15:16Z                                       </span>|
+|<span class="string"> user_id                              </span>|<span class="string"> 3471b47ae4d942cdb582e4550e028a9b                           </span>|
++--------------------------------------+------------------------------------------------------------+
+</code></pre><ul>
+<li>6），查看实例的状态；</li>
+</ul>
+<pre><code><span class="header">root@controller:~# nova list
++--------------------------------------+----------------+--------+------------+-------------+------------------------+</span>
+<span class="header">| ID                                   | Name           | Status | Task State | Power State | Networks               |
++--------------------------------------+----------------+--------+------------+-------------+------------------------+</span>
+| 82899c7a-b883-454a-887c-c714f73bbe19 | demo-instance1 | ACTIVE | -          | Running     | demo-net=192.168.0.180 |
+<span class="header">| 2b6ce589-b316-42e1-a49c-68ff08d854c3 | demo-instance2 | ACTIVE | -          | Running     | demo-net=192.168.0.179 |
++--------------------------------------+----------------+--------+------------+-------------+------------------------+</span>
+</code></pre><p>为了能够访问vm，我们可以通过网页vnc打开vm的控制台。或者ssh登录上去，这里先使用vnc：<br>请求vnc地址。</p>
+<pre><code><span class="header">root@controller:~#  nova get-vnc-console demo-instance2 novnc
++-------+------------------------------------------------------------------------------------+</span>
+<span class="header">| Type  | Url                                                                                |
++-------+------------------------------------------------------------------------------------+</span>
+<span class="header">| novnc | http://192.168.0.146:6080/vnc_auto.html?token=58fa034e-05b0-408f-b548-a316fc05c4da |
++-------+------------------------------------------------------------------------------------+</span>
+</code></pre><p>然后将地址复制粘贴到浏览器中（这里使用的是chrome）。可以看到vm的控制台：</p>
+<p><img src="http://7xl5dz.com1.z0.glb.clouddn.com/vm1.png" alt="vm1"></p>
+<p>验证demo-net的网络：从vm上测试能否上外网：</p>
+<p><img src="http://7xl5dz.com1.z0.glb.clouddn.com/vm2.png" alt="vm2"></p>
+<p>接着添加安全组：</p>
+<p>1，给default安全组添加规则：<br>    a, 允许ping包；</p>
+<pre><code>$ nova secgroup-add-<span class="keyword">rule</span> default icmp -1 -1 0.0.0.0/0  
+</code></pre><p>这句的含义是在安全组default中添加一条规则，允许来自任何ip任何端口的icmp包</p>
+<pre><code>b，允许ssh访问：
+
+$ nova secgroup-add-<span class="keyword">rule</span> default tcp 22 22 0.0.0.0/0
+</code></pre><p>因为ssh是基于tcp22号端口进行访问的，所以这里进行放行任何ip的tcp22号端口流量。</p>
+<p>2，从控制节点或者任何一个在外网的主机上测试一下挽留过的连通性。</p>
+<p><img src="http://7xl5dz.com1.z0.glb.clouddn.com/vm3.png" alt="vm3"></p>
+<p>因为192.168.0.179这个ip有冲突，还是使用180这个ip做测试。</p>
+<p>3，最后在控制节点上使用ssh访问vm实例。</p>
+<p><img src="http://7xl5dz.com1.z0.glb.clouddn.com/vm4.png" alt="vm4"></p>
+<p>到这里，最基本的vm创建，vm访问外网，网络连通性都已经完成。</p>
+<p>下载qcow2镜像的地址: <a href="http://cloud.centos.org/centos/6/images/" target="_blank" rel="external">http://cloud.centos.org/centos/6/images/</a></p>
+]]></content>
+    <summary type="html">
+    <![CDATA[<p>显示全文：</p>]]>
+    
+    </summary>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[OpenStack搭建-dashboar组件]]></title>
+    <link href="http://www.stackops.info/2015/08/20/OpenStack%E6%90%AD%E5%BB%BA-dashboar%E7%BB%84%E4%BB%B6/"/>
+    <id>http://www.stackops.info/2015/08/20/OpenStack搭建-dashboar组件/</id>
+    <published>2015-08-20T06:35:47.000Z</published>
+    <updated>2015-08-20T07:19:36.142Z</updated>
+    <content type="html"><![CDATA[<p>显示全文：<br><a id="more"></a></p>
+<h2 id="添加dashboard服务">添加dashboard服务</h2><p><strong>openstack  dashboard</strong>也被称为Horizon，是一个web界面，使用管理员和用户能够管理openstack不同的资源和服务<br>dashboard 通过OpenStack APIs操作openstack云计算控制器。Horizon允许定制自己的商标<br>Horizon提供了核心类和可重复使用的木板和工具</p>
+<p>这个部署使用的是 Apache web server.</p>
+<p>   系统要求： </p>
+<p>在安装openstack dashboard之前，你必须满足下面需求</p>
+<pre><code>•openstack计算安装，启用用户身份认证服务和项目管理
+
+•注意身份服务的urls和Compute endpoints.
+
+•用户认证服务具有sudo的权限。因为Apache 不能使用root用户服务，用户必须运行dashboard 作为sudo 权限身份认证服务。
+
+•Python <span class="number">2.6</span> 或则 <span class="number">2.7</span>，Python 版本必须支持Django。Python 版本应该运行在任何系统，包括Mac OS，不同的平台安装可能不一样。 
+
+然后在一个节点上安装和配置dashboard 可以连接身份认证服务
+</code></pre><p>用下面信息的用户，因此他们能够通过本地机器的浏览器访问dashboard</p>
+<pre><code>•通过公共<span class="literal">ip</span>地址，可以访问dashboard
+
+•输入用户和密码
+
+ 你的浏览器，必须支持HTML5 ，启用cookies 和JavaScript
+</code></pre><p>注意：</p>
+<pre><code>使用带有dashboard的VNC 客户端，浏览器必须支持HTML5 画布和 HTML5 WebSockets
+</code></pre><ul>
+<li>1），安装包：</li>
+</ul>
+<pre><code># apt-<span class="built_in">get</span> install openstack-dashboard apache2 libapache2-<span class="keyword">mod</span>-wsgi
+memcached <span class="keyword">python</span>-memcache
+</code></pre><p>注意：Ubuntu 安装  openstack-dashboard-ubuntu-theme包作为依赖。一些用户报告以前发布的版本有问题。如果你遇到问题，移除这个包，恢复到原先的openstack包。</p>
+<p>移除可以执行下面命令（这里执行了下面命令）</p>
+<pre><code><span class="preprocessor">#  dpkg --purge openstack-dashboard-ubuntu-theme</span>
+</code></pre><ul>
+<li>2），配置dashboard，修改配置文件/etc/openstack-dashboard/local_settings.py</li>
+</ul>
+<pre><code>OPENSTACK_HOST = <span class="string">"controller"</span>
+ALLOWED_HOSTS = [<span class="string">'*'</span>]
+
+CACHES = {
+<span class="string">'default'</span>: {
+<span class="string">'BACKEND'</span>: <span class="string">'django.core.cache.backends.memcached.
+MemcachedCache'</span>,
+<span class="string">'LOCATION'</span>: <span class="string">'127.0.0.1:11211'</span>,
+}
+}
+</code></pre><p>注意：注释掉其它session存储配置这里不需要修改</p>
+<p>.可选，配置其它 time zone</p>
+<p> TIME_ZONE = “TIME_ZONE”<br>/usr/share/zoneinfo/Asia/ 下保存着系统各个时区信息/etc/localtime 保存当前系统时区及时间信息</p>
+<ul>
+<li>3），检验安装：重启服务。</li>
+</ul>
+<pre><code><span class="preprocessor"># service apache2 restart</span>
+<span class="preprocessor"># service memcached restart</span>
+</code></pre><ul>
+<li>4)，打开浏览器，输入：192.168.0.146/horizon。可以选择使用demo或者admin这两个用户之一登录。</li>
+</ul>
+<p><img src="http://7xl5dz.com1.z0.glb.clouddn.com/dashboard.jpg" alt="dashboard"></p>
+<p>进入后的web界面大概是这样；</p>
+<p><img src="http://7xl5dz.com1.z0.glb.clouddn.com/dashboard2.png" alt="dashboard2"></p>
+<p>在这个界面里可以比较便捷的创建实例，迁移，调整实例大小，设置访问规则等，利用图形化界面管理特别方便。</p>
+]]></content>
+    <summary type="html">
+    <![CDATA[<p>显示全文：<br>]]>
+    
+    </summary>
+    
+      <category term="dashboard" scheme="http://www.stackops.info/tags/dashboard/"/>
+    
+      <category term="openstack" scheme="http://www.stackops.info/tags/openstack/"/>
+    
+  </entry>
   
   <entry>
     <title><![CDATA[OpenStackd搭建-网络组件]]></title>
@@ -1514,7 +1758,7 @@ Include /<span class="keyword">var</span>/lib/submin/conf/apache-svn.conf
 
 <span class="tag">&lt;/IfModule&gt;</span>
 <span class="tag">&lt;/VirtualHost&gt;</span>
-</code></pre><p>当通过浏览器访问web管理界面的时候：<a href="http://192.168.3.48/submin会提示你输入账户和密码，这时候你可以点击页面上的" target="_blank" rel="external">http://192.168.3.48/submin会提示你输入账户和密码，这时候你可以点击页面上的</a>  Forgot your  password , 然后会主动发一封邮件给root用户：<br>可以通过命令：# cat /var/spool/mail/root 查看发过来的重置密码的连接，我们可以通过该链接进行密码的修改：<br>    From: root@localhost.novalocal<br>    To: liyahua@xxx.com<br>    Subject: Submin password reset request<br>    Message-Id: <a href="&#x6d;&#97;&#105;&#108;&#116;&#111;&#58;&#x32;&#x30;&#x31;&#53;&#48;&#x38;&#x31;&#51;&#x30;&#x36;&#50;&#x37;&#53;&#x35;&#x2e;&#x42;&#54;&#x38;&#x36;&#70;&#x36;&#49;&#x46;&#x37;&#x44;&#64;&#115;&#x76;&#110;&#x61;&#100;&#x6d;&#x69;&#110;&#x2e;&#x6e;&#111;&#118;&#97;&#x6c;&#111;&#x63;&#x61;&#108;">&#x32;&#x30;&#x31;&#53;&#48;&#x38;&#x31;&#51;&#x30;&#x36;&#50;&#x37;&#53;&#x35;&#x2e;&#x42;&#54;&#x38;&#x36;&#70;&#x36;&#49;&#x46;&#x37;&#x44;&#64;&#115;&#x76;&#110;&#x61;&#100;&#x6d;&#x69;&#110;&#x2e;&#x6e;&#111;&#118;&#97;&#x6c;&#111;&#x63;&#x61;&#108;</a><br>    Date: Thu, 13 Aug 2015 06:27:55 +0000 (UTC)</p>
+</code></pre><p>当通过浏览器访问web管理界面的时候：<a href="http://192.168.3.48/submin会提示你输入账户和密码，这时候你可以点击页面上的" target="_blank" rel="external">http://192.168.3.48/submin会提示你输入账户和密码，这时候你可以点击页面上的</a>  Forgot your  password , 然后会主动发一封邮件给root用户：<br>可以通过命令：# cat /var/spool/mail/root 查看发过来的重置密码的连接，我们可以通过该链接进行密码的修改：<br>    From: root@localhost.novalocal<br>    To: liyahua@xxx.com<br>    Subject: Submin password reset request<br>    Message-Id: <a href="&#x6d;&#97;&#105;&#108;&#x74;&#x6f;&#x3a;&#50;&#x30;&#49;&#x35;&#x30;&#56;&#49;&#x33;&#48;&#x36;&#x32;&#x37;&#53;&#x35;&#x2e;&#x42;&#54;&#x38;&#54;&#70;&#54;&#x31;&#x46;&#55;&#x44;&#64;&#115;&#x76;&#x6e;&#97;&#x64;&#109;&#105;&#x6e;&#46;&#110;&#x6f;&#118;&#x61;&#108;&#x6f;&#x63;&#x61;&#108;">&#50;&#x30;&#49;&#x35;&#x30;&#56;&#49;&#x33;&#48;&#x36;&#x32;&#x37;&#53;&#x35;&#x2e;&#x42;&#54;&#x38;&#54;&#70;&#54;&#x31;&#x46;&#55;&#x44;&#64;&#115;&#x76;&#x6e;&#97;&#x64;&#109;&#105;&#x6e;&#46;&#110;&#x6f;&#118;&#x61;&#108;&#x6f;&#x63;&#x61;&#108;</a><br>    Date: Thu, 13 Aug 2015 06:27:55 +0000 (UTC)</p>
 <pre><code>You <span class="keyword">are</span> receiving this email because someone requested a password reset for
 your account. If you don't know what this <span class="keyword">is</span> about, you can safely ignore it,
 the reset request will expire automatically.

@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>OpenStack搭建-实例创建 | Leoli&#39;s  blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="显示全文：">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OpenStack搭建-实例创建">
+<meta property="og:url" content="http://www.stackops.info/2015/08/20/OpenStack搭建-实例创建/index.html">
+<meta property="og:site_name" content="Leoli's  blog">
+<meta property="og:description" content="显示全文：">
+<meta property="og:image" content="http://7xl5dz.com1.z0.glb.clouddn.com/vm1.png">
+<meta property="og:image" content="http://7xl5dz.com1.z0.glb.clouddn.com/vm2.png">
+<meta property="og:image" content="http://7xl5dz.com1.z0.glb.clouddn.com/vm3.png">
+<meta property="og:image" content="http://7xl5dz.com1.z0.glb.clouddn.com/vm4.png">
+<meta property="og:updated_time" content="2015-08-20T07:38:12.686Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="OpenStack搭建-实例创建">
+<meta name="twitter:description" content="显示全文：">
+  
+    <link rel="alternative" href="/atom.xml" title="Leoli&#39;s  blog" type="application/atom+xml">
+  
+  
+  <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" type="text/css">
+  
+<script type="text/javascript">
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?d1a0120d84ac9dc6082c5423dec3ef3d";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+</script>
+
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Leoli&#39;s  blog</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">Follow your heart</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://www.stackops.info"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-OpenStack搭建-实例创建" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2015/08/20/OpenStack搭建-实例创建/" class="article-date">
+  <time datetime="2015-08-20T07:20:21.000Z" itemprop="datePublished">2015-08-20</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      OpenStack搭建-实例创建
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>显示全文：</p>
+<a id="more"></a>
+<h3 id="使用legacy_networking_创建实例：">使用legacy networking  创建实例：</h3><p> 略去中间的存储节点配置，先测试以下实例的创建是否能够成功·。</p>
+<h4 id="1，创建一对密钥对：">1，创建一对密钥对：</h4><ul>
+<li>1），生效demo用户凭据：</li>
+</ul>
+<pre><code><span class="built_in">source</span> demo-openrc.sh
+<span class="comment">#demo_openrc.sh内容如下：</span>
+root@controller:~<span class="comment"># cat demo-openrc.sh </span>
+<span class="built_in">export</span> OS_TENANT_NAME=demo
+<span class="built_in">export</span> OS_USERNAME=demo
+<span class="built_in">export</span> OS_PASSWORD=*yourpass*
+<span class="built_in">export</span> OS_AUTH_URL=http://controller:<span class="number">5000</span>/v2.<span class="number">0</span>
+</code></pre><p>主要是一些keystone的认证信息。</p>
+<ul>
+<li>2），生成密钥对：</li>
+</ul>
+<pre><code><span class="variable">$ </span>ssh-keygen   （生成随机数）。
+</code></pre><ul>
+<li><p>3），添加公钥到openstack环境：</p>
+<p>$ nova keypair-add –pub-key ~/.ssh/id_rsa.pub demo-key</p>
+</li>
+<li><p>4），查看公钥：</p>
+</li>
+</ul>
+<pre><code><span class="header">root@controller:~# nova keypair-list
++----------+-------------------------------------------------+</span>
+<span class="header">| Name     | Fingerprint                                     |
++----------+-------------------------------------------------+</span>
+<span class="header">| demo-key | e8:b2:f8:2b:c1:e8:9d:a8:a8:21:69:94:08:a6:f1:c0 |
++----------+-------------------------------------------------+</span>
+</code></pre><h5 id="创建实例：">创建实例：</h5><ul>
+<li>1），先查看flavor列表，各种实例类型。</li>
+</ul>
+<pre><code>root<span class="comment">@controller:~# nova flavor-list</span>
++----+-----------+-----------+------+-----------+------+-------+-------------+-----------+
+|<span class="string"> ID </span>|<span class="string"> Name      </span>|<span class="string"> Memory_MB </span>|<span class="string"> Disk </span>|<span class="string"> Ephemeral </span>|<span class="string"> Swap </span>|<span class="string"> VCPUs </span>|<span class="string"> RXTX_Factor </span>|<span class="string"> Is_Public </span>|<span class="string">    
++----+-----------+-----------+------+-----------+------+-------+-------------+-----------+
+</span>|<span class="string"> 1  </span>|<span class="string"> m1.tiny   </span>|<span class="string"> 512       </span>|<span class="string"> 1    </span>|<span class="string"> 0         </span>|<span class="string">      </span>|<span class="string"> 1     </span>|<span class="string"> 1.0         </span>|<span class="string"> True      </span>|
+|<span class="string"> 2  </span>|<span class="string"> m1.small  </span>|<span class="string"> 2048      </span>|<span class="string"> 20   </span>|<span class="string"> 0         </span>|<span class="string">      </span>|<span class="string"> 1     </span>|<span class="string"> 1.0         </span>|<span class="string"> True      </span>|
+|<span class="string"> 3  </span>|<span class="string"> m1.medium </span>|<span class="string"> 4096      </span>|<span class="string"> 40   </span>|<span class="string"> 0         </span>|<span class="string">      </span>|<span class="string"> 2     </span>|<span class="string"> 1.0         </span>|<span class="string"> True      </span>|
+|<span class="string"> 4  </span>|<span class="string"> m1.large  </span>|<span class="string"> 8192      </span>|<span class="string"> 80   </span>|<span class="string"> 0         </span>|<span class="string">      </span>|<span class="string"> 4     </span>|<span class="string"> 1.0         </span>|<span class="string"> True      </span>|
+|<span class="string"> 5  </span>|<span class="string"> m1.xlarge </span>|<span class="string"> 16384     </span>|<span class="string"> 160  </span>|<span class="string"> 0         </span>|<span class="string">      </span>|<span class="string"> 8     </span>|<span class="string"> 1.0         </span>|<span class="string"> True      </span>|
++----+-----------+-----------+------+-----------+------+-------+-------------+-----------+
+</code></pre><p>可以看到各种可以创建的虚拟机的类型。我们创建的第一个实例采用m1.tiny这个vm类型。</p>
+<ul>
+<li>2），查看当前可用的vm镜像：</li>
+</ul>
+<pre><code>root<span class="comment">@controller:~# nova image-list</span>
++--------------------------------------+---------------------+--------+--------+
+|<span class="string"> ID                                   </span>|<span class="string"> Name                </span>|<span class="string"> Status </span>|<span class="string"> Server </span>|
++--------------------------------------+---------------------+--------+--------+
+|<span class="string"> e60963d5-fcb3-4ebb-b41e-51aa100adfcb </span>|<span class="string"> centos6.6x64        </span>|<span class="string"> ACTIVE </span>|<span class="string">        </span>|
+|<span class="string"> 0eb0e87c-450f-4a68-b4d0-d8f6abf26449 </span>|<span class="string"> cirros-0.3.3-x86_64 </span>|<span class="string"> ACTIVE </span>|<span class="string">        </span>|
+|<span class="string"> c4b8af42-dea4-42e8-bb2a-daaa3d18117f </span>|<span class="string"> ubuntu server       </span>|<span class="string"> ACTIVE </span>|<span class="string">        </span>|
++--------------------------------------+---------------------+--------+--------+
+</code></pre><p>我使用cirros-0.3.3-x86_64这个镜像创建第一个实例。</p>
+<ul>
+<li>3），查看当前可用的网络：（在控制节点上）</li>
+</ul>
+<pre><code>root@controller:~# source admin-openrc.sh
+<span class="header">root@controller:~# nova net-list
++--------------------------------------+----------+------------------+</span>
+<span class="header">| ID                                   | Label    | CIDR             |
++--------------------------------------+----------+------------------+</span>
+<span class="header">| e7972845-3a38-49bb-ae53-56c4f71dc837 | demo-net | 192.168.0.176/28 |
++--------------------------------------+----------+------------------+</span>
+</code></pre><ul>
+<li>4），列出有效的安全组：</li>
+</ul>
+<pre><code><span class="header">root@controller:~# nova secgroup-list
++----+---------+-------------+</span>
+<span class="header">| Id | Name    | Description |
++----+---------+-------------+</span>
+<span class="header">| 2  | default | default     |
++----+---------+-------------+</span>
+</code></pre><ul>
+<li>5），创建一个实例：</li>
+</ul>
+<pre><code><span class="comment">$</span> <span class="comment">nova</span> <span class="comment">boot</span> <span class="literal">-</span><span class="literal">-</span><span class="comment">flavor</span> <span class="comment">m1</span><span class="string">.</span><span class="comment">tiny</span> <span class="literal">-</span><span class="literal">-</span><span class="comment">image</span> <span class="comment">cirros</span><span class="literal">-</span><span class="comment">0</span><span class="string">.</span><span class="comment">3</span><span class="string">.</span><span class="comment">3</span><span class="literal">-</span><span class="comment">x86_64</span> <span class="literal">-</span><span class="literal">-</span><span class="comment">nic</span> <span class="comment">net</span><span class="literal">-</span><span class="comment">id=</span>
+<span class="comment">DEMO_NET_ID</span> <span class="comment">\</span>
+<span class="literal">-</span><span class="literal">-</span><span class="comment">security</span><span class="literal">-</span><span class="comment">group</span> <span class="comment">default</span> <span class="literal">-</span><span class="literal">-</span><span class="comment">key</span><span class="literal">-</span><span class="comment">name</span> <span class="comment">demo</span><span class="literal">-</span><span class="comment">key</span> <span class="comment">demo</span><span class="literal">-</span><span class="comment">instance1</span>
+</code></pre><p>需要为其指定网卡，实例大小模型，镜像，安全组，公钥信息等。</p>
+<pre><code>root<span class="comment">@controller:~# nova boot --flavor m1.tiny --image cirros-0.3.3-x86_64 --nic net-id=e7972845-3a38-49bb-ae53-56c4f71dc837 \</span>
+&gt; --security-group default --key-name demo-key demo-instance2
++--------------------------------------+------------------------------------------------------------+
+|<span class="string"> Property                             </span>|<span class="string"> Value                                                      </span>|
++--------------------------------------+------------------------------------------------------------+
+|<span class="string"> OS-DCF:diskConfig                    </span>|<span class="string"> MANUAL                                                     </span>|
+|<span class="string"> OS-EXT-AZ:availability_zone          </span>|<span class="string"> nova                                                       </span>|
+|<span class="string"> OS-EXT-SRV-ATTR:host                 </span>|<span class="string"> -                                                          </span>|
+|<span class="string"> OS-EXT-SRV-ATTR:hypervisor_hostname  </span>|<span class="string"> -                                                          </span>|
+|<span class="string"> OS-EXT-SRV-ATTR:instance_name        </span>|<span class="string"> instance-00000012                                          </span>|
+|<span class="string"> OS-EXT-STS:power_state               </span>|<span class="string"> 0                                                          </span>|
+|<span class="string"> OS-EXT-STS:task_state                </span>|<span class="string"> scheduling                                                 </span>|
+|<span class="string"> OS-EXT-STS:vm_state                  </span>|<span class="string"> building                                                   </span>|
+|<span class="string"> OS-SRV-USG:launched_at               </span>|<span class="string"> -                                                          </span>|
+|<span class="string"> OS-SRV-USG:terminated_at             </span>|<span class="string"> -                                                          </span>|
+|<span class="string"> accessIPv4                           </span>|<span class="string">                                                            </span>|
+|<span class="string"> accessIPv6                           </span>|<span class="string">                                                            </span>|
+|<span class="string"> adminPass                            </span>|<span class="string"> wfTZg7pi6G5w                                               </span>|
+|<span class="string"> config_drive                         </span>|<span class="string">                                                            </span>|
+|<span class="string"> created                              </span>|<span class="string"> 2015-05-20T07:15:16Z                                       </span>|
+|<span class="string"> flavor                               </span>|<span class="string"> m1.tiny (1)                                                </span>|
+|<span class="string"> hostId                               </span>|<span class="string">                                                            </span>|
+|<span class="string"> id                                   </span>|<span class="string"> 2b6ce589-b316-42e1-a49c-68ff08d854c3                       </span>|
+|<span class="string"> image                                </span>|<span class="string"> cirros-0.3.3-x86_64 (0eb0e87c-450f-4a68-b4d0-d8f6abf26449) </span>|
+|<span class="string"> key_name                             </span>|<span class="string"> demo-key                                                   </span>|
+|<span class="string"> metadata                             </span>|<span class="string"> {}                                                         </span>|
+|<span class="string"> name                                 </span>|<span class="string"> demo-instance2                                             </span>|
+|<span class="string"> os-extended-volumes:volumes_attached </span>|<span class="string"> []                                                         </span>|
+|<span class="string"> progress                             </span>|<span class="string"> 0                                                          </span>|
+|<span class="string"> security_groups                      </span>|<span class="string"> default                                                    </span>|
+|<span class="string"> status                               </span>|<span class="string"> BUILD                                                      </span>|
+|<span class="string"> tenant_id                            </span>|<span class="string"> 8e03709a24154d9d99f7a3e16a1da53f                           </span>|
+|<span class="string"> updated                              </span>|<span class="string"> 2015-05-20T07:15:16Z                                       </span>|
+|<span class="string"> user_id                              </span>|<span class="string"> 3471b47ae4d942cdb582e4550e028a9b                           </span>|
++--------------------------------------+------------------------------------------------------------+
+</code></pre><ul>
+<li>6），查看实例的状态；</li>
+</ul>
+<pre><code><span class="header">root@controller:~# nova list
++--------------------------------------+----------------+--------+------------+-------------+------------------------+</span>
+<span class="header">| ID                                   | Name           | Status | Task State | Power State | Networks               |
++--------------------------------------+----------------+--------+------------+-------------+------------------------+</span>
+| 82899c7a-b883-454a-887c-c714f73bbe19 | demo-instance1 | ACTIVE | -          | Running     | demo-net=192.168.0.180 |
+<span class="header">| 2b6ce589-b316-42e1-a49c-68ff08d854c3 | demo-instance2 | ACTIVE | -          | Running     | demo-net=192.168.0.179 |
++--------------------------------------+----------------+--------+------------+-------------+------------------------+</span>
+</code></pre><p>为了能够访问vm，我们可以通过网页vnc打开vm的控制台。或者ssh登录上去，这里先使用vnc：<br>请求vnc地址。</p>
+<pre><code><span class="header">root@controller:~#  nova get-vnc-console demo-instance2 novnc
++-------+------------------------------------------------------------------------------------+</span>
+<span class="header">| Type  | Url                                                                                |
++-------+------------------------------------------------------------------------------------+</span>
+<span class="header">| novnc | http://192.168.0.146:6080/vnc_auto.html?token=58fa034e-05b0-408f-b548-a316fc05c4da |
++-------+------------------------------------------------------------------------------------+</span>
+</code></pre><p>然后将地址复制粘贴到浏览器中（这里使用的是chrome）。可以看到vm的控制台：</p>
+<p><img src="http://7xl5dz.com1.z0.glb.clouddn.com/vm1.png" alt="vm1"></p>
+<p>验证demo-net的网络：从vm上测试能否上外网：</p>
+<p><img src="http://7xl5dz.com1.z0.glb.clouddn.com/vm2.png" alt="vm2"></p>
+<p>接着添加安全组：</p>
+<p>1，给default安全组添加规则：<br>    a, 允许ping包；</p>
+<pre><code>$ nova secgroup-add-<span class="keyword">rule</span> default icmp -1 -1 0.0.0.0/0  
+</code></pre><p>这句的含义是在安全组default中添加一条规则，允许来自任何ip任何端口的icmp包</p>
+<pre><code>b，允许ssh访问：
+
+$ nova secgroup-add-<span class="keyword">rule</span> default tcp 22 22 0.0.0.0/0
+</code></pre><p>因为ssh是基于tcp22号端口进行访问的，所以这里进行放行任何ip的tcp22号端口流量。</p>
+<p>2，从控制节点或者任何一个在外网的主机上测试一下挽留过的连通性。</p>
+<p><img src="http://7xl5dz.com1.z0.glb.clouddn.com/vm3.png" alt="vm3"></p>
+<p>因为192.168.0.179这个ip有冲突，还是使用180这个ip做测试。</p>
+<p>3，最后在控制节点上使用ssh访问vm实例。</p>
+<p><img src="http://7xl5dz.com1.z0.glb.clouddn.com/vm4.png" alt="vm4"></p>
+<p>到这里，最基本的vm创建，vm访问外网，网络连通性都已经完成。</p>
+<p>下载qcow2镜像的地址: <a href="http://cloud.centos.org/centos/6/images/" target="_blank" rel="external">http://cloud.centos.org/centos/6/images/</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://www.stackops.info/2015/08/20/OpenStack搭建-实例创建/" data-id="cidjwegqv000ilw7b2cmq45mv" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2015/08/20/OpenStack搭建-dashboar组件/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">OpenStack搭建-dashboar组件</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/AMQP/">AMQP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Cisco/">Cisco</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Etherchannel/">Etherchannel</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Keystone/">Keystone</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NTP/">NTP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/OpenStack/">OpenStack</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RSTP/">RSTP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/compute/">compute</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dashboard/">dashboard</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/glance/">glance</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/">hexo</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/image/">image</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/network/">network</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nova/">nova</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nova-network/">nova-network</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/openstack/">openstack</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/portfast/">portfast</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/submin/">submin</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/svn/">svn</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/switch/">switch</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/AMQP/" style="font-size: 10px;">AMQP</a> <a href="/tags/Cisco/" style="font-size: 10px;">Cisco</a> <a href="/tags/Etherchannel/" style="font-size: 10px;">Etherchannel</a> <a href="/tags/Keystone/" style="font-size: 10px;">Keystone</a> <a href="/tags/NTP/" style="font-size: 10px;">NTP</a> <a href="/tags/OpenStack/" style="font-size: 10px;">OpenStack</a> <a href="/tags/RSTP/" style="font-size: 10px;">RSTP</a> <a href="/tags/compute/" style="font-size: 10px;">compute</a> <a href="/tags/dashboard/" style="font-size: 10px;">dashboard</a> <a href="/tags/glance/" style="font-size: 10px;">glance</a> <a href="/tags/hexo/" style="font-size: 10px;">hexo</a> <a href="/tags/image/" style="font-size: 10px;">image</a> <a href="/tags/network/" style="font-size: 10px;">network</a> <a href="/tags/nova/" style="font-size: 10px;">nova</a> <a href="/tags/nova-network/" style="font-size: 10px;">nova-network</a> <a href="/tags/openstack/" style="font-size: 20px;">openstack</a> <a href="/tags/portfast/" style="font-size: 10px;">portfast</a> <a href="/tags/submin/" style="font-size: 10px;">submin</a> <a href="/tags/svn/" style="font-size: 10px;">svn</a> <a href="/tags/switch/" style="font-size: 10px;">switch</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">13</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recents</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2015/08/20/OpenStack搭建-实例创建/">OpenStack搭建-实例创建</a>
+          </li>
+        
+          <li>
+            <a href="/2015/08/20/OpenStack搭建-dashboar组件/">OpenStack搭建-dashboar组件</a>
+          </li>
+        
+          <li>
+            <a href="/2015/08/20/OpenStackd搭建-网络组件/">OpenStackd搭建-网络组件</a>
+          </li>
+        
+          <li>
+            <a href="/2015/08/20/OpenStack搭建-nova组件/">OpenStack搭建-nova组件</a>
+          </li>
+        
+          <li>
+            <a href="/2015/08/19/OpenStack搭建-Glance组件/">OpenStack搭建-Glance组件</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2015 liyahua<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css" type="text/css">
+  <script src="/fancybox/jquery.fancybox.pack.js" type="text/javascript"></script>
+
+
+<script src="/js/script.js" type="text/javascript"></script>
+
+  </div>
+</body>
+</html>
