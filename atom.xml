@@ -5,7 +5,7 @@
   <subtitle><![CDATA[Follow your heart]]></subtitle>
   <link href="/atom.xml" rel="self"/>
   <link href="http://www.stackops.info//"/>
-  <updated>2015-08-20T04:40:16.907Z</updated>
+  <updated>2015-08-20T06:24:37.575Z</updated>
   <id>http://www.stackops.info//</id>
   
   <author>
@@ -14,6 +14,172 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title><![CDATA[OpenStackd搭建-网络组件]]></title>
+    <link href="http://www.stackops.info/2015/08/20/OpenStackd%E6%90%AD%E5%BB%BA-%E7%BD%91%E7%BB%9C%E7%BB%84%E4%BB%B6/"/>
+    <id>http://www.stackops.info/2015/08/20/OpenStackd搭建-网络组件/</id>
+    <published>2015-08-20T05:16:10.000Z</published>
+    <updated>2015-08-20T06:24:37.575Z</updated>
+    <content type="html"><![CDATA[<p>显示全文：</p>
+<a id="more"></a>
+<h3 id="添加网络组件：">添加网络组件：</h3><p>openstack网络架构（nova-network/neutron）</p>
+<p>openstack网络体系中，网络技术没有创新，但用到的技术点非常庞杂，包括bridge、vlan、gre、vxlan、ovs、openflow、sdn、iptables等，当然这里不会做具体技术介绍，概述技术，主要将其与openstack的结合点做详细分析。</p>
+<p>nova-network网络架构:<br>    <img src="http://7xl5dz.com1.z0.glb.clouddn.com/flatdhcp.png" alt="nova-network"></p>
+<p>在nova-network中，其网络模型包括flat、 flatdhcp、vlan，用到的技术主要有bridge、vlan，<br>我这里采用的是flatdhcp。 这种模式，能够自动给vm分发ip地址，能够实现vm访问外网。结构简单，但是稳定性比较好。</p>
+<p>优点：结构简单，稳定</p>
+<p>缺点：所有租户都在一个水平面上，租户之间没有隔离，由于所有租户都在一个子网内，当大规模部署后，其广播风暴将会是不小的负面因素。因为只是先做个测试，还没有考虑这么多。</p>
+<p>相比于neutron网络，虽说没有neutron那么多的功能插件，仅有bridge，但是其稳定性已得到大多数用户的验证，对于小规模的私有云(1千台虚机的规模)，nova-network是可以考虑的，目前线上部署的环境也是nova-network。</p>
+<p>简单的介绍一下neutron：</p>
+<p>neutron网络架构:<br>    <img src="http://7xl5dz.com1.z0.glb.clouddn.com/neutron.jpg" alt="neutron"></p>
+<p>neutron网络体系相比于nova-network要复杂的多，用到的技术点也非常庞杂，在介绍网络架构之前，有必要概述下gre、vxlan、ovs、openflow、sdn技术点。<br> 上面阐述过，vlan技术存在vlan id个数限制4094，公有云租户肯定不止4094，二层技术，只能部署在一个局域网内，无法实现跨机房部署。为了突破这俩个限制，增加了gre和vxlan隧道技术.</p>
+<p>OpenStack 网络<br>openstack网络允许创建和附加第三方网络插件，插件可以实现适应不同的网络设备和软件,使用的openstack部署和架构更加的灵活。</p>
+<p>neutron-server: 接受api请求，并选择适当的网络插件做出响应</p>
+<p>openstack网络插件和代理创建和删除端口，创建网络和子网和提供ip地址。这些插件与代理不同，取决于使用的特定的云供应商和技术。openstack网络插件和代理，是由思科的虚拟、物理switches、 NEC OpenFlow products, Open vSwitch, Linux bridging, Ryu Network Operating System, and the VMware NSX product.<br>通用代理 L3 (layer 3), DHCP (dynamic host IP addressing), 和 一个 plug-in agent.</p>
+<p>消息队列大多数用于在 neutron-server于多种客户端之间传递信息，也作为一个数据库存储网络插件的状态。openstack网络与openstack计算提供的实例连接相互作用。</p>
+<h3 id="网络概念">网络概念</h3><p>openstack neutron在openstack环境中，管理所有虚拟网络及访问物理网络结构接入层方面（PNI）</p>
+<p>openstack neutron能使网络租户创建网络拓扑，包括服务例如 firewalls, load balancers, and virtual private networks (VPNs).</p>
+<p>openstack网络包括networks，子网，和路由对象的抽象，每个抽象路由功能模仿物理理由：网络包括子网，路由器连接不同子网及网络之间</p>
+<p>   每个路由器连接到网络，和网卡连接到子网。子网可以访问连接到相同路由的机器的其它子网<br>任何的设置，至少有一个外网。不像其他网络，这个外网不止是虚拟的定义网络，相反它可以通过外部网络访问openstack。对于openstack的外部网卡，外部的物理网络都是可以访问的，在这个网络中，dhcp是被禁用的。<br>    除了外部网络，任何网络都有一个或多个内部网络，这些软件定义的网络直接连接到虚拟机。在任何给定网络的虚拟机，或则在子网中连接相同的路由，可以直接访问VMs 连接的网络。</p>
+<p>   对于外部网络访问实例，实例访问外部网络，路由在网络之间是必须的。每个路由器连接到网络和网卡连接到子网，像物理路由器，子网访问其它子网的机器需要连接相同的路由，实例能访问外部网络通过路由。</p>
+<p>   此外，可以分配外网ip地址，对于内部网络的接口。凡是连接子网的，统称为接口。你可以给连接虚拟机端口分配ip地址。这样外部网络实体可以访问虚拟机。<br>openstack网络也支持安全组，管理员能够自定防火墙规则在安全组中，一个实例可以属于一个或多个安全组实例，网络在安全组中设置的规则，阻止或则允许端口、端口的范围或则虚拟机流量类型。</p>
+<p>   每个插件,网络的使用都有自己的概念。而操作虚拟网络结构和openstack环境不是至关重要的，理解这些概念帮助你创建网络。所有的网络设备使用一个核心插件和安全组插件。此外 Firewall-as-a-Service (FWaaS) 和 Load-Balancer-as-a-Service (LBaaS) plug-ins 插件都是可以利用的</p>
+<h3 id="下面进行网络组件的安装：">下面进行网络组件的安装：</h3><h4 id="1，在控制节点上配置legacy_network；控制节点上需要修改的东西很少，只需要将网络模式改为nova-network就好了。">1，在控制节点上配置legacy  network；控制节点上需要修改的东西很少，只需要将网络模式改为nova-network就好了。</h4><ul>
+<li>1），修改配置文件：/etc/nova/nova.conf</li>
+</ul>
+<pre><code>[DEFAULT]
+...
+network_api_class = nova<span class="class">.network</span><span class="class">.api</span><span class="class">.API</span>
+security_group_api = nova
+选择nova-network这种网络模式。
+</code></pre><ul>
+<li>2），重启compute服务。</li>
+</ul>
+<pre><code><span class="preprocessor"># service nova-api restart</span>
+<span class="preprocessor"># service nova-scheduler restart</span>
+<span class="preprocessor"># service nova-conductor restart</span>
+</code></pre><h4 id="2，配置compute节点：（可以配置多个计算节点，我这里仅配置了一个）。">2，配置compute节点：（可以配置多个计算节点，我这里仅配置了一个）。</h4><ul>
+<li>1），安装legacy networking的组件：</li>
+</ul>
+<h1 id="apt-get_install_nova-network_nova-api-metadata">apt-get install nova-network nova-api-metadata</h1><ul>
+<li>2），修改/etc/nova/nova.conf的配置文件。</li>
+</ul>
+<pre><code>[DEFAULT]
+...
+<span class="constant">network_api_class</span> = nova.network.api.API
+<span class="constant">security_group_api</span> = nova
+<span class="constant">firewall_driver</span> = nova.virt.libvirt.firewall.IptablesFirewallDriver
+<span class="constant">network_manager</span> = nova.network.manager.FlatDHCPManager
+<span class="constant">network_size</span> = 254
+<span class="constant">allow_same_net_traffic</span> = False
+<span class="constant">multi_host</span> = True
+<span class="constant">send_arp_for_ha</span> = True
+<span class="constant">share_dhcp_address</span> = True
+<span class="constant">force_dhcp_release</span> = True
+<span class="constant">flat_network_bridge</span> = br100
+<span class="constant">flat_interface</span> = INTERFACE_NAME
+<span class="constant">public_interface</span> = INTERFACE_NAME
+</code></pre><p><strong>注释</strong>：flat_interface 是eth1，管理接口<br>public_interface是eth0，访问外网的接口。(网络这方面根据实际情况而定，例如服务器两个接口都是连接的内网，其中eth0连接的内网可以通过nat实现上网，而eth1不能，并且你划定的flatdhcp地址池就是eth0所在的网段，那么你的flat_interface和public_interface都应该是eth0，我们做决定的时候一定要切合实际情况来决定)。</p>
+<ul>
+<li><p>3），重启服务：</p>
+<h1 id="service_nova-network_restart">service nova-network restart</h1><h1 id="service_nova-api-metadata_restart">service nova-api-metadata restart</h1></li>
+</ul>
+<h3 id="创建实例化网络：（在控制节点上）。">创建实例化网络：（在控制节点上）。</h3><p>1），设置环境变量：</p>
+<pre><code>$ <span class="keyword">source</span> admin-openrc.<span class="keyword">sh</span>
+</code></pre><p>2），创建网络：</p>
+<pre><code>$ nova network-create demo-net --bridge br100 --multi-host T \
+--fixed-range-v4 NETWORK<span class="emphasis">_CIDR
+
+</span>例如： nova network-create demo-net --bridge br100 --multi-host T   --fixed-range-v4 192.168.0.176/28
+
+可以使用命令查看
+
+<span class="header">root@controller:~# nova net-list
++--------------------------------------+---------+-----------------+</span>
+<span class="header">| ID                                   | Label   | CIDR            |
++--------------------------------------+---------+-----------------+</span>
+<span class="header">| 6aecec82-5d87-4b77-8fb8-0d7dd687e091 | lan-net | 192.168.3.32/27 |
++--------------------------------------+---------+-----------------+</span>
+</code></pre><p>问题：<br>    注意这里需要根据你选择的网络模式修改配置文件。选择network_api_class<br>。并且重启所有nova服务。特别要注意nova的服务是否正常开启。如果报错：ERROR (ClientException): The server has either erred or is incapable of performing the requested operation. (HTTP 500) (Request-ID: req-f2c74d47-6f4a-467b-9f5c-c1f2261e6696)<br>则是因为nova.conf文件内容有错，或者是服务有的没有开启，可以使用nova service-list 来查看，并且可以通过同步nova到数据库中来查看nova.conf 文件是否有错。</p>
+<p>到这里为止，目前的openstack环境已经包含了创建一个基本实例所要用到的所有组件，可以创建一个instance（即vm）来测试，也可以继续添加其他模块。我又接着添加了dashboard即horizon提供可视化界面来管理创建实例。<br>同时我还修改了/etc/sysctl.conf这个配置文件，实现地址转发。（不知道有没有这个必要，待验证）。</p>
+<pre><code><span class="number">1</span>. Edit the /etc/sysctl.<span class="keyword">conf</span> <span class="keyword">file</span> <span class="keyword">to</span> contain the following parameter<span class="variable">s:</span>
+net.ipv4.ip_forward=<span class="number">1</span>
+net.ipv4.<span class="keyword">conf</span>.<span class="keyword">all</span>.rp_filter=<span class="number">0</span>
+net.ipv4.<span class="keyword">conf</span>.default.rp_filter=<span class="number">0</span>
+
+<span class="number">2</span>. Implement the <span class="keyword">change</span><span class="variable">s:</span>
+# sysctl -<span class="keyword">p</span>
+</code></pre><h2 id="验证网络服务：">验证网络服务：</h2><p>当我们创建完最基本的网络服务之后，一定要检查以下几项内容：</p>
+<p>首先，确保产生一个桥接接口br100,所有使用openstack创建的vm都会通过这个br100作为桥接接口，作为通往internet的出口。<br>可以看到br100的ip地址是我们所分配ip地址段的网关，当我们使用openstack创建一个实例的时候，实例的默认网关就会指向br100.</p>
+<pre><code>root@compute1:~<span class="preprocessor"># ifconfig </span>
+br100     Link encap:Ethernet  HWaddr c8:<span class="number">1f</span>:<span class="number">66</span>:bc:<span class="number">73</span>:c2  
+          inet addr:<span class="number">192.168</span><span class="number">.3</span><span class="number">.33</span>  Bcast:<span class="number">192.168</span><span class="number">.3</span><span class="number">.63</span>  Mask:<span class="number">255.255</span><span class="number">.255</span><span class="number">.224</span>
+          inet6 addr: fe80::<span class="number">984</span>c:dfff:fe9d:<span class="number">6575</span>/<span class="number">64</span> Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:<span class="number">1500</span>  Metric:<span class="number">1</span>
+          RX packets:<span class="number">2233483</span> errors:<span class="number">0</span> dropped:<span class="number">25</span> overruns:<span class="number">0</span> frame:<span class="number">0</span>
+          TX packets:<span class="number">1272014</span> errors:<span class="number">0</span> dropped:<span class="number">0</span> overruns:<span class="number">0</span> carrier:<span class="number">0</span>
+          collisions:<span class="number">0</span> txqueuelen:<span class="number">0</span> 
+          RX bytes:<span class="number">518104430</span> (<span class="number">518.1</span> MB)  TX bytes:<span class="number">481296191</span> (<span class="number">481.2</span> MB)
+</code></pre><p>其次，必须保证br100是桥接在你物理网卡的flat_interface上，例如我线上flat_interface和public_interface都是em1.<br>可以通过brctl这条命令查看：</p>
+<pre><code>root<span class="property">@compute1</span>:~<span class="comment"># brctl show</span>
+bridge name     bridge id               STP enabled     interfaces
+br100           <span class="number">8000.</span>c81f66bc73c2       <span class="literal">no</span>              em1
+                                                        vnet0
+                                                        vnet1
+                                                        vnet2
+                                                        vnet3
+                                                        vnet4
+                                                        vnet5
+                                                        vnet6
+                                                        vnet7
+                                                        vnet8
+virbr0          <span class="number">8000.000000000000</span>       <span class="literal">yes</span>
+</code></pre><p>然后，查看当前路由的默认网关，必须是你能够访问外网的网关，并且出口肯定是br100，不然一定会出错。</p>
+<pre><code>root@compute1:~<span class="preprocessor"># route</span>
+Kernel IP routing table
+Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
+<span class="keyword">default</span>         <span class="number">192.168</span><span class="number">.3</span><span class="number">.254</span>   <span class="number">0.0</span><span class="number">.0</span><span class="number">.0</span>         UG    <span class="number">0</span>      <span class="number">0</span>        <span class="number">0</span> br100
+<span class="number">10.0</span><span class="number">.0</span><span class="number">.0</span>        *               <span class="number">255.255</span><span class="number">.255</span><span class="number">.0</span>   U     <span class="number">0</span>      <span class="number">0</span>        <span class="number">0</span> em2
+<span class="number">192.168</span><span class="number">.3</span><span class="number">.0</span>     *               <span class="number">255.255</span><span class="number">.255</span><span class="number">.0</span>   U     <span class="number">0</span>      <span class="number">0</span>        <span class="number">0</span> br100
+<span class="number">192.168</span><span class="number">.3</span><span class="number">.32</span>    *               <span class="number">255.255</span><span class="number">.255</span><span class="number">.224</span> U     <span class="number">0</span>      <span class="number">0</span>        <span class="number">0</span> br100
+<span class="number">192.168</span><span class="number">.122</span><span class="number">.0</span>   *               <span class="number">255.255</span><span class="number">.255</span><span class="number">.0</span>   U     <span class="number">0</span>      <span class="number">0</span>        <span class="number">0</span> virbr0
+</code></pre><p>最后，查看一下dnsmasq服务是否正常启动。</p>
+<pre><code>root@compute1:~<span class="preprocessor"># ps aux | grep dnsmasq</span>
+libvirt+  <span class="number">1842</span>  <span class="number">0.0</span>  <span class="number">0.0</span>  <span class="number">28212</span>  <span class="number">2312</span> ?        S    Jul18   <span class="number">0</span>:<span class="number">00</span> /usr/sbin/dnsmasq --conf-file=/var/lib/libvirt/dnsmasq/<span class="keyword">default</span>.conf
+nobody    <span class="number">1855</span>  <span class="number">0.0</span>  <span class="number">0.0</span>  <span class="number">28208</span>  <span class="number">2488</span> ?        S    Jul18   <span class="number">0</span>:<span class="number">01</span> /usr/sbin/dnsmasq --strict-order --bind-interfaces --conf-file= --pid-file=/var/lib
+/nova/networks/nova-br100.pid --dhcp-optsfile=/var/lib/nova/networks/nova-br100.opts --listen-address=<span class="number">192.168</span><span class="number">.3</span><span class="number">.33</span> --except-interface=lo --dhcp-range=<span class="built_in">set</span>:lan-net,<span class="number">192.168</span><span class="number">.3</span><span class="number">.34</span>,<span class="keyword">static</span>,<span class="number">255.255</span><span class="number">.255</span><span class="number">.224</span>,<span class="number">86400</span>s --dhcp-lease-max=<span class="number">32</span> --dhcp-hostsfile=/var/lib/nova/networks/nova-br100.conf --dhcp-script=/usr/local/bin/nova-dhcpbridge --no-hosts --leasefile-ro --domain=novalocal --addn-hosts=/var/lib/nova/networks/nova-br100.hostsroot      <span class="number">1856</span>  <span class="number">0.0</span>  <span class="number">0.0</span>  <span class="number">28208</span>  <span class="number">1888</span> ?        S    Jul18   <span class="number">0</span>:<span class="number">00</span> /usr/sbin/dnsmasq --strict-order --bind-interfaces --conf-file= --pid-file=/var/lib
+/nova/networks/nova-br100.pid --dhcp-optsfile=/var/lib/nova/networks/nova-br100.opts --listen-address=<span class="number">192.168</span><span class="number">.3</span><span class="number">.33</span> --except-interface=lo --dhcp-range=<span class="built_in">set</span>:lan-net,<span class="number">192.168</span><span class="number">.3</span><span class="number">.34</span>,<span class="keyword">static</span>,<span class="number">255.255</span><span class="number">.255</span><span class="number">.224</span>,<span class="number">86400</span>s --dhcp-lease-max=<span class="number">32</span> --dhcp-hostsfile=/var/lib/nova/networks/nova-br100.conf --dhcp-script=/usr/local/bin/nova-dhcpbridge --no-hosts --leasefile-ro --domain=novalocal --addn-hosts=/var/lib/nova/networks/nova-br100.hostsroot      <span class="number">1976</span>  <span class="number">0.0</span>  <span class="number">0.0</span>  <span class="number">10468</span>  <span class="number">2264</span> pts/<span class="number">18</span>   S+   <span class="number">14</span>:<span class="number">07</span>   <span class="number">0</span>:<span class="number">00</span> grep --color=<span class="keyword">auto</span> dnsmasq
+</code></pre><p>可以看到监听的网段，详细的dhcp信息。之前有把openstack进行过整体迁移，例如网络从192.168.0.0/24迁移到192.168.3.0/24网段。迁移完后发现dnsmasq监听的地址还是在192.168.0.0这个网段，dhcp获得地址也都不正确。解决方法是：重启dnsmasq服务。</p>
+<pre><code>等一切服务安装完成之后，compute节点上每创建一个实例，就会生成一个vnet接口，
+
+vnet0     Link encap:Ethernet  HWaddr fe:<span class="number">16</span>:<span class="number">3</span>e:ae:c7:<span class="number">70</span>  
+          inet6 addr: fe80::fc16:<span class="number">3</span>eff:feae:c770/<span class="number">64</span> Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:<span class="number">1500</span>  Metric:<span class="number">1</span>
+          RX packets:<span class="number">280562</span> errors:<span class="number">0</span> dropped:<span class="number">0</span> overruns:<span class="number">0</span> frame:<span class="number">0</span>
+          TX packets:<span class="number">1535062</span> errors:<span class="number">0</span> dropped:<span class="number">0</span> overruns:<span class="number">0</span> carrier:<span class="number">0</span>
+          collisions:<span class="number">0</span> txqueuelen:<span class="number">500</span> 
+          RX bytes:<span class="number">57656002</span> (<span class="number">57.6</span> MB)  TX bytes:<span class="number">660459406</span> (<span class="number">660.4</span> MB)
+
+vnet1     Link encap:Ethernet  HWaddr fe:<span class="number">16</span>:<span class="number">3</span>e:<span class="number">03</span>:<span class="number">11</span>:<span class="number">29</span>  
+          inet6 addr: fe80::fc16:<span class="number">3</span>eff:fe03:<span class="number">1129</span>/<span class="number">64</span> Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:<span class="number">1500</span>  Metric:<span class="number">1</span>
+          RX packets:<span class="number">107176</span> errors:<span class="number">0</span> dropped:<span class="number">0</span> overruns:<span class="number">0</span> frame:<span class="number">0</span>
+          TX packets:<span class="number">700957</span> errors:<span class="number">0</span> dropped:<span class="number">0</span> overruns:<span class="number">0</span> carrier:<span class="number">0</span>
+          collisions:<span class="number">0</span> txqueuelen:<span class="number">500</span> 
+          RX bytes:<span class="number">22395464</span> (<span class="number">22.3</span> MB)  TX bytes:<span class="number">256144937</span> (<span class="number">256.1</span> MB)
+</code></pre>]]></content>
+    <summary type="html">
+    <![CDATA[<p>显示全文：</p>]]>
+    
+    </summary>
+    
+      <category term="network" scheme="http://www.stackops.info/tags/network/"/>
+    
+      <category term="nova-network" scheme="http://www.stackops.info/tags/nova-network/"/>
+    
+      <category term="openstack" scheme="http://www.stackops.info/tags/openstack/"/>
+    
+  </entry>
   
   <entry>
     <title><![CDATA[OpenStack搭建-nova组件]]></title>
@@ -1348,7 +1514,7 @@ Include /<span class="keyword">var</span>/lib/submin/conf/apache-svn.conf
 
 <span class="tag">&lt;/IfModule&gt;</span>
 <span class="tag">&lt;/VirtualHost&gt;</span>
-</code></pre><p>当通过浏览器访问web管理界面的时候：<a href="http://192.168.3.48/submin会提示你输入账户和密码，这时候你可以点击页面上的" target="_blank" rel="external">http://192.168.3.48/submin会提示你输入账户和密码，这时候你可以点击页面上的</a>  Forgot your  password , 然后会主动发一封邮件给root用户：<br>可以通过命令：# cat /var/spool/mail/root 查看发过来的重置密码的连接，我们可以通过该链接进行密码的修改：<br>    From: root@localhost.novalocal<br>    To: liyahua@xxx.com<br>    Subject: Submin password reset request<br>    Message-Id: <a href="&#x6d;&#97;&#105;&#108;&#116;&#x6f;&#58;&#x32;&#48;&#x31;&#53;&#x30;&#x38;&#x31;&#51;&#48;&#54;&#50;&#x37;&#x35;&#x35;&#x2e;&#66;&#54;&#x38;&#54;&#70;&#x36;&#49;&#70;&#55;&#68;&#x40;&#x73;&#118;&#110;&#x61;&#100;&#x6d;&#105;&#x6e;&#x2e;&#x6e;&#111;&#x76;&#x61;&#x6c;&#x6f;&#x63;&#x61;&#x6c;">&#x32;&#48;&#x31;&#53;&#x30;&#x38;&#x31;&#51;&#48;&#54;&#50;&#x37;&#x35;&#x35;&#x2e;&#66;&#54;&#x38;&#54;&#70;&#x36;&#49;&#70;&#55;&#68;&#x40;&#x73;&#118;&#110;&#x61;&#100;&#x6d;&#105;&#x6e;&#x2e;&#x6e;&#111;&#x76;&#x61;&#x6c;&#x6f;&#x63;&#x61;&#x6c;</a><br>    Date: Thu, 13 Aug 2015 06:27:55 +0000 (UTC)</p>
+</code></pre><p>当通过浏览器访问web管理界面的时候：<a href="http://192.168.3.48/submin会提示你输入账户和密码，这时候你可以点击页面上的" target="_blank" rel="external">http://192.168.3.48/submin会提示你输入账户和密码，这时候你可以点击页面上的</a>  Forgot your  password , 然后会主动发一封邮件给root用户：<br>可以通过命令：# cat /var/spool/mail/root 查看发过来的重置密码的连接，我们可以通过该链接进行密码的修改：<br>    From: root@localhost.novalocal<br>    To: liyahua@xxx.com<br>    Subject: Submin password reset request<br>    Message-Id: <a href="&#x6d;&#97;&#105;&#108;&#116;&#111;&#58;&#x32;&#x30;&#x31;&#53;&#48;&#x38;&#x31;&#51;&#x30;&#x36;&#50;&#x37;&#53;&#x35;&#x2e;&#x42;&#54;&#x38;&#x36;&#70;&#x36;&#49;&#x46;&#x37;&#x44;&#64;&#115;&#x76;&#110;&#x61;&#100;&#x6d;&#x69;&#110;&#x2e;&#x6e;&#111;&#118;&#97;&#x6c;&#111;&#x63;&#x61;&#108;">&#x32;&#x30;&#x31;&#53;&#48;&#x38;&#x31;&#51;&#x30;&#x36;&#50;&#x37;&#53;&#x35;&#x2e;&#x42;&#54;&#x38;&#x36;&#70;&#x36;&#49;&#x46;&#x37;&#x44;&#64;&#115;&#x76;&#110;&#x61;&#100;&#x6d;&#x69;&#110;&#x2e;&#x6e;&#111;&#118;&#97;&#x6c;&#111;&#x63;&#x61;&#108;</a><br>    Date: Thu, 13 Aug 2015 06:27:55 +0000 (UTC)</p>
 <pre><code>You <span class="keyword">are</span> receiving this email because someone requested a password reset for
 your account. If you don't know what this <span class="keyword">is</span> about, you can safely ignore it,
 the reset request will expire automatically.
