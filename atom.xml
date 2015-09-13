@@ -5,7 +5,7 @@
   <subtitle><![CDATA[Follow your heart]]></subtitle>
   <link href="/atom.xml" rel="self"/>
   <link href="http://www.stackops.info//"/>
-  <updated>2015-08-20T07:38:12.686Z</updated>
+  <updated>2015-09-13T04:16:00.824Z</updated>
   <id>http://www.stackops.info//</id>
   
   <author>
@@ -14,6 +14,319 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title><![CDATA[Linux内核升级]]></title>
+    <link href="http://www.stackops.info/2015/09/13/Linux%E5%86%85%E6%A0%B8%E5%8D%87%E7%BA%A7/"/>
+    <id>http://www.stackops.info/2015/09/13/Linux内核升级/</id>
+    <published>2015-09-13T02:01:52.000Z</published>
+    <updated>2015-09-13T04:16:00.824Z</updated>
+    <content type="html"><![CDATA[<p>显示全文：<br><a id="more"></a></p>
+<h2 id="Linux内核的简介：">Linux内核的简介：</h2><p>linux操作系统是一个用来和硬件打交道同时为用户程序提供一个有限服务集的低级支撑软件。内核提供了底层硬件的驱动，以及提供各种系统所需的核心功能，包括防火墙机制，是否支持LVM或Quota等文件系统等。</p>
+<h2 id="为什么要进行linux内核的升级？">为什么要进行linux内核的升级？</h2><p>大部分情况下，我们可以不对内核进行太大改变，直接使用现有的内核，因为它已经可以提供给我们基本的功能，但现在的硬件升级速度太快了，如果核心太老，而机器又换了新的硬件，那么这个核心肯定是无法支持，当然我们也可以将新硬件的驱动做成模块化安装，现实情况也是这么做的。但我们不可能把内核所有支持的功能都编译进内核来支持所有硬件运行工作。我们可以通过编译内核，针对linux的用途加载不同的功能，让linux跑的更稳定，更流畅，这也是我们要编译核心的最主要原因。</p>
+<h3 id="内核的两个模块：">内核的两个模块：</h3><pre><code>核心  ：<span class="regexp">/boot/</span>vmlinuz-version
+内核模块: <span class="regexp">/lib/m</span>odules<span class="regexp">/version/</span>
+</code></pre><h3 id="内核设计的两种风格：">内核设计的两种风格：</h3><pre><code>单内核：linux（采用微内核的设计思想，引用模块化设计）。
+
+微内核：在微内核中，大部分内核都作为单独的进程在特权状态下运行，他们通过消息传递进行通讯。
+</code></pre><h5 id="linux下装载模块的命令：">linux下装载模块的命令：</h5><pre><code><span class="title">insmod</span>
+modprobe
+</code></pre><h5 id="linux下查看当前系统的内核版本">linux下查看当前系统的内核版本</h5><pre><code><span class="attr_selector">[root@www boot]</span># <span class="tag">uname</span> <span class="tag">-r</span>
+2<span class="class">.6</span><span class="class">.32-431</span><span class="class">.el6</span><span class="class">.x86_64</span>
+主 次 修正  次修正号
+</code></pre><p>次版本号为偶数表示稳定版，<br>修正：修正bug<br>次修正：添加新特性。</p>
+<p>用户空间的访问，监控内核的方式：<br>/proc, /sys<br>伪文件系统。（是内核参数）<br>/proc/sys：此目录中的文件很多是可读写的。修改文件内容来修改内核运行特性。<br>例如：</p>
+<pre><code>[root@localhost vm]<span class="preprocessor"># pwd</span>
+/proc/sys/vm
+[root@localhost vm]<span class="preprocessor"># ls -l</span>
+total <span class="number">0</span>
+-rw-r--r-- <span class="number">1</span> root root <span class="number">0</span> Sep <span class="number">13</span> <span class="number">12</span>:<span class="number">08</span> block_dump
+--w------- <span class="number">1</span> root root <span class="number">0</span> Sep <span class="number">13</span> <span class="number">12</span>:<span class="number">08</span> compact_memory
+-rw-r--r-- <span class="number">1</span> root root <span class="number">0</span> Sep <span class="number">13</span> <span class="number">12</span>:<span class="number">08</span> dirty_background_bytes
+-rw-r--r-- <span class="number">1</span> root root <span class="number">0</span> Sep <span class="number">13</span> <span class="number">12</span>:<span class="number">08</span> dirty_background_ratio
+-rw-r--r-- <span class="number">1</span> root root <span class="number">0</span> Sep <span class="number">13</span> <span class="number">12</span>:<span class="number">08</span> dirty_bytes
+-rw-r--r-- <span class="number">1</span> root root <span class="number">0</span> Sep <span class="number">13</span> <span class="number">12</span>:<span class="number">08</span> dirty_expire_centisecs
+-rw-r--r-- <span class="number">1</span> root root <span class="number">0</span> Sep <span class="number">13</span> <span class="number">12</span>:<span class="number">08</span> dirty_ratio
+-rw-r--r-- <span class="number">1</span> root root <span class="number">0</span> Sep <span class="number">13</span> <span class="number">12</span>:<span class="number">08</span> dirty_writeback_centisecs
+-rw-r--r-- <span class="number">1</span> root root <span class="number">0</span> Sep <span class="number">13</span> <span class="number">12</span>:<span class="number">08</span> drop_caches
+-rw-r--r-- <span class="number">1</span> root root <span class="number">0</span> Sep <span class="number">13</span> <span class="number">12</span>:<span class="number">08</span> extfrag_threshold
+-rw-r--r-- <span class="number">1</span> root root <span class="number">0</span> Sep <span class="number">13</span> <span class="number">12</span>:<span class="number">08</span> hugepages_treat_as_movable
+-rw-r--r-- <span class="number">1</span> root root <span class="number">0</span> Sep <span class="number">13</span> <span class="number">12</span>:<span class="number">08</span> hugetlb_shm_group
+-rw-r--r-- <span class="number">1</span> root root <span class="number">0</span> Sep <span class="number">13</span> <span class="number">12</span>:<span class="number">08</span> laptop_mode
+-rw-r--r-- <span class="number">1</span> root root <span class="number">0</span> Sep <span class="number">13</span> <span class="number">12</span>:<span class="number">08</span> legacy_va_layout
+-rw-r--r-- <span class="number">1</span> root root <span class="number">0</span> Sep <span class="number">13</span> <span class="number">12</span>:<span class="number">08</span> lowmem_reserve_ratio
+-rw-r--r-- <span class="number">1</span> root root <span class="number">0</span> Sep <span class="number">13</span> <span class="number">12</span>:<span class="number">08</span> max_map_count
+-rw-r--r-- <span class="number">1</span> root root <span class="number">0</span> Sep <span class="number">13</span> <span class="number">12</span>:<span class="number">08</span> memory_failure_early_kill
+-rw-r--r-- <span class="number">1</span> root root <span class="number">0</span> Sep <span class="number">13</span> <span class="number">12</span>:<span class="number">08</span> memory_failure_recovery
+-rw-r--r-- <span class="number">1</span> root root <span class="number">0</span> Sep <span class="number">13</span> <span class="number">12</span>:<span class="number">08</span> min_free_kbytes
+-rw-r--r-- <span class="number">1</span> root root <span class="number">0</span> Sep <span class="number">13</span> <span class="number">12</span>:<span class="number">08</span> min_slab_ratio
+-rw-r--r-- <span class="number">1</span> root root <span class="number">0</span> Sep <span class="number">13</span> <span class="number">12</span>:<span class="number">08</span> min_unmapped_ratio
+</code></pre><p>这些都是内核参数，作为管理员，可以进行内核参数的修改。<br>/sys/某些文件可写。<br>例如：通过修改内核参数/proc/sys/vm/drop_caches为，可以清空buffer。</p>
+<p><img src="http://7xl5dz.com1.z0.glb.clouddn.com/drop_caches.png" alt="drop_cache"></p>
+<p><strong>注意</strong>：<br>    设定内核参数值的方法不能用vim而用echo重定向：</p>
+<pre><code>#echo   VALUE  &gt;  <span class="regexp">/proc /</span>sys<span class="regexp">/TO/</span>SOMEFILE
+</code></pre><p>例如: 我们想修改hostname主机名</p>
+<h4 id="方法一：直接用echo修改内核的参数。">方法一：直接用echo修改内核的参数。</h4><pre><code>[root@localhost kernel]<span class="comment"># pwd</span>
+/<span class="keyword">proc</span>/sys/kernel
+[root@localhost kernel]<span class="comment"># cat hostname </span>
+localhost.localdomain
+[root@localhost kernel]<span class="comment"># hostname </span>
+localhost.localdomain
+[root@localhost kernel]<span class="comment"># echo leo &gt; hostname</span>
+[root@localhost kernel]<span class="comment"># hostname</span>
+leo
+</code></pre><h4 id="方法二：使用sysctl控制">方法二：使用sysctl控制</h4><pre><code><span class="comment">#sysctl   -w  kernel.hostname="localhost.localdomain"</span>
+
+使用<span class="string">"."</span>指定路径。文件必须是在/<span class="keyword">proc</span>/sys目录下的子目录里。
+[root@localhost kernel]<span class="comment"># hostname </span>
+leo
+[root@localhost kernel]<span class="comment"># sysctl -w kernel.hostname=localhost.localdomain</span>
+kernel.hostname = localhost.localdomain
+[root@localhost kernel]<span class="comment"># hostname</span>
+localhost.localdomain
+</code></pre><p><strong>但是这两种方法都是立即生效的，但是不能永久生效</strong>。</p>
+<p>想永久生效的话：唯一的办法是修改<strong>/etc/sysctl.conf</strong>（但不能立即生效）内核参数根据/etc/sysctl.conf这个文件设置内核参数的值。<br>写法：</p>
+<pre><code><span class="title">sysctl</span>   -w  kernel.hostname=<span class="string">"localhost.localdomain"</span>
+</code></pre><p>例如：<br>两块网卡，是否允许在两块网卡之间传递包。</p>
+<pre><code>[root<span class="constant">@localhost</span> ~]<span class="preprocessor"># cat /proc/sys/net/ipv4/ip_forward </span>
+<span class="number">0</span> 
+</code></pre><p>1代表传递，0代表不传递。</p>
+<p>通过修改/etc/sysctl.conf 这个文件，将0改为1，即可永久生效，但是不会立即生效、</p>
+<pre><code>[root@localhost ~]<span class="preprocessor"># head /etc/sysctl.conf </span>
+<span class="preprocessor"># Kernel sysctl configuration file for Red Hat Linux</span>
+<span class="preprocessor">#</span>
+<span class="preprocessor"># For binary values, <span class="number">0</span> is disabled, <span class="number">1</span> is enabled.  See sysctl(<span class="number">8</span>) and</span>
+<span class="preprocessor"># sysctl.conf(<span class="number">5</span>) for more details.</span>
+
+<span class="preprocessor"># Controls IP packet forwarding</span>
+net.ipv4.ip_forward = <span class="number">1</span>
+
+<span class="preprocessor"># Controls source route verification</span>
+net.ipv4.conf.<span class="keyword">default</span>.rp_filter = <span class="number">1</span>
+</code></pre><p>或者，我们可以通过命令</p>
+<pre><code><span class="id">#sysctl</span>  -<span class="tag">p</span>  
+</code></pre><p>让内核重读这个文件，实现立即生效。</p>
+<pre><code>[root@localhost ~]<span class="preprocessor"># sysctl -p</span>
+net.ipv4.ip_forward = <span class="number">1</span>
+net.ipv4.conf.<span class="keyword">default</span>.rp_filter = <span class="number">1</span>
+net.ipv4.conf.<span class="keyword">default</span>.accept_source_route = <span class="number">0</span>
+kernel.sysrq = <span class="number">0</span>
+kernel.core_uses_pid = <span class="number">1</span>
+net.ipv4.tcp_syncookies = <span class="number">1</span>
+error: <span class="string">"net.bridge.bridge-nf-call-ip6tables"</span> is an unknown key
+error: <span class="string">"net.bridge.bridge-nf-call-iptables"</span> is an unknown key
+error: <span class="string">"net.bridge.bridge-nf-call-arptables"</span> is an unknown key
+kernel.msgmnb = <span class="number">65536</span>
+kernel.msgmax = <span class="number">65536</span>
+kernel.shmmax = <span class="number">68719476736</span>
+kernel.shmall = <span class="number">4294967296</span>
+
+
+<span class="preprocessor">#sysctl  -a  ：显示所有的内核参数和其值。</span>
+</code></pre><p>常用的三个参数：<strong>hostname</strong>，<strong>ip_forward</strong>，<strong>/proc/sys/vm/drop_caches</strong></p>
+<p>内核模块管理：</p>
+<p>lsmod：列出当前内核装载的模块。</p>
+<pre><code>[root@localhost kernel]<span class="preprocessor"># lsmod </span>
+Module                  Size  Used by
+ipv6                  <span class="number">321747</span>  <span class="number">266</span> 
+nls_utf8                <span class="number">1421</span>  <span class="number">1</span> 
+dm_mirror              <span class="number">14048</span>  <span class="number">0</span> 
+dm_region_hash         <span class="number">10730</span>  <span class="number">1</span> dm_mirror
+dm_log                  <span class="number">9696</span>  <span class="number">2</span> dm_mirror,dm_region_hash
+snd_ens1371            <span class="number">20593</span>  <span class="number">0</span> 
+snd_rawmidi            <span class="number">22734</span>  <span class="number">1</span> snd_ens1371
+snd_ac97_codec        <span class="number">124339</span>  <span class="number">1</span> snd_ens1371
+ac97_bus                <span class="number">1442</span>  <span class="number">1</span> snd_ac97_codec
+snd_seq                <span class="number">55532</span>  <span class="number">0</span> 
+snd_seq_device          <span class="number">6522</span>  <span class="number">2</span> snd_rawmidi,snd_seq
+snd_pcm                <span class="number">85629</span>  <span class="number">2</span> snd_ens1371,snd_ac97_codec
+snd_timer              <span class="number">21904</span>  <span class="number">2</span> snd_seq,snd_pcm
+snd                    <span class="number">68480</span>  <span class="number">7</span> snd_ens1371,snd_rawmidi,snd_ac97_codec,snd_seq,snd_seq_device,
+snd_pcm,snd_timersoundcore               <span class="number">7668</span>  <span class="number">1</span> snd
+snd_page_alloc          <span class="number">8428</span>  <span class="number">1</span> snd_pcm
+e1000                 <span class="number">145057</span>  <span class="number">0</span> 
+floppy                 <span class="number">63253</span>  <span class="number">0</span> 
+vmw_balloon             <span class="number">6781</span>  <span class="number">0</span> 
+microcode             <span class="number">111822</span>  <span class="number">0</span> 
+pcspkr                  <span class="number">1958</span>  <span class="number">0</span> 
+i2c_piix4              <span class="number">10998</span>  <span class="number">0</span> 
+i2c_core               <span class="number">30023</span>  <span class="number">1</span> i2c_piix4
+shpchp                 <span class="number">27791</span>  <span class="number">0</span> 
+sg                     <span class="number">29692</span>  <span class="number">0</span> 
+dm_mod                 <span class="number">74380</span>  <span class="number">2</span> dm_mirror,dm_log
+ext4                  <span class="number">364623</span>  <span class="number">1</span> 
+mbcache                 <span class="number">7254</span>  <span class="number">1</span> ext4
+jbd2                   <span class="number">80484</span>  <span class="number">1</span> ext4
+sd_mod                 <span class="number">35179</span>  <span class="number">3</span> 
+crc_t10dif              <span class="number">1531</span>  <span class="number">1</span> sd_mod
+sr_mod                 <span class="number">15213</span>  <span class="number">1</span> 
+cdrom                  <span class="number">39482</span>  <span class="number">1</span> sr_mod
+mptspi                 <span class="number">16113</span>  <span class="number">2</span> 
+mptscsih               <span class="number">34977</span>  <span class="number">1</span> mptspi
+mptbase                <span class="number">93281</span>  <span class="number">2</span> mptspi,mptscsih
+scsi_transport_spi     <span class="number">24957</span>  <span class="number">1</span> mptspi
+pata_acpi               <span class="number">3691</span>  <span class="number">0</span> 
+ata_generic             <span class="number">3891</span>  <span class="number">0</span> 
+ata_piix               <span class="number">23068</span>  <span class="number">1</span> 
+
+
+modprobe  MOD_NAME：模块装载。
+modprobe  -r  MOD_NAME ：卸载模块。
+modinfo  MOD_NAME：查看模块的具体信息
+另两个命令：但这里必须指定模块路径。
+insmod  /path/to/module_file：装载模块（必须指定模块的路径）。
+rmmod    MOD_NAME:卸载模块（移除）
+depmod  /path/to/modiles_dir   生成模块依赖。。。（需要指定路径）
+内核模块必须和驱动程序完全相同。
+</code></pre><p>内核中的功能除了核心功能之外，在编译时，大多数功能都要有三种选择：</p>
+<ul>
+<li>1，<strong>不使用此功能</strong></li>
+<li>2，<strong>编译成内核模块   modprobe装载</strong>，</li>
+<li>3，<strong>编译进内核</strong>。</li>
+</ul>
+<p>##如何手动编译内核：</p>
+<p>目前内核版本是：<br><img src="http://7xl5dz.com1.z0.glb.clouddn.com/uname.png" alt="uname"></p>
+<p>挂载系统镜像光驱到/mnt目录，创建一个rpm仓库，编辑yum的配置文件：</p>
+<ul>
+<li>1）， cd /etc/yum.repos.d目录下，创建一个.repo的文件。内容如下：</li>
+</ul>
+<pre><code><span class="title">[root@localhost ~]</span><span class="comment"># cat /etc/yum.repos.d/Base.repo </span>
+<span class="title">[base]</span>
+<span class="setting">name=<span class="value">Server</span></span>
+<span class="setting">baseurl=<span class="value">file:///mnt</span></span>
+<span class="setting">enabled=<span class="value"><span class="number">1</span></span></span>
+<span class="setting">gpgcheck=<span class="value"><span class="number">0</span></span></span>
+</code></pre><ul>
+<li>2)，编辑/etc/fstab，使得系统光驱开机自动挂载，搭建一个本地的yum仓库。</li>
+</ul>
+<pre><code>[root@localhost ~]<span class="comment"># cat /etc/fstab </span>
+
+<span class="comment">#</span>
+<span class="comment">#/etc/fstab</span>
+<span class="comment">#Created by anaconda on Sat Sep 12 10:59:40 2015</span>
+<span class="comment">#</span>
+<span class="comment">#Accessible filesystems, by reference, are maintained under '/dev/disk'</span>
+<span class="comment">#See man pages fstab(5), findfs(8), mount(8) and/or blkid(8) for more info</span>
+<span class="comment">#</span>
+<span class="type">UUID</span>=<span class="number">8</span>ebb2c3a-<span class="number">320</span>d-<span class="number">40</span>fb-<span class="number">8</span>d57-<span class="number">062</span>be9556d46 /                       ext4    defaults        <span class="number">1</span> <span class="number">1</span>
+<span class="type">UUID</span>=<span class="number">6499</span>e7e6-a462-<span class="number">4</span>b30-b195-<span class="number">1</span>bca6ee04eaa swap                    swap    defaults        <span class="number">0</span> <span class="number">0</span>
+tmpfs                   /dev/shm                tmpfs   defaults        <span class="number">0</span> <span class="number">0</span>
+devpts                  /dev/pts                devpts  gid=<span class="number">5</span>,mode=<span class="number">620</span>  <span class="number">0</span> <span class="number">0</span>
+sysfs                   /sys                    sysfs   defaults        <span class="number">0</span> <span class="number">0</span>
+<span class="keyword">proc</span>                    /<span class="keyword">proc</span>                   <span class="keyword">proc</span>    defaults        <span class="number">0</span> <span class="number">0</span>
+**/dev/cdrom               /mnt            iso9660 defaults        <span class="number">0</span> <span class="number">0</span>**
+</code></pre><p>只需要添加最后一行即可。</p>
+<ul>
+<li>3)，安装需要用到的开发库：</li>
+</ul>
+<pre><code><span class="title">yum</span> groupinstall <span class="string">"Development Tools"</span> <span class="string">"Development Libraries"</span> -y
+</code></pre><p>可以通过命令  #yum  grouplist 查看当前系统哪些库装了，哪些没安装，依据自己实际情况而定。</p>
+<ul>
+<li>4),将下载的内核解压到/usr/src这个目录下。<br>下载内核链接：www.kernel.org</li>
+</ul>
+<pre><code><span class="id">#tar</span> -xvf linux-<span class="number">2.6</span>.<span class="number">38.2</span><span class="class">.tar</span><span class="class">.xz</span> -C /usr/src/
+</code></pre><p>创建一个软连接，当前我们使用的内核或正在编译的内核一般链接为linux</p>
+<pre><code><span class="id">#ln</span> -sv linux-<span class="number">2.6</span>.<span class="number">38.2</span> linux
+`linux<span class="string">' -&gt; `linux-2.6.38.2'</span>
+</code></pre><p>查看linux目录下的文件：<br><img src="http://7xl5dz.com1.z0.glb.clouddn.com/ls.png" alt="ls"></p>
+<p>可以看到有很多的子目录：<br>例如：</p>
+<pre><code>arch：架构有关。
+crypto：加密解密
+drivers：驱动
+<span class="built_in">fs</span>：文件系统，里面包括ntfs，默认没有安装这个模块，我们可以安装。这样双系统就可以共享文件。
+virt：虚拟化功能
+ipc：进程间通信
+firmware：固件
+Documentation：文档。
+</code></pre><h2 id="如何手动编译内核呢：">如何手动编译内核呢：</h2><ul>
+<li><p>1），make gconfig :  Gnome桌面环境使用（需要安装图形开发库）GNOME  Software  Development<br>make  kconfig：KDE桌面环境使用；需要安装图形开发库）<br>需要安装桌面，用的不是特别多，用的更多是下面哪种方法。</p>
+</li>
+<li><p>2），使用menuconfig这个命令之前要先将开发库安装好。</p>
+</li>
+</ul>
+<pre><code><span class="id">#yum</span> -y install ncurses-devel
+<span class="id">#make</span>  menuconfig 
+</code></pre><p>打开文本菜单（需要在内核所在的目录输入该命令）。勾选内核属性。我们可以将当前系统的内核配置文件拷备过去，然后在当前系统内核配置文件的基础上做修改。</p>
+<ul>
+<li>3），make编译。<br><img src="http://7xl5dz.com1.z0.glb.clouddn.com/看.png" alt="k1"></li>
+</ul>
+<p>可以看到选择的界面，注意—-&gt;表示底下有很多子条目。敲回车即可打开子条目。<br>    [*]：表示做进内核中<br>    [M]：表示做成模块<br>    [  ]：表示不启用此功能。</p>
+<p>在General  setup的子目录下，有个叫做local   version的选项，就是本地版本号<br>例如：<br>    [root@www boot]# uname -r<br>    2.6.32-431.el6.x86_64<br>这里的431就是本地版本号，我们可以自己定义。<br>在local version那个选项那里回车即可输入自己编译的版本号。<br><img src="http://7xl5dz.com1.z0.glb.clouddn.com/k1.png" alt="k1"><br>连敲两下esc可以退到上一层目录。</p>
+<p>在出现的界面中我们可以选择文件系统的选项，可以将NTFS这个功能做成模块。这样如果电脑装了双系统，linux系统也可以访问windows的NTFS文件系统下的文件。</p>
+<p><img src="http://7xl5dz.com1.z0.glb.clouddn.com/k2.png" alt="k2"></p>
+<p>然后选好自己想要安装的内核功能，然后保存配置文件。</p>
+<p><img src="http://7xl5dz.com1.z0.glb.clouddn.com/k3.png" alt="k3"></p>
+<p>点击yes退出，就会在内核编译的目录下生成一个隐藏配置文件.config，</p>
+<p><img src="http://7xl5dz.com1.z0.glb.clouddn.com/config.png" alt="config"></p>
+<p>我们当前运行的系统也存在一个内核的配置文件，在/boot目录下，</p>
+<p><img src="http://7xl5dz.com1.z0.glb.clouddn.com/config2.png" alt="config2"></p>
+<p>我们自己定义的config可能在编译的过程中发生错误而导致编译不成功。为了减小这种错误，我们可以将目前系统的内核配置文件复制过去，然后再在当前配置文件的基础上进行修改，这样出现问题的几率就会小很多。<br>例如：<br>    我们新下载的一个内核，进行编译的时候，先将目前内核的配置文件复制到内核文件所在目录下命名为.config，然后执行make  menuconfig这个命令，根据自己的需求进行修改。这样出现问题的可能性会降小。</p>
+<p>对内核进行一些调整：</p>
+<p><img src="http://7xl5dz.com1.z0.glb.clouddn.com/k4.png" alt="k4"></p>
+<p>选中项定义了处理器的类型和特点，我们可以进行选择，去掉一些不常用的功能。<br>centos和redhat默认的cpu类型都是选择的Generic-x86-64，我们可以依据自己的实际情况选择，例如我自己的笔记本是core i5的就可以将处理器选择为core2的。</p>
+<p><img src="http://7xl5dz.com1.z0.glb.clouddn.com/k5.png" alt="k5"><br>同时我们可以去掉一些内核的驱动，一些很老，没必要使用的驱动。<br><img src="http://7xl5dz.com1.z0.glb.clouddn.com/k6.png" alt="k6"><br>例如网卡驱动：</p>
+<p>几个比较古老已经淘汰了的东西：<br><img src="http://7xl5dz.com1.z0.glb.clouddn.com/k7.png" alt="k7"></p>
+<p>上面的PCMCIA,ATM,FDDI都已经淘汰，用不到，可以去掉了。</p>
+<ul>
+<li>4），make安装：</li>
+</ul>
+<p>make  进行编译内核。可能会经历很长时间。</p>
+<p>可以使用</p>
+<pre><code><span class="id">#make</span>  -j4   
+</code></pre><p>同时使用4核来进行编译加快速度，具体根据自己的机器核心数来指定-j后的number。</p>
+<p>make编译安装之后会生成vmlinux,System.map ,modules.builtin等文件。</p>
+<pre><code><span class="id">#make</span>  modules_install  -j4  先进行模块安装，再安装。
+</code></pre><p><img src="http://7xl5dz.com1.z0.glb.clouddn.com/make1.png" alt="make1"></p>
+<pre><code><span class="id">#make</span>   install  -j4  安装。
+</code></pre><p><img src="http://7xl5dz.com1.z0.glb.clouddn.com/make2.png" alt="make2"></p>
+<p>至此，编译系统编译安装完成。</p>
+<p>如果之前的编译不好用，可以进行编译清理。<br>二次编译时清理：（清理前，如果有需要，请备份配置文件.config）<br>    make  clean：清理此前编译好的二进制模块。<br>    make    mrproper：清理此前编译的内容，使用之前，最好先备份配置文件.config）。</p>
+<p>内核编译完成之后，会在 /usr/src/linux/arch/x86/boot目录下生成一个bzImage，这是linux内核的映像文件。<br><img src="http://7xl5dz.com1.z0.glb.clouddn.com/bz.png" alt="bz"></p>
+<p>内核编译完成后我们可以通过修改/boot/grub/grub.conf这个grub的配置文件进行内核选择，从新的内核启动。<br>    [root@localhost ~]# cat /boot/grub/grub.conf </p>
+<pre><code><span class="preprocessor">#grub.conf generated by anaconda</span>
+<span class="preprocessor">#</span>
+<span class="preprocessor">#Note that you do not have to rerun grub after making changes to this file</span>
+<span class="preprocessor">#NOTICE:  You do not have a /boot partition.  This means that</span>
+<span class="preprocessor">#          all kernel and initrd paths are relative to /, eg.</span>
+<span class="preprocessor">#          root (hd0,<span class="number">1</span>)</span>
+<span class="preprocessor">#          kernel /boot/vmlinuz-version ro root=/dev/sda2</span>
+<span class="preprocessor">#          initrd /boot/initrd-[generic-]version.img</span>
+<span class="preprocessor">#boot=/dev/sda</span>
+<span class="keyword">default</span>=<span class="number">0</span>
+timeout=<span class="number">5</span>
+splashimage=(hd0,<span class="number">1</span>)/boot/grub/splash.xpm.<span class="function">gz
+hiddenmenu
+title <span class="title">CentOS</span> <span class="params">(<span class="number">2.6</span><span class="number">.38</span><span class="number">.2</span>-<span class="number">1.</span>el6)</span>
+    <span class="title">root</span> <span class="params">(hd0,<span class="number">1</span>)</span>
+    kernel /boot/vmlinuz-2.6.38.2-1.el6 ro root</span>=UUID=<span class="number">8</span>ebb2c3a-<span class="number">320</span>d-<span class="number">40f</span>b-<span class="number">8</span>d57-<span class="number">062</span>be9556d46 rd_NO_LUKS rd_NO_LVM LANG=en_US.UTF-<span class="number">8</span> rd_NO_MD SYSFONT
+=latarcyrheb-sun16 crashkernel=<span class="keyword">auto</span>  KEYBOARDTYPE=pc KEYTABLE=us rd_NO_DM rhgb quiet    initrd /boot/initramfs-<span class="number">2.6</span><span class="number">.38</span><span class="number">.2</span>-<span class="number">1.</span>el6.img
+title CentOS <span class="number">6</span> (<span class="number">2.6</span><span class="number">.32</span>-<span class="number">504.</span>el6.x86_64)
+    root (hd0,<span class="number">1</span>)
+    kernel /boot/vmlinuz-<span class="number">2.6</span><span class="number">.32</span>-<span class="number">504.</span>el6.x86_64 ro root=UUID=<span class="number">8</span>ebb2c3a-<span class="number">320</span>d-<span class="number">40f</span>b-<span class="number">8</span>d57-<span class="number">062</span>be9556d46 rd_NO_LUKS rd_NO_LVM LANG=en_US.UTF-<span class="number">8</span> rd_NO_MD 
+SYSFONT=latarcyrheb-sun16 crashkernel=<span class="keyword">auto</span>  KEYBOARDTYPE=pc KEYTABLE=us rd_NO_DM rhgb quiet    initrd /boot/initramfs-<span class="number">2.6</span><span class="number">.32</span>-<span class="number">504.</span>el6.x86_64.img
+</code></pre><p>如图，只需要将default=1改为default=0即可，即从第一个内核vmlinuz-2.6.38.2-1.el6启动。</p>
+<p>解释下各参数的含义：<br>    default=0:设定默认启动的title的编号，从0开始<br>    timeout=5  ：等待用户选择超时时长，单位为s<br>    splashimage=(hd0,0)/grub/splash.xpm.gz：grub的背景图片<br>    hiddenmenu：隐藏菜单。<br>    title Red Hat Enterprise Linux (2.6.32-358.el6.i686)   内核标题或操作系统标题。字符串，可以自由修改。<br>    root (hd0,1)#内核文件所在的设备。（对grub而言，所有类型硬盘一律为hd；格式为（hd#,N)  hd#表示第#个磁盘。最后的0则表示对应的磁盘分区。<br>        kernel /vmlinuz-2.6.32-358.el6.i686 ro #grub的访问路径所以是在根下。<br>        root=UUID=1e0664cd-aaf4-4064-96b5-3090c26f37a0 rd_NO_LUKS rd_NO_LVM LANG=en_US.UTF-8 rd_NO_MD SYSFONT<br>    =latarcyrheb-sun16 crashkernel=auto  KEYBOARDTYPE=pc KEYTABLE=us rd_NO_DM rhgb quiet</p>
+<pre><code><span class="preprocessor">#内核文件路径。</span>
+initrd /initramfs-<span class="number">2.6</span><span class="number">.32</span>-<span class="number">358.</span>el6.i686.img <span class="preprocessor">#ramdisk的文件路径。</span>
+</code></pre><p>重启系统后，查看内核是否完成升级</p>
+<pre><code>[root@localhost ~]<span class="preprocessor"># uname -r</span>
+<span class="number">2.6</span><span class="number">.38</span><span class="number">.2</span>-<span class="number">1.</span>el6
+</code></pre><p>可以看到内核已经从2.6.32升级到2.6.38了。</p>
+<h2 id="可能遇到的问题：">可能遇到的问题：</h2><p>使用vmware进行编译内核的时候，执行到make install时候会提示如下错误，意思是vmware_balloon这个模块找不到，原因是这个模块名字已经发生了改变为vmw_balloon.ko。做个软连接即可。<br>错误提示：<br><img src="http://7xl5dz.com1.z0.glb.clouddn.com/err.png" alt="err"></p>
+<p>找不到 vmware_balloon 模块，原因有两个：<br>首先，确认你的 .config 文件里面有  CONFIG_VMWARE_BALLOON=m 这一行，或者你可以用 make menuconfig 进去内核编译菜单，选中 Device Drivers -&gt; MISC devices -&gt; VMware Balloon Driver 为 M 或者 *<br>其次，而这个模块在后面的版本中，已经更名为 vmw_balloon，所以 可以用下面的命令来解决：<br>cd /lib/modules/3.x.xx/kernel/drivers/misc #将版本号改成你自己的<br>ln -s vmw_balloon.ko vmware_balloon.ko #建立软连接</p>
+<h4 id="解决方法：">解决方法：</h4><p><img src="http://7xl5dz.com1.z0.glb.clouddn.com/ln.png" alt="ln"></p>
+<h4 id="成功编译：">成功编译：</h4><p><img src="http://7xl5dz.com1.z0.glb.clouddn.com/make2.png" alt="make2"></p>
+]]></content>
+    <summary type="html">
+    <![CDATA[<p>显示全文：<br>]]>
+    
+    </summary>
+    
+      <category term="kernel" scheme="http://www.stackops.info/tags/kernel/"/>
+    
+      <category term="linux" scheme="http://www.stackops.info/tags/linux/"/>
+    
+  </entry>
   
   <entry>
     <title><![CDATA[OpenStack搭建-实例创建]]></title>
@@ -1758,7 +2071,7 @@ Include /<span class="keyword">var</span>/lib/submin/conf/apache-svn.conf
 
 <span class="tag">&lt;/IfModule&gt;</span>
 <span class="tag">&lt;/VirtualHost&gt;</span>
-</code></pre><p>当通过浏览器访问web管理界面的时候：<a href="http://192.168.3.48/submin会提示你输入账户和密码，这时候你可以点击页面上的" target="_blank" rel="external">http://192.168.3.48/submin会提示你输入账户和密码，这时候你可以点击页面上的</a>  Forgot your  password , 然后会主动发一封邮件给root用户：<br>可以通过命令：# cat /var/spool/mail/root 查看发过来的重置密码的连接，我们可以通过该链接进行密码的修改：<br>    From: root@localhost.novalocal<br>    To: liyahua@xxx.com<br>    Subject: Submin password reset request<br>    Message-Id: <a href="&#109;&#x61;&#x69;&#108;&#116;&#111;&#x3a;&#x32;&#x30;&#x31;&#x35;&#x30;&#56;&#x31;&#51;&#x30;&#54;&#x32;&#55;&#53;&#53;&#46;&#x42;&#54;&#x38;&#54;&#x46;&#x36;&#x31;&#x46;&#55;&#x44;&#x40;&#115;&#118;&#110;&#x61;&#x64;&#109;&#x69;&#x6e;&#46;&#110;&#111;&#118;&#x61;&#108;&#x6f;&#99;&#97;&#x6c;">&#x32;&#x30;&#x31;&#x35;&#x30;&#56;&#x31;&#51;&#x30;&#54;&#x32;&#55;&#53;&#53;&#46;&#x42;&#54;&#x38;&#54;&#x46;&#x36;&#x31;&#x46;&#55;&#x44;&#x40;&#115;&#118;&#110;&#x61;&#x64;&#109;&#x69;&#x6e;&#46;&#110;&#111;&#118;&#x61;&#108;&#x6f;&#99;&#97;&#x6c;</a><br>    Date: Thu, 13 Aug 2015 06:27:55 +0000 (UTC)</p>
+</code></pre><p>当通过浏览器访问web管理界面的时候：<a href="http://192.168.3.48/submin会提示你输入账户和密码，这时候你可以点击页面上的" target="_blank" rel="external">http://192.168.3.48/submin会提示你输入账户和密码，这时候你可以点击页面上的</a>  Forgot your  password , 然后会主动发一封邮件给root用户：<br>可以通过命令：# cat /var/spool/mail/root 查看发过来的重置密码的连接，我们可以通过该链接进行密码的修改：<br>    From: root@localhost.novalocal<br>    To: liyahua@xxx.com<br>    Subject: Submin password reset request<br>    Message-Id: <a href="&#x6d;&#97;&#x69;&#x6c;&#116;&#111;&#58;&#50;&#48;&#x31;&#x35;&#x30;&#x38;&#x31;&#51;&#48;&#x36;&#x32;&#x37;&#53;&#x35;&#46;&#x42;&#54;&#x38;&#x36;&#x46;&#54;&#49;&#x46;&#55;&#x44;&#x40;&#115;&#x76;&#x6e;&#97;&#x64;&#x6d;&#x69;&#x6e;&#46;&#110;&#111;&#x76;&#x61;&#108;&#x6f;&#x63;&#97;&#x6c;">&#50;&#48;&#x31;&#x35;&#x30;&#x38;&#x31;&#51;&#48;&#x36;&#x32;&#x37;&#53;&#x35;&#46;&#x42;&#54;&#x38;&#x36;&#x46;&#54;&#49;&#x46;&#55;&#x44;&#x40;&#115;&#x76;&#x6e;&#97;&#x64;&#x6d;&#x69;&#x6e;&#46;&#110;&#111;&#x76;&#x61;&#108;&#x6f;&#x63;&#97;&#x6c;</a><br>    Date: Thu, 13 Aug 2015 06:27:55 +0000 (UTC)</p>
 <pre><code>You <span class="keyword">are</span> receiving this email because someone requested a password reset for
 your account. If you don't know what this <span class="keyword">is</span> about, you can safely ignore it,
 the reset request will expire automatically.
