@@ -557,11 +557,11 @@ $ nova secgroup-add-<span class="keyword">rule</span> default tcp 22 22 0.0.0.0/
   </entry>
   
   <entry>
-    <title><![CDATA[OpenStack搭建-dashboar组件]]></title>
+    <title><![CDATA[OpenStack搭建-dashboard组件]]></title>
     <link href="http://www.stackops.info/2015/08/20/OpenStack%E6%90%AD%E5%BB%BA-dashboard%E7%BB%84%E4%BB%B6/"/>
     <id>http://www.stackops.info/2015/08/20/OpenStack搭建-dashboard组件/</id>
     <published>2015-08-20T06:35:47.000Z</published>
-    <updated>2015-08-20T07:19:36.142Z</updated>
+    <updated>2015-09-15T15:10:48.973Z</updated>
     <content type="html"><![CDATA[<p>显示全文：<br><a id="more"></a></p>
 <h2 id="添加dashboard服务">添加dashboard服务</h2><p><strong>openstack  dashboard</strong>也被称为Horizon，是一个web界面，使用管理员和用户能够管理openstack不同的资源和服务<br>dashboard 通过OpenStack APIs操作openstack云计算控制器。Horizon允许定制自己的商标<br>Horizon提供了核心类和可重复使用的木板和工具</p>
 <p>这个部署使用的是 Apache web server.</p>
@@ -2131,7 +2131,7 @@ Include /<span class="keyword">var</span>/lib/submin/conf/apache-svn.conf
 
 <span class="tag">&lt;/IfModule&gt;</span>
 <span class="tag">&lt;/VirtualHost&gt;</span>
-</code></pre><p>当通过浏览器访问web管理界面的时候：<a href="http://192.168.3.48/submin会提示你输入账户和密码，这时候你可以点击页面上的" target="_blank" rel="external">http://192.168.3.48/submin会提示你输入账户和密码，这时候你可以点击页面上的</a>  Forgot your  password , 然后会主动发一封邮件给root用户：<br>可以通过命令：# cat /var/spool/mail/root 查看发过来的重置密码的连接，我们可以通过该链接进行密码的修改：<br>    From: root@localhost.novalocal<br>    To: liyahua@xxx.com<br>    Subject: Submin password reset request<br>    Message-Id: <a href="&#x6d;&#x61;&#x69;&#x6c;&#116;&#111;&#58;&#x32;&#x30;&#x31;&#x35;&#x30;&#x38;&#49;&#51;&#x30;&#54;&#50;&#55;&#53;&#53;&#46;&#x42;&#54;&#56;&#54;&#x46;&#x36;&#x31;&#70;&#55;&#x44;&#64;&#x73;&#118;&#x6e;&#x61;&#100;&#x6d;&#105;&#x6e;&#46;&#x6e;&#x6f;&#x76;&#x61;&#x6c;&#x6f;&#x63;&#97;&#x6c;">&#x32;&#x30;&#x31;&#x35;&#x30;&#x38;&#49;&#51;&#x30;&#54;&#50;&#55;&#53;&#53;&#46;&#x42;&#54;&#56;&#54;&#x46;&#x36;&#x31;&#70;&#55;&#x44;&#64;&#x73;&#118;&#x6e;&#x61;&#100;&#x6d;&#105;&#x6e;&#46;&#x6e;&#x6f;&#x76;&#x61;&#x6c;&#x6f;&#x63;&#97;&#x6c;</a><br>    Date: Thu, 13 Aug 2015 06:27:55 +0000 (UTC)</p>
+</code></pre><p>当通过浏览器访问web管理界面的时候：<a href="http://192.168.3.48/submin会提示你输入账户和密码，这时候你可以点击页面上的" target="_blank" rel="external">http://192.168.3.48/submin会提示你输入账户和密码，这时候你可以点击页面上的</a>  Forgot your  password , 然后会主动发一封邮件给root用户：<br>可以通过命令：# cat /var/spool/mail/root 查看发过来的重置密码的连接，我们可以通过该链接进行密码的修改：<br>    From: root@localhost.novalocal<br>    To: liyahua@xxx.com<br>    Subject: Submin password reset request<br>    Message-Id: <a href="&#109;&#x61;&#105;&#108;&#x74;&#111;&#58;&#x32;&#x30;&#x31;&#53;&#48;&#56;&#x31;&#x33;&#48;&#x36;&#x32;&#55;&#53;&#53;&#x2e;&#66;&#54;&#56;&#54;&#x46;&#54;&#49;&#70;&#x37;&#68;&#x40;&#115;&#118;&#110;&#97;&#100;&#109;&#105;&#110;&#46;&#110;&#x6f;&#x76;&#97;&#x6c;&#x6f;&#99;&#97;&#108;">&#x32;&#x30;&#x31;&#53;&#48;&#56;&#x31;&#x33;&#48;&#x36;&#x32;&#55;&#53;&#53;&#x2e;&#66;&#54;&#56;&#54;&#x46;&#54;&#49;&#70;&#x37;&#68;&#x40;&#115;&#118;&#110;&#97;&#100;&#109;&#105;&#110;&#46;&#110;&#x6f;&#x76;&#97;&#x6c;&#x6f;&#99;&#97;&#108;</a><br>    Date: Thu, 13 Aug 2015 06:27:55 +0000 (UTC)</p>
 <pre><code>You <span class="keyword">are</span> receiving this email because someone requested a password reset for
 your account. If you don't know what this <span class="keyword">is</span> about, you can safely ignore it,
 the reset request will expire automatically.
