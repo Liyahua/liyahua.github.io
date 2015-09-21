@@ -3,20 +3,17 @@
 <head>
   <meta charset="utf-8">
   
-  <title>OpenStack搭建-dashboard组件 | Leoli&#39;s  blog</title>
+  <title>Tag: NetEase | Leoli&#39;s  blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="显示全文：">
-<meta property="og:type" content="article">
-<meta property="og:title" content="OpenStack搭建-dashboard组件">
-<meta property="og:url" content="http://www.stackops.info/2015/08/20/OpenStack搭建-dashboard组件/index.html">
+  <meta name="description">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Leoli's  blog">
+<meta property="og:url" content="http://www.stackops.info/tags/NetEase/index.html">
 <meta property="og:site_name" content="Leoli's  blog">
-<meta property="og:description" content="显示全文：">
-<meta property="og:image" content="http://7xl5dz.com1.z0.glb.clouddn.com/dashboard.jpg">
-<meta property="og:image" content="http://7xl5dz.com1.z0.glb.clouddn.com/dashboard2.png">
-<meta property="og:updated_time" content="2015-09-15T15:10:48.973Z">
+<meta property="og:description">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="OpenStack搭建-dashboard组件">
-<meta name="twitter:description" content="显示全文：">
+<meta name="twitter:title" content="Leoli's  blog">
+<meta name="twitter:description">
   
     <link rel="alternative" href="/atom.xml" title="Leoli&#39;s  blog" type="application/atom+xml">
   
@@ -77,141 +74,40 @@ var _hmt = _hmt || [];
   </div>
 </header>
       <div class="outer">
-        <section id="main"><article id="post-OpenStack搭建-dashboard组件" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2015/08/20/OpenStack搭建-dashboard组件/" class="article-date">
-  <time datetime="2015-08-20T06:35:47.000Z" itemprop="datePublished">2015-08-20</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
+        <section id="main">
   
-    <h1 class="article-title" itemprop="name">
-      OpenStack搭建-dashboard组件
+  
+    
+    
+      
+      
+      <section class="archives-wrap">
+        <div class="archive-year-wrap">
+          <a href="/archives/2015" class="archive-year">2015</a>
+        </div>
+        <div class="archives">
+    
+    <article class="archive-article archive-type-post">
+  <div class="archive-article-inner">
+    <header class="archive-article-header">
+      <a href="/2015/09/21/网易互联网-系统运维工程师面试记/" class="archive-article-date">
+  <time datetime="2015-09-21T12:58:18.000Z" itemprop="datePublished">9月 21</time>
+</a>
+      
+  
+    <h1 itemprop="name">
+      <a class="archive-article-title" href="/2015/09/21/网易互联网-系统运维工程师面试记/">网易互联网-系统运维工程师面试记</a>
     </h1>
   
 
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>显示全文：<br><a id="more"></a></p>
-<h2 id="添加dashboard服务">添加dashboard服务</h2><p><strong>openstack  dashboard</strong>也被称为Horizon，是一个web界面，使用管理员和用户能够管理openstack不同的资源和服务<br>dashboard 通过OpenStack APIs操作openstack云计算控制器。Horizon允许定制自己的商标<br>Horizon提供了核心类和可重复使用的木板和工具</p>
-<p>这个部署使用的是 Apache web server.</p>
-<p>   系统要求： </p>
-<p>在安装openstack dashboard之前，你必须满足下面需求</p>
-<pre><code>•openstack计算安装，启用用户身份认证服务和项目管理
-
-•注意身份服务的urls和Compute endpoints.
-
-•用户认证服务具有sudo的权限。因为Apache 不能使用root用户服务，用户必须运行dashboard 作为sudo 权限身份认证服务。
-
-•Python <span class="number">2.6</span> 或则 <span class="number">2.7</span>，Python 版本必须支持Django。Python 版本应该运行在任何系统，包括Mac OS，不同的平台安装可能不一样。 
-
-然后在一个节点上安装和配置dashboard 可以连接身份认证服务
-</code></pre><p>用下面信息的用户，因此他们能够通过本地机器的浏览器访问dashboard</p>
-<pre><code>•通过公共<span class="literal">ip</span>地址，可以访问dashboard
-
-•输入用户和密码
-
- 你的浏览器，必须支持HTML5 ，启用cookies 和JavaScript
-</code></pre><p>注意：</p>
-<pre><code>使用带有dashboard的VNC 客户端，浏览器必须支持HTML5 画布和 HTML5 WebSockets
-</code></pre><ul>
-<li>1），安装包：</li>
-</ul>
-<pre><code># apt-<span class="built_in">get</span> install openstack-dashboard apache2 libapache2-<span class="keyword">mod</span>-wsgi
-memcached <span class="keyword">python</span>-memcache
-</code></pre><p>注意：Ubuntu 安装  openstack-dashboard-ubuntu-theme包作为依赖。一些用户报告以前发布的版本有问题。如果你遇到问题，移除这个包，恢复到原先的openstack包。</p>
-<p>移除可以执行下面命令（这里执行了下面命令）</p>
-<pre><code><span class="preprocessor">#  dpkg --purge openstack-dashboard-ubuntu-theme</span>
-</code></pre><ul>
-<li>2），配置dashboard，修改配置文件/etc/openstack-dashboard/local_settings.py</li>
-</ul>
-<pre><code>OPENSTACK_HOST = <span class="string">"controller"</span>
-ALLOWED_HOSTS = [<span class="string">'*'</span>]
-
-CACHES = {
-<span class="string">'default'</span>: {
-<span class="string">'BACKEND'</span>: <span class="string">'django.core.cache.backends.memcached.
-MemcachedCache'</span>,
-<span class="string">'LOCATION'</span>: <span class="string">'127.0.0.1:11211'</span>,
-}
-}
-</code></pre><p>注意：注释掉其它session存储配置这里不需要修改</p>
-<p>.可选，配置其它 time zone</p>
-<p> TIME_ZONE = “TIME_ZONE”<br>/usr/share/zoneinfo/Asia/ 下保存着系统各个时区信息/etc/localtime 保存当前系统时区及时间信息</p>
-<ul>
-<li>3），检验安装：重启服务。</li>
-</ul>
-<pre><code><span class="preprocessor"># service apache2 restart</span>
-<span class="preprocessor"># service memcached restart</span>
-</code></pre><ul>
-<li>4)，打开浏览器，输入：192.168.0.146/horizon。可以选择使用demo或者admin这两个用户之一登录。</li>
-</ul>
-<p><img src="http://7xl5dz.com1.z0.glb.clouddn.com/dashboard.jpg" alt="dashboard"></p>
-<p>进入后的web界面大概是这样；</p>
-<p><img src="http://7xl5dz.com1.z0.glb.clouddn.com/dashboard2.png" alt="dashboard2"></p>
-<p>在这个界面里可以比较便捷的创建实例，迁移，调整实例大小，设置访问规则等，利用图形化界面管理特别方便。</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://www.stackops.info/2015/08/20/OpenStack搭建-dashboard组件/" data-id="cieu5uonp000xbo7b8pmbyw6d" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/dashboard/">dashboard</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/openstack/">openstack</a></li></ul>
-
-    </footer>
+    </header>
   </div>
-  
-    
-<nav id="article-nav">
-  
-    <a href="/2015/08/20/OpenStack搭建-实例创建/" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Newer</strong>
-      <div class="article-nav-title">
-        
-          OpenStack搭建-实例创建
-        
-      </div>
-    </a>
-  
-  
-    <a href="/2015/08/20/OpenStackd搭建-网络组件/" id="article-nav-older" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Older</strong>
-      <div class="article-nav-title">OpenStackd搭建-网络组件</div>
-    </a>
-  
-</nav>
-
-  
 </article>
-
-
-  <section id="comments">
-    <!-- 多说评论框 start -->
-    <div class="ds-thread" data-thread-key="post-OpenStack搭建-dashboard组件" data-title="OpenStack搭建-dashboard组件" data-url="http://www.stackops.info/2015/08/20/OpenStack搭建-dashboard组件/"></div>
-    <!-- 多说评论框 end -->
-    <!-- 多说公共JS代码 start (一个网页只需插入一次) -->
-    <script type="text/javascript">
-    var duoshuoQuery = {short_name:'leoli'};
-      (function() {
-        var ds = document.createElement('script');
-        ds.type = 'text/javascript';ds.async = true;
-        ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
-        ds.charset = 'UTF-8';
-        (document.getElementsByTagName('head')[0] 
-         || document.getElementsByTagName('body')[0]).appendChild(ds);
-      })();
-      </script>
-    <!-- 多说公共JS代码 end -->
-  </section>
-  </section>
+  
+  
+    </div></section>
+  
+</section>
         
           <aside id="sidebar">
   

@@ -3,19 +3,17 @@
 <head>
   <meta charset="utf-8">
   
-  <title>OpenStack搭建-dashboard组件 | Leoli&#39;s  blog</title>
+  <title>网易互联网-系统运维工程师面试记 | Leoli&#39;s  blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="显示全文：">
 <meta property="og:type" content="article">
-<meta property="og:title" content="OpenStack搭建-dashboard组件">
-<meta property="og:url" content="http://www.stackops.info/2015/08/20/OpenStack搭建-dashboard组件/index.html">
+<meta property="og:title" content="网易互联网-系统运维工程师面试记">
+<meta property="og:url" content="http://www.stackops.info/2015/09/21/网易互联网-系统运维工程师面试记/index.html">
 <meta property="og:site_name" content="Leoli's  blog">
 <meta property="og:description" content="显示全文：">
-<meta property="og:image" content="http://7xl5dz.com1.z0.glb.clouddn.com/dashboard.jpg">
-<meta property="og:image" content="http://7xl5dz.com1.z0.glb.clouddn.com/dashboard2.png">
-<meta property="og:updated_time" content="2015-09-15T15:10:48.973Z">
+<meta property="og:updated_time" content="2015-09-21T16:41:07.164Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="OpenStack搭建-dashboard组件">
+<meta name="twitter:title" content="网易互联网-系统运维工程师面试记">
 <meta name="twitter:description" content="显示全文：">
   
     <link rel="alternative" href="/atom.xml" title="Leoli&#39;s  blog" type="application/atom+xml">
@@ -77,10 +75,10 @@ var _hmt = _hmt || [];
   </div>
 </header>
       <div class="outer">
-        <section id="main"><article id="post-OpenStack搭建-dashboard组件" class="article article-type-post" itemscope itemprop="blogPost">
+        <section id="main"><article id="post-网易互联网-系统运维工程师面试记" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2015/08/20/OpenStack搭建-dashboard组件/" class="article-date">
-  <time datetime="2015-08-20T06:35:47.000Z" itemprop="datePublished">2015-08-20</time>
+    <a href="/2015/09/21/网易互联网-系统运维工程师面试记/" class="article-date">
+  <time datetime="2015-09-21T12:58:18.000Z" itemprop="datePublished">2015-09-21</time>
 </a>
     
   </div>
@@ -91,7 +89,7 @@ var _hmt = _hmt || [];
         
   
     <h1 class="article-title" itemprop="name">
-      OpenStack搭建-dashboard组件
+      网易互联网-系统运维工程师面试记
     </h1>
   
 
@@ -99,72 +97,75 @@ var _hmt = _hmt || [];
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>显示全文：<br><a id="more"></a></p>
-<h2 id="添加dashboard服务">添加dashboard服务</h2><p><strong>openstack  dashboard</strong>也被称为Horizon，是一个web界面，使用管理员和用户能够管理openstack不同的资源和服务<br>dashboard 通过OpenStack APIs操作openstack云计算控制器。Horizon允许定制自己的商标<br>Horizon提供了核心类和可重复使用的木板和工具</p>
-<p>这个部署使用的是 Apache web server.</p>
-<p>   系统要求： </p>
-<p>在安装openstack dashboard之前，你必须满足下面需求</p>
-<pre><code>•openstack计算安装，启用用户身份认证服务和项目管理
+        <p>显示全文：</p>
+<a id="more"></a>
+<p>前几天去了趟杭州，这是我第二次来杭州。上次来是2014年的AWDC阿里云开发者大会。当时还是三个人，还自嘲称我们是“互联网三剑客”（见笑了）。然而此时此刻物是人非，只身来杭。<br>简单介绍下网易互联网的面试内容：<br>这次面试的岗位是系统运维工程师，面试官是个搞linux系统运维的人，所以面试内容大多和linux有关。列举如下：</p>
+<h2 id="技术面的问题：">技术面的问题：</h2><pre><code>*    <span class="number">1</span>），自我介绍
 
-•注意身份服务的urls和Compute endpoints.
+*    <span class="number">2</span>），说一下自己用过哪些linux系统，以及平时用linux比较多还是windows比较多
 
-•用户认证服务具有sudo的权限。因为Apache 不能使用root用户服务，用户必须运行dashboard 作为sudo 权限身份认证服务。
+*    <span class="number">3</span>），说几个熟悉的linux命令，并会抽几个让你详细介绍，同时让你说出几个在系统性能出现问题的时候经常可以用哪些
+命令来协助排错，根据命令输出介绍每个参数的含义。例如vmstat命令，<span class="built_in">free</span>命令，top等
 
-•Python <span class="number">2.6</span> 或则 <span class="number">2.7</span>，Python 版本必须支持Django。Python 版本应该运行在任何系统，包括Mac OS，不同的平台安装可能不一样。 
+*    <span class="number">4</span>），介绍下buffer和cache的区别
 
-然后在一个节点上安装和配置dashboard 可以连接身份认证服务
-</code></pre><p>用下面信息的用户，因此他们能够通过本地机器的浏览器访问dashboard</p>
-<pre><code>•通过公共<span class="literal">ip</span>地址，可以访问dashboard
+*    <span class="number">5</span>），为什么有时候物理内存还未使用完，swap分区就开始使用了，以及swap分区使用<span class="number">100</span>%的情况下，物理内存还有，新的应用请求内存该怎么处理？详解过程
 
-•输入用户和密码
+*    <span class="number">6</span>），列举几个内核参数，及其功能，例如ip_forward等
 
- 你的浏览器，必须支持HTML5 ，启用cookies 和JavaScript
-</code></pre><p>注意：</p>
-<pre><code>使用带有dashboard的VNC 客户端，浏览器必须支持HTML5 画布和 HTML5 WebSockets
-</code></pre><ul>
-<li>1），安装包：</li>
-</ul>
-<pre><code># apt-<span class="built_in">get</span> install openstack-dashboard apache2 libapache2-<span class="keyword">mod</span>-wsgi
-memcached <span class="keyword">python</span>-memcache
-</code></pre><p>注意：Ubuntu 安装  openstack-dashboard-ubuntu-theme包作为依赖。一些用户报告以前发布的版本有问题。如果你遇到问题，移除这个包，恢复到原先的openstack包。</p>
-<p>移除可以执行下面命令（这里执行了下面命令）</p>
-<pre><code><span class="preprocessor">#  dpkg --purge openstack-dashboard-ubuntu-theme</span>
-</code></pre><ul>
-<li>2），配置dashboard，修改配置文件/etc/openstack-dashboard/local_settings.py</li>
-</ul>
-<pre><code>OPENSTACK_HOST = <span class="string">"controller"</span>
-ALLOWED_HOSTS = [<span class="string">'*'</span>]
+*    <span class="number">7</span>），讲述一个数据包从接口到达内核，以及再回包的一个过程。
 
-CACHES = {
-<span class="string">'default'</span>: {
-<span class="string">'BACKEND'</span>: <span class="string">'django.core.cache.backends.memcached.
-MemcachedCache'</span>,
-<span class="string">'LOCATION'</span>: <span class="string">'127.0.0.1:11211'</span>,
-}
-}
-</code></pre><p>注意：注释掉其它session存储配置这里不需要修改</p>
-<p>.可选，配置其它 time zone</p>
-<p> TIME_ZONE = “TIME_ZONE”<br>/usr/share/zoneinfo/Asia/ 下保存着系统各个时区信息/etc/localtime 保存当前系统时区及时间信息</p>
-<ul>
-<li>3），检验安装：重启服务。</li>
-</ul>
-<pre><code><span class="preprocessor"># service apache2 restart</span>
-<span class="preprocessor"># service memcached restart</span>
-</code></pre><ul>
-<li>4)，打开浏览器，输入：192.168.0.146/horizon。可以选择使用demo或者admin这两个用户之一登录。</li>
-</ul>
-<p><img src="http://7xl5dz.com1.z0.glb.clouddn.com/dashboard.jpg" alt="dashboard"></p>
-<p>进入后的web界面大概是这样；</p>
-<p><img src="http://7xl5dz.com1.z0.glb.clouddn.com/dashboard2.png" alt="dashboard2"></p>
-<p>在这个界面里可以比较便捷的创建实例，迁移，调整实例大小，设置访问规则等，利用图形化界面管理特别方便。</p>
+*    <span class="number">8</span>），awk命令，例如怎么定义分隔符，$NF含义（这个经常会问到）
+
+*    <span class="number">9</span>），列举下IP包头中所含有的信息。
+
+*    <span class="number">10</span>），介绍下自己所搭建的OpenStack私有云平台，以及自己实习的时候主要的工作内容是什么，Openstack现在的一个情况是否投入使用，以及自己从实习到正式能为公司做点事情大约要花多长时间。
+
+*    <span class="number">11</span>），讲述下SDN项目，主要负责了哪些内容，实现了那些功能，是否有对代码进行过修改。
+
+*    <span class="number">12</span>），Openstack的共享存储是怎么做的？实例在迁移的过程中是否会产生内存丢失的现象？
+
+*    <span class="number">13</span>），为公司挑选新的服务器，主要有哪些服务器类型？具体参数，为什么要这么选呢？
+
+*    <span class="number">14</span>），Kickstart+LANMP环境中，涉及的自动化脚本大约有多少行。
+
+*    <span class="number">15</span>），详解apache的一个工作原理，以apache的各种MPM，prefork，worker，event等，对比优缺点。apache怎么定义最大连接数，以及当超过最大连接数的情况下，会怎么处理。
+
+*    <span class="number">16</span>），详细介绍下http这个协议，写出请求报文格式，Linux服务器是如何区分http请求中请求的内容是否需要调用php模块进行动态化处理，以及apache是如何和php交互处理的？http请求报文中的method有哪些方法？
+
+*    <span class="number">17</span>），怎么通过iptables实现NAT功能，具体的命令是什么？以及NAT转换的一个过程，SNAT转换出去的包，回包的时候linux服务器是怎么知道需要进行DNAT的转换？为什么使用到NAT？解释下kickstart基本的网络环境，以及数据包通过NAT转发功能上网的一个具体过程，涉及到iptables的哪些链？
+
+*    <span class="number">18</span>），Ospf是否使用过？自己是否在真实环境中使用过？以及ospf的数据报文格式，包含哪些字段及含义。
+
+*    <span class="number">19</span>），VRRP的一个工作原理，功能。 
+
+*    <span class="number">20</span>），GRE Tunnel的工作原理，有哪些应用场景。
+
+*    <span class="number">21</span>），列举一些常用到的信号？kill  -l 可以看到所有的信号。
+
+*    <span class="number">22</span>），inode号的作用，里面包含哪些信息？
+</code></pre><h2 id="HR面的问题：">HR面的问题：</h2><p><em>问的内容比较少，在面完技术面之后和面试官闲聊了半个小时O(∩_∩)O哈哈~</em></p>
+<pre><code><span class="bullet">*    </span>1），刚才跑哪里去了？为什么联系不到你了（刚才一直在和技术面面试官吹牛逼。。）
+
+<span class="bullet">*    </span>2），介绍下自己
+
+<span class="bullet">*    </span>3），自己之前的实习经历，以及自己为什么从之前的公司离职，工作了大约多长时间？
+
+<span class="bullet">*    </span>4），能不能提前过来实习？
+
+<span class="bullet">*    </span>5），手上有多少offer，大概开的薪资范围是多少？你自己感觉你比较期望的薪资范围是多少？
+
+<span class="bullet">*    </span>6），让我来提问他问题。我问了个很煞笔的问题：“网易会比较在乎应聘者的学历吗？”
+面试官答曰：“不会，如果看中学历的话，你就不会在这里面试了。”囧o(╯□╰)o，确实来面试的好多都是东大，南大等。。。
+</code></pre><p>因为是网易特别开辟的绿色通道，我就经历了一轮技术面，加上和技术面试官的闲聊，大概花了90min，一轮hr面。网易的面试大概如此，还是很不错的，整个过程感觉很和谐，而且网易的工作环境还不错，对应聘者的服务也很周到，不错的公司。</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://www.stackops.info/2015/08/20/OpenStack搭建-dashboard组件/" data-id="cieu5uonp000xbo7b8pmbyw6d" class="article-share-link">Share</a>
+      <a data-url="http://www.stackops.info/2015/09/21/网易互联网-系统运维工程师面试记/" data-id="cieu5uok80000bo7bgi6jsm9b" class="article-share-link">Share</a>
       
       
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/dashboard/">dashboard</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/openstack/">openstack</a></li></ul>
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/NetEase/">NetEase</a></li></ul>
 
     </footer>
   </div>
@@ -172,19 +173,10 @@ MemcachedCache'</span>,
     
 <nav id="article-nav">
   
-    <a href="/2015/08/20/OpenStack搭建-实例创建/" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Newer</strong>
-      <div class="article-nav-title">
-        
-          OpenStack搭建-实例创建
-        
-      </div>
-    </a>
   
-  
-    <a href="/2015/08/20/OpenStackd搭建-网络组件/" id="article-nav-older" class="article-nav-link-wrap">
+    <a href="/2015/09/20/Linux命令详解-free/" id="article-nav-older" class="article-nav-link-wrap">
       <strong class="article-nav-caption">Older</strong>
-      <div class="article-nav-title">OpenStackd搭建-网络组件</div>
+      <div class="article-nav-title">Linux命令详解-free</div>
     </a>
   
 </nav>
@@ -195,7 +187,7 @@ MemcachedCache'</span>,
 
   <section id="comments">
     <!-- 多说评论框 start -->
-    <div class="ds-thread" data-thread-key="post-OpenStack搭建-dashboard组件" data-title="OpenStack搭建-dashboard组件" data-url="http://www.stackops.info/2015/08/20/OpenStack搭建-dashboard组件/"></div>
+    <div class="ds-thread" data-thread-key="post-网易互联网-系统运维工程师面试记" data-title="网易互联网-系统运维工程师面试记" data-url="http://www.stackops.info/2015/09/21/网易互联网-系统运维工程师面试记/"></div>
     <!-- 多说评论框 end -->
     <!-- 多说公共JS代码 start (一个网页只需插入一次) -->
     <script type="text/javascript">
