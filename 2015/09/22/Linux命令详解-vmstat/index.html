@@ -3,19 +3,17 @@
 <head>
   <meta charset="utf-8">
   
-  <title>OpenStack搭建-dashboard组件 | Leoli&#39;s  blog</title>
+  <title>Linux命令详解-vmstat | Leoli&#39;s  blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="显示全文：">
 <meta property="og:type" content="article">
-<meta property="og:title" content="OpenStack搭建-dashboard组件">
-<meta property="og:url" content="http://www.stackops.info/2015/08/20/OpenStack搭建-dashboard组件/index.html">
+<meta property="og:title" content="Linux命令详解-vmstat">
+<meta property="og:url" content="http://www.stackops.info/2015/09/22/Linux命令详解-vmstat/index.html">
 <meta property="og:site_name" content="Leoli's  blog">
 <meta property="og:description" content="显示全文：">
-<meta property="og:image" content="http://7xl5dz.com1.z0.glb.clouddn.com/dashboard.jpg">
-<meta property="og:image" content="http://7xl5dz.com1.z0.glb.clouddn.com/dashboard2.png">
-<meta property="og:updated_time" content="2015-09-15T15:10:48.973Z">
+<meta property="og:updated_time" content="2015-09-22T08:36:00.853Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="OpenStack搭建-dashboard组件">
+<meta name="twitter:title" content="Linux命令详解-vmstat">
 <meta name="twitter:description" content="显示全文：">
   
     <link rel="alternative" href="/atom.xml" title="Leoli&#39;s  blog" type="application/atom+xml">
@@ -77,10 +75,10 @@ var _hmt = _hmt || [];
   </div>
 </header>
       <div class="outer">
-        <section id="main"><article id="post-OpenStack搭建-dashboard组件" class="article article-type-post" itemscope itemprop="blogPost">
+        <section id="main"><article id="post-Linux命令详解-vmstat" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2015/08/20/OpenStack搭建-dashboard组件/" class="article-date">
-  <time datetime="2015-08-20T06:35:47.000Z" itemprop="datePublished">2015-08-20</time>
+    <a href="/2015/09/22/Linux命令详解-vmstat/" class="article-date">
+  <time datetime="2015-09-22T07:38:29.000Z" itemprop="datePublished">2015-09-22</time>
 </a>
     
   </div>
@@ -91,7 +89,7 @@ var _hmt = _hmt || [];
         
   
     <h1 class="article-title" itemprop="name">
-      OpenStack搭建-dashboard组件
+      Linux命令详解-vmstat
     </h1>
   
 
@@ -99,72 +97,43 @@ var _hmt = _hmt || [];
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>显示全文：<br><a id="more"></a></p>
-<h2 id="添加dashboard服务">添加dashboard服务</h2><p><strong>openstack  dashboard</strong>也被称为Horizon，是一个web界面，使用管理员和用户能够管理openstack不同的资源和服务<br>dashboard 通过OpenStack APIs操作openstack云计算控制器。Horizon允许定制自己的商标<br>Horizon提供了核心类和可重复使用的木板和工具</p>
-<p>这个部署使用的是 Apache web server.</p>
-<p>   系统要求： </p>
-<p>在安装openstack dashboard之前，你必须满足下面需求</p>
-<pre><code>•openstack计算安装，启用用户身份认证服务和项目管理
+        <p>显示全文：</p>
+<a id="more"></a>
+<h2 id="监控CPU调度程序运行队列：">监控CPU调度程序运行队列：</h2><p>vmstat是Virtual Memory Statics（虚拟内存统计）的缩写，是实时系统监控工具。该命令通过使用knlist子程序和/dev/kmen伪设备驱动器访问这些数据，输出信息直接打印在屏幕。</p>
+<h2 id="vmstat命令输出包括以下内容：">vmstat命令输出包括以下内容：</h2><p>(1)，多少任务在运行<br>(2)，CPU的使用情况<br>(3)，CPU收到多少中断<br>(4)，发生多少上下文切换</p>
+<h2 id="命令输出：">命令输出：</h2><pre><code>[root@www ~]<span class="preprocessor"># vmstat</span>
+procs -----------memory---------- ---swap-- -----io---- --system-- -----cpu-----
+ r  b   swpd   <span class="built_in">free</span>   buff  cache   si   so    bi    bo   in   cs us sy id wa st
+ <span class="number">1</span>  <span class="number">0</span>      <span class="number">0</span> <span class="number">1715728</span>  <span class="number">19348</span>  <span class="number">72648</span>    <span class="number">0</span>    <span class="number">0</span>    <span class="number">28</span>     <span class="number">3</span>   <span class="number">34</span>   <span class="number">29</span>  <span class="number">0</span>  <span class="number">0</span> <span class="number">97</span>  <span class="number">2</span>  <span class="number">0</span>    
 
-•注意身份服务的urls和Compute endpoints.
+ vmstat   <span class="number">1</span>  ：每隔<span class="number">1</span>s中刷新一次。
+</code></pre><h4 id="各输出字段含义解释：">各输出字段含义解释：</h4><p><strong>procs</strong>：<br>    <strong>r</strong>：运行队列长度 (就是说多少个进程真的分配到CPU)，我测试的服务器目前CPU比较空闲，没什么程序在跑，当这个值超过了CPU数目，就会出现CPU瓶颈了。这个也和top的负载有关系，一般负载超过了3就比较高，超过了5就高，超过了10就不正常了，服务器的状态很危险。top的负载类似每秒的运行队列。如果运行队列过大，表示你的CPU很繁忙，一般会造成CPU使用率很高。<br>    <strong>b</strong>：阻塞队列长度<br><strong>memory</strong>：<br>    <strong>swpd</strong>：交换内存已经使用的大小，<br>    <strong>free</strong>：空闲内存<br>    <strong>buffer</strong>：缓冲（之前的那一篇文章讲述了buffer和cache之间的区别）。<br>    <strong>cache</strong>：缓存<br><strong>swap</strong>：动态swap信息<br>    <strong>si</strong>：swapin  物理内存到交换内存的转换<br>    <strong>so</strong>：swapout  交换内存到物理内存的转换<br><strong>io</strong>:<br>    <strong>bi</strong>：blockin   物理磁盘块到交换内存块<br>    <strong>bo</strong>：blockout   交换内存块到物理内存块<br><strong>system</strong>：<br>    <strong>in</strong>：终止，每秒的中断数，包括时钟中断。<br>    <strong>cs</strong>：context  switch：上下文切换<br><strong>cpu</strong>：<br>    <strong>us</strong>：用户空间占用百分比（用户进程执行时间）<br>    <strong>sy</strong>：系统进程执行时间<br>    <strong>id</strong>：空闲时间（包括IO等待时间）<br>    <strong>wa</strong>：等待IO时间</p>
+<h2 id="vmstat可以添加的参数：">vmstat可以添加的参数：</h2><pre><code>[root@www ~]# vmstat -<span class="operator"><span class="keyword">help</span>
+<span class="keyword">usage</span>: vmstat [-V] [-<span class="keyword">n</span>] [delay [<span class="keyword">count</span>]]
+              -V prints <span class="keyword">version</span>.   显示vmstat的版本信息
+              -<span class="keyword">n</span> causes the headers <span class="keyword">not</span> <span class="keyword">to</span> be reprinted regularly. 只在开始事显示一次各字段名称。
+              -a print inactive/active page stats. 显示活跃和非活跃的内存
+              -<span class="keyword">d</span> prints disk <span class="keyword">statistics</span> 显示磁盘统计信息
+              -<span class="keyword">D</span> prints disk <span class="keyword">table</span> 以表格形式显示disk信息。
+              -<span class="keyword">p</span> prints disk <span class="keyword">partition</span> <span class="keyword">statistics</span>  显示指定磁盘分区统计信息
+              -s prints vm <span class="keyword">table</span> 显示内存相关统计信息及多种系统活动数量。
+              -<span class="keyword">m</span> prints slabinfo 显示slabinfo
+              -<span class="keyword">t</span> <span class="keyword">add</span> <span class="keyword">timestamp</span> <span class="keyword">to</span> <span class="keyword">output</span> 给输出添加时间戳
+              -S unit <span class="keyword">size</span>  使用指定单位显示。参数有 <span class="keyword">k</span> 、<span class="keyword">K</span> 、<span class="keyword">m</span> 、<span class="keyword">M</span> ，分别代表<span class="number">1000</span>、<span class="number">1024</span>、<span class="number">1000000</span>、<span class="number">1048576</span>字节（<span class="keyword">byte</span>）。默认单位为<span class="keyword">K</span>（<span class="number">1024</span> <span class="keyword">bytes</span>）
+              delay <span class="keyword">is</span> the delay <span class="keyword">between</span> updates <span class="keyword">in</span> seconds. 刷新时间间隔。如果不指定，只显示一条结果。
+              unit <span class="keyword">size</span> <span class="keyword">k</span>:<span class="number">1000</span> <span class="keyword">K</span>:<span class="number">1024</span> <span class="keyword">m</span>:<span class="number">1000000</span> <span class="keyword">M</span>:<span class="number">1048576</span> (<span class="keyword">default</span> <span class="keyword">is</span> <span class="keyword">K</span>)
+              <span class="keyword">count</span> <span class="keyword">is</span> the <span class="built_in">number</span> <span class="keyword">of</span> updates. 刷新次数。如果不指定刷新次数，但指定了刷新时间间隔，这时刷新次数为无穷。
 
-•用户认证服务具有sudo的权限。因为Apache 不能使用root用户服务，用户必须运行dashboard 作为sudo 权限身份认证服务。
-
-•Python <span class="number">2.6</span> 或则 <span class="number">2.7</span>，Python 版本必须支持Django。Python 版本应该运行在任何系统，包括Mac OS，不同的平台安装可能不一样。 
-
-然后在一个节点上安装和配置dashboard 可以连接身份认证服务
-</code></pre><p>用下面信息的用户，因此他们能够通过本地机器的浏览器访问dashboard</p>
-<pre><code>•通过公共<span class="literal">ip</span>地址，可以访问dashboard
-
-•输入用户和密码
-
- 你的浏览器，必须支持HTML5 ，启用cookies 和JavaScript
-</code></pre><p>注意：</p>
-<pre><code>使用带有dashboard的VNC 客户端，浏览器必须支持HTML5 画布和 HTML5 WebSockets
-</code></pre><ul>
-<li>1），安装包：</li>
-</ul>
-<pre><code># apt-<span class="built_in">get</span> install openstack-dashboard apache2 libapache2-<span class="keyword">mod</span>-wsgi
-memcached <span class="keyword">python</span>-memcache
-</code></pre><p>注意：Ubuntu 安装  openstack-dashboard-ubuntu-theme包作为依赖。一些用户报告以前发布的版本有问题。如果你遇到问题，移除这个包，恢复到原先的openstack包。</p>
-<p>移除可以执行下面命令（这里执行了下面命令）</p>
-<pre><code><span class="preprocessor">#  dpkg --purge openstack-dashboard-ubuntu-theme</span>
-</code></pre><ul>
-<li>2），配置dashboard，修改配置文件/etc/openstack-dashboard/local_settings.py</li>
-</ul>
-<pre><code>OPENSTACK_HOST = <span class="string">"controller"</span>
-ALLOWED_HOSTS = [<span class="string">'*'</span>]
-
-CACHES = {
-<span class="string">'default'</span>: {
-<span class="string">'BACKEND'</span>: <span class="string">'django.core.cache.backends.memcached.
-MemcachedCache'</span>,
-<span class="string">'LOCATION'</span>: <span class="string">'127.0.0.1:11211'</span>,
-}
-}
-</code></pre><p>注意：注释掉其它session存储配置这里不需要修改</p>
-<p>.可选，配置其它 time zone</p>
-<p> TIME_ZONE = “TIME_ZONE”<br>/usr/share/zoneinfo/Asia/ 下保存着系统各个时区信息/etc/localtime 保存当前系统时区及时间信息</p>
-<ul>
-<li>3），检验安装：重启服务。</li>
-</ul>
-<pre><code><span class="preprocessor"># service apache2 restart</span>
-<span class="preprocessor"># service memcached restart</span>
-</code></pre><ul>
-<li>4)，打开浏览器，输入：192.168.0.146/horizon。可以选择使用demo或者admin这两个用户之一登录。</li>
-</ul>
-<p><img src="http://7xl5dz.com1.z0.glb.clouddn.com/dashboard.jpg" alt="dashboard"></p>
-<p>进入后的web界面大概是这样；</p>
-<p><img src="http://7xl5dz.com1.z0.glb.clouddn.com/dashboard2.png" alt="dashboard2"></p>
-<p>在这个界面里可以比较便捷的创建实例，迁移，调整实例大小，设置访问规则等，利用图形化界面管理特别方便。</p>
+vmstat  <span class="number">1</span>  <span class="number">5</span>  ：每<span class="number">1</span>秒刷新一次，只显示<span class="number">5</span>次。</span>
+</code></pre><p><em>补充知识：</em><br>解释下进程上下文的含义（也不一定太准确）：<br>   当一个进程在执行时,CPU的所有寄存器中的值、进程的状态以及堆栈中的内容被称为该进程的上下文。当内核需要切换到另一个进程时，它需要保存当前进程的所有状态，即保存当前进程的上下文，以便在再次执行该进程时，能够得到切换时的状态执行下去。在LINUX中，当前进程上下文均保存在进程的任务数据结构中。在发生中断时,内核就在被中断进程的上下文中，在内核态下执行中断服务例程。但同时会保留所有需要用到的资源，以便中继服务结束时能恢复被中断进程的执行。</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://www.stackops.info/2015/08/20/OpenStack搭建-dashboard组件/" data-id="ciev42795000xlw7bgdvmrfk2" class="article-share-link">Share</a>
+      <a data-url="http://www.stackops.info/2015/09/22/Linux命令详解-vmstat/" data-id="ciev427b4001qlw7buek9r98b" class="article-share-link">Share</a>
       
       
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/dashboard/">dashboard</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/openstack/">openstack</a></li></ul>
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux/">linux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/vmstat/">vmstat</a></li></ul>
 
     </footer>
   </div>
@@ -172,19 +141,10 @@ MemcachedCache'</span>,
     
 <nav id="article-nav">
   
-    <a href="/2015/08/20/OpenStack搭建-实例创建/" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Newer</strong>
-      <div class="article-nav-title">
-        
-          OpenStack搭建-实例创建
-        
-      </div>
-    </a>
   
-  
-    <a href="/2015/08/20/OpenStackd搭建-网络组件/" id="article-nav-older" class="article-nav-link-wrap">
+    <a href="/2015/09/21/网易互联网-系统运维工程师面试记/" id="article-nav-older" class="article-nav-link-wrap">
       <strong class="article-nav-caption">Older</strong>
-      <div class="article-nav-title">OpenStackd搭建-网络组件</div>
+      <div class="article-nav-title">网易互联网-系统运维工程师面试记</div>
     </a>
   
 </nav>
@@ -195,7 +155,7 @@ MemcachedCache'</span>,
 
   <section id="comments">
     <!-- 多说评论框 start -->
-    <div class="ds-thread" data-thread-key="post-OpenStack搭建-dashboard组件" data-title="OpenStack搭建-dashboard组件" data-url="http://www.stackops.info/2015/08/20/OpenStack搭建-dashboard组件/"></div>
+    <div class="ds-thread" data-thread-key="post-Linux命令详解-vmstat" data-title="Linux命令详解-vmstat" data-url="http://www.stackops.info/2015/09/22/Linux命令详解-vmstat/"></div>
     <!-- 多说评论框 end -->
     <!-- 多说公共JS代码 start (一个网页只需插入一次) -->
     <script type="text/javascript">

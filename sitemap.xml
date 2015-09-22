@@ -1,326 +1,99 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-
-    
+  
+  <url>
+    <loc>http://www.stackops.info/2015/09/22/Linux%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3-vmstat/</loc>
+    <lastmod>2015-09-22T08:36:00.853Z</lastmod>
+  </url>
+  
   <url>
     <loc>http://www.stackops.info/2015/09/21/%E7%BD%91%E6%98%93%E4%BA%92%E8%81%94%E7%BD%91-%E7%B3%BB%E7%BB%9F%E8%BF%90%E7%BB%B4%E5%B7%A5%E7%A8%8B%E5%B8%88%E9%9D%A2%E8%AF%95%E8%AE%B0/</loc>
     <lastmod>2015-09-22T07:03:43.938Z</lastmod>
-    <data>
-        <display>
-        <title>网易互联网-系统运维工程师面试记</title>
-        <pubTime>2015-09-21T12:58:18.000Z</pubTime>
-        
-        <tag>NetEase </tag>
-         
-         
-           
-        </display>
-    </data>
-    </url>
-
-    
+  </url>
+  
   <url>
     <loc>http://www.stackops.info/2015/09/20/Linux%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3-free/</loc>
     <lastmod>2015-09-20T12:39:13.752Z</lastmod>
-    <data>
-        <display>
-        <title>Linux命令详解-free</title>
-        <pubTime>2015-09-20T12:15:53.000Z</pubTime>
-        
-        <tag>free </tag>
-         
-        <tag>linux </tag>
-         
-         
-           
-        </display>
-    </data>
-    </url>
-
-    
+  </url>
+  
   <url>
     <loc>http://www.stackops.info/2015/08/20/OpenStack%E6%90%AD%E5%BB%BA-dashboard%E7%BB%84%E4%BB%B6/</loc>
     <lastmod>2015-09-15T15:10:48.973Z</lastmod>
-    <data>
-        <display>
-        <title>OpenStack搭建-dashboard组件</title>
-        <pubTime>2015-08-20T06:35:47.000Z</pubTime>
-        
-        <tag>dashboard </tag>
-         
-        <tag>openstack </tag>
-         
-         
-           
-        </display>
-    </data>
-    </url>
-
-    
+  </url>
+  
   <url>
     <loc>http://www.stackops.info/2015/09/14/bash%E7%BC%96%E7%A8%8B-%E6%96%90%E6%B3%A2%E9%82%A3%E5%A5%91%E5%BA%8F%E5%88%97/</loc>
     <lastmod>2015-09-14T15:26:07.019Z</lastmod>
-    <data>
-        <display>
-        <title>bash编程-斐波那契序列</title>
-        <pubTime>2015-09-14T14:14:49.000Z</pubTime>
-        
-        <tag>Fibonacci Sequence </tag>
-         
-        <tag>bash </tag>
-         
-         
-           
-        </display>
-    </data>
-    </url>
-
-    
+  </url>
+  
   <url>
     <loc>http://www.stackops.info/2015/09/13/Linux%E5%86%85%E6%A0%B8%E5%8D%87%E7%BA%A7/</loc>
     <lastmod>2015-09-13T04:16:00.824Z</lastmod>
-    <data>
-        <display>
-        <title>Linux内核升级</title>
-        <pubTime>2015-09-13T02:01:52.000Z</pubTime>
-        
-        <tag>kernel </tag>
-         
-        <tag>linux </tag>
-         
-         
-           
-        </display>
-    </data>
-    </url>
-
-    
+  </url>
+  
   <url>
     <loc>http://www.stackops.info/2015/08/20/OpenStack%E6%90%AD%E5%BB%BA-%E5%AE%9E%E4%BE%8B%E5%88%9B%E5%BB%BA/</loc>
     <lastmod>2015-08-20T07:38:12.686Z</lastmod>
-    <data>
-        <display>
-        <title>OpenStack搭建-实例创建</title>
-        <pubTime>2015-08-20T07:20:21.000Z</pubTime>
-        
-         
-           
-        </display>
-    </data>
-    </url>
-
-    
+  </url>
+  
   <url>
     <loc>http://www.stackops.info/2015/08/20/OpenStackd%E6%90%AD%E5%BB%BA-%E7%BD%91%E7%BB%9C%E7%BB%84%E4%BB%B6/</loc>
     <lastmod>2015-08-20T06:24:37.575Z</lastmod>
-    <data>
-        <display>
-        <title>OpenStackd搭建-网络组件</title>
-        <pubTime>2015-08-20T05:16:10.000Z</pubTime>
-        
-        <tag>network </tag>
-         
-        <tag>nova-network </tag>
-         
-        <tag>openstack </tag>
-         
-         
-           
-        </display>
-    </data>
-    </url>
-
-    
+  </url>
+  
   <url>
     <loc>http://www.stackops.info/2015/08/20/OpenStack%E6%90%AD%E5%BB%BA-nova%E7%BB%84%E4%BB%B6/</loc>
     <lastmod>2015-08-20T04:40:16.907Z</lastmod>
-    <data>
-        <display>
-        <title>OpenStack搭建-nova组件</title>
-        <pubTime>2015-08-20T01:14:43.000Z</pubTime>
-        
-        <tag>compute </tag>
-         
-        <tag>nova </tag>
-         
-        <tag>openstack </tag>
-         
-         
-           
-        </display>
-    </data>
-    </url>
-
-    
+  </url>
+  
   <url>
     <loc>http://www.stackops.info/2015/08/19/OpenStack%E6%90%AD%E5%BB%BA-Keystone%E7%BB%84%E4%BB%B6/</loc>
     <lastmod>2015-08-20T04:40:13.267Z</lastmod>
-    <data>
-        <display>
-        <title>OpenStack搭建-Keystone组件</title>
-        <pubTime>2015-08-19T09:10:02.000Z</pubTime>
-        
-        <tag>Keystone </tag>
-         
-        <tag>OpenStack </tag>
-         
-         
-           
-        </display>
-    </data>
-    </url>
-
-    
+  </url>
+  
   <url>
     <loc>http://www.stackops.info/2015/08/19/OpenStack%E6%90%AD%E5%BB%BA-Glance%E7%BB%84%E4%BB%B6/</loc>
     <lastmod>2015-08-20T04:40:09.238Z</lastmod>
-    <data>
-        <display>
-        <title>OpenStack搭建-Glance组件</title>
-        <pubTime>2015-08-19T13:41:14.000Z</pubTime>
-        
-        <tag>glance </tag>
-         
-        <tag>image </tag>
-         
-        <tag>openstack </tag>
-         
-         
-           
-        </display>
-    </data>
-    </url>
-
-    
-    
+  </url>
+  
+  <url>
+    <loc>http://www.stackops.info/OpenStack%E6%90%AD%E5%BB%BA-nova%E7%BB%84%E4%BB%B6.html</loc>
+    <lastmod>2015-08-20T02:42:46.555Z</lastmod>
+  </url>
+  
   <url>
     <loc>http://www.stackops.info/2015/08/09/%E4%BD%BF%E7%94%A8submin%E6%90%AD%E5%BB%BA%E5%9B%BE%E5%BD%A2%E5%8C%96svn%E7%AE%A1%E7%90%86%E5%B7%A5%E5%85%B7/</loc>
     <lastmod>2015-08-19T08:52:27.074Z</lastmod>
-    <data>
-        <display>
-        <title>使用submin搭建图形化svn管理工具</title>
-        <pubTime>2015-08-09T14:58:11.000Z</pubTime>
-        
-        <tag>submin </tag>
-         
-        <tag>svn </tag>
-         
-         
-           
-        </display>
-    </data>
-    </url>
-
-    
+  </url>
+  
   <url>
     <loc>http://www.stackops.info/2015/08/17/Cisco-2960%E4%BA%A4%E6%8D%A2%E6%9C%BA%E9%85%8D%E7%BD%AE/</loc>
     <lastmod>2015-08-17T16:10:00.706Z</lastmod>
-    <data>
-        <display>
-        <title>Cisco-2960交换机配置</title>
-        <pubTime>2015-08-17T12:32:58.000Z</pubTime>
-        
-        <tag>Cisco </tag>
-         
-        <tag>switch </tag>
-         
-         
-           
-        </display>
-    </data>
-    </url>
-
-    
+  </url>
+  
   <url>
     <loc>http://www.stackops.info/2015/08/15/%E6%9C%BA%E6%88%BF%E7%BD%91%E7%BB%9C%E4%BC%98%E5%8C%96/</loc>
     <lastmod>2015-08-16T15:56:16.154Z</lastmod>
-    <data>
-        <display>
-        <title>机房网络优化</title>
-        <pubTime>2015-08-15T12:50:58.000Z</pubTime>
-        
-        <tag>Etherchannel </tag>
-         
-        <tag>RSTP </tag>
-         
-        <tag>portfast </tag>
-         
-         
-           
-        </display>
-    </data>
-    </url>
-
-    
+  </url>
+  
   <url>
     <loc>http://www.stackops.info/2015/08/09/OpenStack-%E5%9F%BA%E7%A1%80%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E4%B8%80/</loc>
     <lastmod>2015-08-15T10:48:06.023Z</lastmod>
-    <data>
-        <display>
-        <title>OpenStack基础环境搭建一</title>
-        <pubTime>2015-08-09T14:58:11.000Z</pubTime>
-        
-        <tag>openstack </tag>
-         
-         
-           
-        </display>
-    </data>
-    </url>
-
-    
+  </url>
+  
   <url>
     <loc>http://www.stackops.info/2015/08/09/OpenStack%E6%90%AD%E5%BB%BA%E6%96%87%E6%A1%A3/</loc>
     <lastmod>2015-08-15T03:39:45.748Z</lastmod>
-    <data>
-        <display>
-        <title>OpenStack搭建文档</title>
-        <pubTime>2015-08-09T14:58:11.000Z</pubTime>
-        
-        <tag>openstack </tag>
-         
-         
-           
-        </display>
-    </data>
-    </url>
-
-    
+  </url>
+  
   <url>
     <loc>http://www.stackops.info/2015/08/09/OpenStack-%E5%9F%BA%E7%A1%80%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E4%BA%8C/</loc>
     <lastmod>2015-08-15T03:00:50.443Z</lastmod>
-    <data>
-        <display>
-        <title>OpenStack基础环境搭建二</title>
-        <pubTime>2015-08-09T14:58:11.000Z</pubTime>
-        
-        <tag>AMQP </tag>
-         
-        <tag>NTP </tag>
-         
-        <tag>openstack </tag>
-         
-         
-           
-        </display>
-    </data>
-    </url>
-
-    
+  </url>
+  
   <url>
     <loc>http://www.stackops.info/2015/08/09/first/</loc>
     <lastmod>2015-08-12T02:57:16.322Z</lastmod>
-    <data>
-        <display>
-        <title>first</title>
-        <pubTime>2015-08-09T08:37:45.000Z</pubTime>
-        
-        <tag>hexo </tag>
-         
-         
-           
-        </display>
-    </data>
-    </url>
-
+  </url>
+  
 </urlset>
