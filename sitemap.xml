@@ -2,6 +2,11 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://www.stackops.info/2015/09/22/Linux%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3-top/</loc>
+    <lastmod>2015-09-22T11:22:57.148Z</lastmod>
+  </url>
+  
+  <url>
     <loc>http://www.stackops.info/2015/09/22/Linux%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3-vmstat/</loc>
     <lastmod>2015-09-22T08:36:00.853Z</lastmod>
   </url>

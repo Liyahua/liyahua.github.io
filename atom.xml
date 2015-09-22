@@ -5,7 +5,7 @@
   <subtitle><![CDATA[Follow your heart]]></subtitle>
   <link href="/atom.xml" rel="self"/>
   <link href="http://www.stackops.info//"/>
-  <updated>2015-09-22T08:36:00.853Z</updated>
+  <updated>2015-09-22T11:22:57.148Z</updated>
   <id>http://www.stackops.info//</id>
   
   <author>
@@ -14,6 +14,100 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title><![CDATA[Linux命令详解-top]]></title>
+    <link href="http://www.stackops.info/2015/09/22/Linux%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3-top/"/>
+    <id>http://www.stackops.info/2015/09/22/Linux命令详解-top/</id>
+    <published>2015-09-22T09:02:26.000Z</published>
+    <updated>2015-09-22T11:22:57.148Z</updated>
+    <content type="html"><![CDATA[<p>显示全文：</p>
+<a id="more"></a>
+<p>linux下的top命令能够比较详细的显示linux正在运行的一些进程，显示cpu，内存等资源使用率，非常实用。</p>
+<h2 id="执行top命令的输出：">执行top命令的输出：</h2><pre><code>top - 18:41:37 up  3:22,  1 user,  <span class="operator"><span class="keyword">load</span> average: <span class="number">0.00</span>, <span class="number">0.00</span>, <span class="number">0.00</span>
+Tasks: <span class="number">145</span> total,   <span class="number">1</span> running, <span class="number">144</span> sleeping,   <span class="number">0</span> stopped,   <span class="number">0</span> zombie
+Cpu(s):  <span class="number">0.1</span>%us,  <span class="number">0.2</span>%sy,  <span class="number">0.0</span>%ni, <span class="number">99.2</span>%<span class="keyword">id</span>,  <span class="number">0.6</span>%wa,  <span class="number">0.0</span>%hi,  <span class="number">0.0</span>%si,  <span class="number">0.0</span>%st
+Mem:   <span class="number">1906552</span><span class="keyword">k</span> total,   <span class="number">358736</span><span class="keyword">k</span> used,  <span class="number">1547816</span><span class="keyword">k</span> free,    <span class="number">61964</span><span class="keyword">k</span> buffers
+Swap:  <span class="number">2097144</span><span class="keyword">k</span> total,        <span class="number">0</span><span class="keyword">k</span> used,  <span class="number">2097144</span><span class="keyword">k</span> free,   <span class="number">168592</span><span class="keyword">k</span> cached
+
+   PID <span class="keyword">USER</span>      PR  NI  VIRT  RES  SHR S %CPU %MEM    <span class="keyword">TIME</span>+  COMMAND                        
+   <span class="number">250</span> root      <span class="number">20</span>   <span class="number">0</span>     <span class="number">0</span>    <span class="number">0</span>    <span class="number">0</span> S  <span class="number">2.0</span>  <span class="number">0.0</span>   <span class="number">0</span>:<span class="number">00.64</span> mpt_poll_0                      
+  <span class="number">3925</span> root      <span class="number">20</span>   <span class="number">0</span> <span class="number">15032</span> <span class="number">1128</span>  <span class="number">832</span> R  <span class="number">2.0</span>  <span class="number">0.1</span>   <span class="number">0</span>:<span class="number">00.02</span> top                             
+     <span class="number">1</span> root      <span class="number">20</span>   <span class="number">0</span> <span class="number">19356</span> <span class="number">1540</span> <span class="number">1232</span> S  <span class="number">0.0</span>  <span class="number">0.1</span>   <span class="number">0</span>:<span class="number">02.24</span> init                            
+     <span class="number">2</span> root      <span class="number">20</span>   <span class="number">0</span>     <span class="number">0</span>    <span class="number">0</span>    <span class="number">0</span> S  <span class="number">0.0</span>  <span class="number">0.0</span>   <span class="number">0</span>:<span class="number">00.01</span> kthreadd                        
+     <span class="number">3</span> root      RT   <span class="number">0</span>     <span class="number">0</span>    <span class="number">0</span>    <span class="number">0</span> S  <span class="number">0.0</span>  <span class="number">0.0</span>   <span class="number">0</span>:<span class="number">00.40</span> <span class="keyword">migration</span>/<span class="number">0</span>                     
+     <span class="number">4</span> root      <span class="number">20</span>   <span class="number">0</span>     <span class="number">0</span>    <span class="number">0</span>    <span class="number">0</span> S  <span class="number">0.0</span>  <span class="number">0.0</span>   <span class="number">0</span>:<span class="number">00.45</span> ksoftirqd/<span class="number">0</span>                     
+     <span class="number">5</span> root      RT   <span class="number">0</span>     <span class="number">0</span>    <span class="number">0</span>    <span class="number">0</span> S  <span class="number">0.0</span>  <span class="number">0.0</span>   <span class="number">0</span>:<span class="number">00.00</span> <span class="keyword">migration</span>/<span class="number">0</span>                     
+     <span class="number">6</span> root      RT   <span class="number">0</span>     <span class="number">0</span>    <span class="number">0</span>    <span class="number">0</span> S  <span class="number">0.0</span>  <span class="number">0.0</span>   <span class="number">0</span>:<span class="number">00.04</span> watchdog/<span class="number">0</span>                      
+     <span class="number">7</span> root      RT   <span class="number">0</span>     <span class="number">0</span>    <span class="number">0</span>    <span class="number">0</span> S  <span class="number">0.0</span>  <span class="number">0.0</span>   <span class="number">0</span>:<span class="number">00.11</span> <span class="keyword">migration</span>/<span class="number">1</span>                     
+     <span class="number">8</span> root      RT   <span class="number">0</span>     <span class="number">0</span>    <span class="number">0</span>    <span class="number">0</span> S  <span class="number">0.0</span>  <span class="number">0.0</span>   <span class="number">0</span>:<span class="number">00.00</span> <span class="keyword">migration</span>/<span class="number">1</span>                     
+     <span class="number">9</span> root      <span class="number">20</span>   <span class="number">0</span>     <span class="number">0</span>    <span class="number">0</span>    <span class="number">0</span> S  <span class="number">0.0</span>  <span class="number">0.0</span>   <span class="number">0</span>:<span class="number">00.20</span> ksoftirqd/<span class="number">1</span>                     
+    <span class="number">10</span> root      RT   <span class="number">0</span>     <span class="number">0</span>    <span class="number">0</span>    <span class="number">0</span> S  <span class="number">0.0</span>  <span class="number">0.0</span>   <span class="number">0</span>:<span class="number">00.03</span> watchdog/<span class="number">1</span>                      
+    <span class="number">11</span> root      <span class="number">20</span>   <span class="number">0</span>     <span class="number">0</span>    <span class="number">0</span>    <span class="number">0</span> S  <span class="number">0.0</span>  <span class="number">0.0</span>   <span class="number">0</span>:<span class="number">11.86</span> <span class="keyword">events</span>/<span class="number">0</span>                        
+    <span class="number">12</span> root      <span class="number">20</span>   <span class="number">0</span>     <span class="number">0</span>    <span class="number">0</span>    <span class="number">0</span> S  <span class="number">0.0</span>  <span class="number">0.0</span>   <span class="number">0</span>:<span class="number">01.63</span> <span class="keyword">events</span>/<span class="number">1</span>                        
+    <span class="number">13</span> root      <span class="number">20</span>   <span class="number">0</span>     <span class="number">0</span>    <span class="number">0</span>    <span class="number">0</span> S  <span class="number">0.0</span>  <span class="number">0.0</span>   <span class="number">0</span>:<span class="number">00.00</span> cgroup                          
+    <span class="number">14</span> root      <span class="number">20</span>   <span class="number">0</span>     <span class="number">0</span>    <span class="number">0</span>    <span class="number">0</span> S  <span class="number">0.0</span>  <span class="number">0.0</span>   <span class="number">0</span>:<span class="number">00.00</span> khelper                         
+    <span class="number">15</span> root      <span class="number">20</span>   <span class="number">0</span>     <span class="number">0</span>    <span class="number">0</span>    <span class="number">0</span> S  <span class="number">0.0</span>  <span class="number">0.0</span>   <span class="number">0</span>:<span class="number">00.00</span> netns                           
+    <span class="number">16</span> root      <span class="number">20</span>   <span class="number">0</span>     <span class="number">0</span>    <span class="number">0</span>    <span class="number">0</span> S  <span class="number">0.0</span>  <span class="number">0.0</span>   <span class="number">0</span>:<span class="number">00.00</span> async/mgr                       
+    <span class="number">17</span> root      <span class="number">20</span>   <span class="number">0</span>     <span class="number">0</span>    <span class="number">0</span>    <span class="number">0</span> S  <span class="number">0.0</span>  <span class="number">0.0</span>   <span class="number">0</span>:<span class="number">00.00</span> pm                              
+    <span class="number">18</span> root      <span class="number">20</span>   <span class="number">0</span>     <span class="number">0</span>    <span class="number">0</span>    <span class="number">0</span> S  <span class="number">0.0</span>  <span class="number">0.0</span>   <span class="number">0</span>:<span class="number">00.14</span> sync_supers      </span>
+</code></pre><p>输出各参数含义：</p>
+<p><strong>top - 18:41:37 up  3:22</strong>：启动时间，运行时间。<br><strong>load  average  0.00  0.00  0.00</strong>   平均1min，5min，10min的平均队列长度，长度约小，cpu负载越低<br><strong>tasks</strong>：所有进程的相关信息。正在运行的进程总数，睡眠中的进程，运行中的进程，僵尸进程以及停止进程的数目。<br><strong>cpus</strong>显示平均cpu的负载情况；按1键可以看到多个cpu的情况。</p>
+<pre><code><span class="number">0.0</span>%us：用户空间所占的百分比
+<span class="number">0.2</span>%<span class="keyword">sy</span>：系统进程所占用cpu百分比，
+ni：nice值，调整nice或者为了调整nice所占比例。
+id：空闲； <span class="keyword">w</span><span class="variable">a:</span>等待IO完成所等待的时间。<span class="keyword">hi</span>：硬件终端所占用的时间。si：软件终端所占用的时间
+<span class="keyword">st</span>：被偷走的。
+</code></pre><p><strong>Mem</strong>：内存统计信息，包括内存总量，已用内存，空闲内存量，不同进程共享的内存量，以及用作缓冲区的内存量。</p>
+<p><strong>Swap</strong>：显示了虚存或交换活动的统计信息，包括交换空间总量，已用的交换空间，空闲的交换空间大小以及缓存的交换空间大小。</p>
+<p><strong>VIRT</strong>：虚拟内存集：进程“需要的”虚拟内存大小，包括进程使用的库，代码，数据等。假如进程申请100m的内存，但实际只使用了10m，那么它会增长100m，而不是实际的使用量<br><strong>RES</strong>：常驻内存集    ：</p>
+<pre><code><span class="number">1</span>），进程当前使用的内存大小，但不包括swap out 
+<span class="number">2</span>），包含其他进程的共享 
+<span class="number">3</span>），如果申请<span class="number">100</span>m的内存，实际使用<span class="number">10</span>m，它只增长<span class="number">10</span>m，与VIRT相反 
+<span class="number">4</span>），关于库占用内存的情况，它只统计加载的库文件所占内存大小 
+</code></pre><p><strong>SHR</strong>：共享内存大小：</p>
+<pre><code><span class="number">1</span>），除了自身进程的共享内存，也包括其他进程的共享内存 
+<span class="number">2</span>），虽然进程只使用了几个共享库的函数，但它包含了整个共享库的大小 
+<span class="number">3</span>），计算某个进程所占的物理内存大小公式：RES – SHR 
+<span class="number">4</span>），swap out后，它将会降下来 
+</code></pre><p><strong>S</strong>：状态（详细进程各种状态见下方补充）。<br><strong>time</strong>：并不是挂钟走的时间，而是真正占用cpu的时间。</p>
+<h2 id="top是一个交互命令，我们可以输入以下命令：">top是一个交互命令，我们可以输入以下命令：</h2><pre><code><span class="keyword">M</span>：按照<span class="keyword">memory</span>的大小进行排列。
+P：按照占用的cpu进行排列。
+T：占用的时间进行排序。
+
+<span class="keyword">l</span>：是否显示平均负载和启动时间
+t：是否显示进程和CPU状态相关信息。
+<span class="keyword">m</span>：是否显示内存相关信息。
+
+c：是否显示完整的命令行信息
+q：退出top
+k：终止某个进程。
+
+top   -<span class="keyword">d</span>  1  ：显示刷新时长为1s
+top    -b  ：批处理，一屏一屏显示。
+    -<span class="keyword">n</span>  #：指定显示多少批。
+</code></pre><p><em>补充：进程的一些状态信息：</em></p>
+<h2 id="进程状态：">进程状态：</h2><pre><code><span class="keyword">*</span><span class="keyword">*</span>D<span class="keyword">*</span><span class="keyword">*</span>:表示不可中断的睡眠
+<span class="keyword">*</span><span class="keyword">*</span>R<span class="keyword">*</span><span class="keyword">*</span>:表示运行或就绪
+<span class="keyword">*</span><span class="keyword">*</span>S<span class="keyword">*</span><span class="keyword">*</span>：可中断的睡眠
+<span class="keyword">*</span><span class="keyword">*</span>T<span class="keyword">*</span><span class="keyword">*</span>：停止
+<span class="keyword">*</span><span class="keyword">*</span>Z<span class="keyword">*</span><span class="keyword">*</span>：僵死
+<span class="keyword">*</span><span class="keyword">*</span><span class="variable">&lt;**：高优先级的进程
+**N**：低优先级的进程
+**+**：前台进程组中的进程。（从命令行输入的进程）
+**l**：多线程进程
+**s**：会话进程首进程</span>
+</code></pre>]]></content>
+    <summary type="html">
+    <![CDATA[<p>显示全文：</p>]]>
+    
+    </summary>
+    
+      <category term="linux" scheme="http://www.stackops.info/tags/linux/"/>
+    
+      <category term="top" scheme="http://www.stackops.info/tags/top/"/>
+    
+  </entry>
   
   <entry>
     <title><![CDATA[Linux命令详解-vmstat]]></title>
@@ -2579,7 +2673,7 @@ Include /<span class="keyword">var</span>/lib/submin/conf/apache-svn.conf
 
 <span class="tag">&lt;/IfModule&gt;</span>
 <span class="tag">&lt;/VirtualHost&gt;</span>
-</code></pre><p>当通过浏览器访问web管理界面的时候：<a href="http://192.168.3.48/submin会提示你输入账户和密码，这时候你可以点击页面上的" target="_blank" rel="external">http://192.168.3.48/submin会提示你输入账户和密码，这时候你可以点击页面上的</a>  Forgot your  password , 然后会主动发一封邮件给root用户：<br>可以通过命令：# cat /var/spool/mail/root 查看发过来的重置密码的连接，我们可以通过该链接进行密码的修改：<br>    From: root@localhost.novalocal<br>    To: liyahua@xxx.com<br>    Subject: Submin password reset request<br>    Message-Id: <a href="&#109;&#97;&#105;&#x6c;&#x74;&#x6f;&#58;&#50;&#x30;&#x31;&#53;&#48;&#56;&#49;&#51;&#x30;&#x36;&#50;&#55;&#x35;&#x35;&#46;&#66;&#54;&#x38;&#x36;&#x46;&#x36;&#49;&#x46;&#x37;&#68;&#x40;&#115;&#118;&#x6e;&#x61;&#x64;&#109;&#105;&#x6e;&#x2e;&#x6e;&#111;&#x76;&#x61;&#108;&#x6f;&#x63;&#97;&#108;">&#50;&#x30;&#x31;&#53;&#48;&#56;&#49;&#51;&#x30;&#x36;&#50;&#55;&#x35;&#x35;&#46;&#66;&#54;&#x38;&#x36;&#x46;&#x36;&#49;&#x46;&#x37;&#68;&#x40;&#115;&#118;&#x6e;&#x61;&#x64;&#109;&#105;&#x6e;&#x2e;&#x6e;&#111;&#x76;&#x61;&#108;&#x6f;&#x63;&#97;&#108;</a><br>    Date: Thu, 13 Aug 2015 06:27:55 +0000 (UTC)</p>
+</code></pre><p>当通过浏览器访问web管理界面的时候：<a href="http://192.168.3.48/submin会提示你输入账户和密码，这时候你可以点击页面上的" target="_blank" rel="external">http://192.168.3.48/submin会提示你输入账户和密码，这时候你可以点击页面上的</a>  Forgot your  password , 然后会主动发一封邮件给root用户：<br>可以通过命令：# cat /var/spool/mail/root 查看发过来的重置密码的连接，我们可以通过该链接进行密码的修改：<br>    From: root@localhost.novalocal<br>    To: liyahua@xxx.com<br>    Subject: Submin password reset request<br>    Message-Id: <a href="&#x6d;&#x61;&#x69;&#x6c;&#x74;&#111;&#x3a;&#50;&#x30;&#x31;&#x35;&#x30;&#x38;&#x31;&#x33;&#48;&#54;&#50;&#55;&#x35;&#53;&#x2e;&#66;&#x36;&#x38;&#54;&#70;&#x36;&#x31;&#70;&#55;&#68;&#64;&#115;&#x76;&#x6e;&#97;&#100;&#x6d;&#x69;&#x6e;&#x2e;&#x6e;&#111;&#x76;&#97;&#x6c;&#x6f;&#x63;&#x61;&#x6c;">&#50;&#x30;&#x31;&#x35;&#x30;&#x38;&#x31;&#x33;&#48;&#54;&#50;&#55;&#x35;&#53;&#x2e;&#66;&#x36;&#x38;&#54;&#70;&#x36;&#x31;&#70;&#55;&#68;&#64;&#115;&#x76;&#x6e;&#97;&#100;&#x6d;&#x69;&#x6e;&#x2e;&#x6e;&#111;&#x76;&#97;&#x6c;&#x6f;&#x63;&#x61;&#x6c;</a><br>    Date: Thu, 13 Aug 2015 06:27:55 +0000 (UTC)</p>
 <pre><code>You <span class="keyword">are</span> receiving this email because someone requested a password reset for
 your account. If you don't know what this <span class="keyword">is</span> about, you can safely ignore it,
 the reset request will expire automatically.
