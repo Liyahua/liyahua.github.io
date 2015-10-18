@@ -2,6 +2,51 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://www.stackops.info/2015/08/20/OpenStack%E6%90%AD%E5%BB%BA09-%E5%AE%9E%E4%BE%8B%E5%88%9B%E5%BB%BA/</loc>
+    <lastmod>2015-10-18T03:30:24.270Z</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://www.stackops.info/2015/08/20/OpenStack%E6%90%AD%E5%BB%BA08-dashboard%E7%BB%84%E4%BB%B6/</loc>
+    <lastmod>2015-10-18T03:30:02.379Z</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://www.stackops.info/2015/08/20/OpenStackd%E6%90%AD%E5%BB%BA07-network/</loc>
+    <lastmod>2015-10-18T03:29:40.265Z</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://www.stackops.info/2015/08/20/OpenStack%E6%90%AD%E5%BB%BA06-nova%E7%BB%84%E4%BB%B6/</loc>
+    <lastmod>2015-10-18T03:29:16.413Z</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://www.stackops.info/2015/08/19/OpenStack%E6%90%AD%E5%BB%BA05-Glance%E7%BB%84%E4%BB%B6/</loc>
+    <lastmod>2015-10-18T03:28:57.199Z</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://www.stackops.info/2015/08/19/OpenStack%E6%90%AD%E5%BB%BA04-Keystone%E7%BB%84%E4%BB%B6/</loc>
+    <lastmod>2015-10-18T03:28:37.807Z</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://www.stackops.info/2015/08/09/OpenStack%E6%90%AD%E5%BB%BA03-%E5%9F%BA%E7%A1%80%E7%8E%AF%E5%A2%83%E4%BA%8C/</loc>
+    <lastmod>2015-10-18T03:28:16.238Z</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://www.stackops.info/2015/08/09/OpenStack%E6%90%AD%E5%BB%BA02-%E5%9F%BA%E7%A1%80%E7%8E%AF%E5%A2%83%E4%B8%80/</loc>
+    <lastmod>2015-10-18T03:27:53.581Z</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://www.stackops.info/2015/08/09/OpenStack%E6%90%AD%E5%BB%BA01-%E7%AE%80%E4%BB%8B/</loc>
+    <lastmod>2015-10-18T03:27:31.503Z</lastmod>
+  </url>
+  
+  <url>
     <loc>http://www.stackops.info/2015/09/22/Linux%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3-top/</loc>
     <lastmod>2015-09-22T11:22:57.148Z</lastmod>
   </url>
@@ -22,11 +67,6 @@
   </url>
   
   <url>
-    <loc>http://www.stackops.info/2015/08/20/OpenStack%E6%90%AD%E5%BB%BA-dashboard%E7%BB%84%E4%BB%B6/</loc>
-    <lastmod>2015-09-15T15:10:48.973Z</lastmod>
-  </url>
-  
-  <url>
     <loc>http://www.stackops.info/2015/09/14/bash%E7%BC%96%E7%A8%8B-%E6%96%90%E6%B3%A2%E9%82%A3%E5%A5%91%E5%BA%8F%E5%88%97/</loc>
     <lastmod>2015-09-14T15:26:07.019Z</lastmod>
   </url>
@@ -34,31 +74,6 @@
   <url>
     <loc>http://www.stackops.info/2015/09/13/Linux%E5%86%85%E6%A0%B8%E5%8D%87%E7%BA%A7/</loc>
     <lastmod>2015-09-13T04:16:00.824Z</lastmod>
-  </url>
-  
-  <url>
-    <loc>http://www.stackops.info/2015/08/20/OpenStack%E6%90%AD%E5%BB%BA-%E5%AE%9E%E4%BE%8B%E5%88%9B%E5%BB%BA/</loc>
-    <lastmod>2015-08-20T07:38:12.686Z</lastmod>
-  </url>
-  
-  <url>
-    <loc>http://www.stackops.info/2015/08/20/OpenStackd%E6%90%AD%E5%BB%BA-%E7%BD%91%E7%BB%9C%E7%BB%84%E4%BB%B6/</loc>
-    <lastmod>2015-08-20T06:24:37.575Z</lastmod>
-  </url>
-  
-  <url>
-    <loc>http://www.stackops.info/2015/08/20/OpenStack%E6%90%AD%E5%BB%BA-nova%E7%BB%84%E4%BB%B6/</loc>
-    <lastmod>2015-08-20T04:40:16.907Z</lastmod>
-  </url>
-  
-  <url>
-    <loc>http://www.stackops.info/2015/08/19/OpenStack%E6%90%AD%E5%BB%BA-Keystone%E7%BB%84%E4%BB%B6/</loc>
-    <lastmod>2015-08-20T04:40:13.267Z</lastmod>
-  </url>
-  
-  <url>
-    <loc>http://www.stackops.info/2015/08/19/OpenStack%E6%90%AD%E5%BB%BA-Glance%E7%BB%84%E4%BB%B6/</loc>
-    <lastmod>2015-08-20T04:40:09.238Z</lastmod>
   </url>
   
   <url>
@@ -79,21 +94,6 @@
   <url>
     <loc>http://www.stackops.info/2015/08/15/%E6%9C%BA%E6%88%BF%E7%BD%91%E7%BB%9C%E4%BC%98%E5%8C%96/</loc>
     <lastmod>2015-08-16T15:56:16.154Z</lastmod>
-  </url>
-  
-  <url>
-    <loc>http://www.stackops.info/2015/08/09/OpenStack-%E5%9F%BA%E7%A1%80%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E4%B8%80/</loc>
-    <lastmod>2015-08-15T10:48:06.023Z</lastmod>
-  </url>
-  
-  <url>
-    <loc>http://www.stackops.info/2015/08/09/OpenStack%E6%90%AD%E5%BB%BA%E6%96%87%E6%A1%A3/</loc>
-    <lastmod>2015-08-15T03:39:45.748Z</lastmod>
-  </url>
-  
-  <url>
-    <loc>http://www.stackops.info/2015/08/09/OpenStack-%E5%9F%BA%E7%A1%80%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E4%BA%8C/</loc>
-    <lastmod>2015-08-15T03:00:50.443Z</lastmod>
   </url>
   
   <url>

@@ -3,17 +3,17 @@
 <head>
   <meta charset="utf-8">
   
-  <title>OpenStack基础环境搭建二 | Leoli&#39;s  blog</title>
+  <title>OpenStack搭建03-基础环境二 | Leoli&#39;s  blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="显示全文：">
 <meta property="og:type" content="article">
-<meta property="og:title" content="OpenStack基础环境搭建二">
-<meta property="og:url" content="http://www.stackops.info/2015/08/09/OpenStack-基础环境搭建二/index.html">
+<meta property="og:title" content="OpenStack搭建03-基础环境二">
+<meta property="og:url" content="http://www.stackops.info/2015/08/09/OpenStack搭建03-基础环境二/index.html">
 <meta property="og:site_name" content="Leoli's  blog">
 <meta property="og:description" content="显示全文：">
-<meta property="og:updated_time" content="2015-08-15T03:00:50.443Z">
+<meta property="og:updated_time" content="2015-10-18T03:28:16.238Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="OpenStack基础环境搭建二">
+<meta name="twitter:title" content="OpenStack搭建03-基础环境二">
 <meta name="twitter:description" content="显示全文：">
   
     <link rel="alternative" href="/atom.xml" title="Leoli&#39;s  blog" type="application/atom+xml">
@@ -75,9 +75,9 @@ var _hmt = _hmt || [];
   </div>
 </header>
       <div class="outer">
-        <section id="main"><article id="post-OpenStack-基础环境搭建二" class="article article-type-post" itemscope itemprop="blogPost">
+        <section id="main"><article id="post-OpenStack搭建03-基础环境二" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2015/08/09/OpenStack-基础环境搭建二/" class="article-date">
+    <a href="/2015/08/09/OpenStack搭建03-基础环境二/" class="article-date">
   <time datetime="2015-08-09T14:58:11.000Z" itemprop="datePublished">2015-08-09</time>
 </a>
     
@@ -89,7 +89,7 @@ var _hmt = _hmt || [];
         
   
     <h1 class="article-title" itemprop="name">
-      OpenStack基础环境搭建二
+      OpenStack搭建03-基础环境二
     </h1>
   
 
@@ -107,6 +107,7 @@ server controller iburst
 <span class="keyword">restrict</span> -<span class="number">6</span> <span class="keyword">default</span> kod notrap nomodify   
 （删掉nopeer and noquery ）
 如果 /var/lib/ntp/ntp.conf文件存在，则删除。
+
 <span class="number">3.</span> 重启ntp的服务
 <span class="preprocessor">#  service ntp restart</span>
 </code></pre><h2 id="其他节点：">其他节点：</h2><pre><code><span class="number">1.</span> 安装NTP服务
@@ -162,24 +163,28 @@ very <span class="number">2.0</span>s: ntpq -p                                  
 
         <span class="number">3.</span> 重启服务：# service mysql restart
         <span class="number">4.</span> 保护数据库服务：# mysql_secure_installation</span>
-</code></pre><h2 id="（3），安装Messaging服务：（通常安装在controller节点上）。">（3），安装Messaging服务：（通常安装在controller节点上）。</h2><pre><code><span class="number">1.</span> Openstack组件之间的通需要通过支持AMQP的Messaging的服务软件，Openstack支持的有RabbitMQ，Qpid，和ZeroMQ，这里安装的RabbitMQ，
-<span class="preprocessor"># apt-get install rabbitmq-server</span>
-<span class="number">2.</span> 安装RabbitMQ服务软件时，RabbitMQ默认用户guest的密码是guest，我们需要修改一下guest密码： 
-<span class="preprocessor"># rabbitmqctl change_password guest RABBIT_PASS   (替换成你用的密码)</span>
-<span class="number">3.</span> 安装完之后需要查看RabbitMQ的version
-root@controller:~<span class="preprocessor">#  rabbitmqctl status | grep rabbit</span>
-Status of node rabbit@controller ...
-{running_applications,[{rabbit,<span class="string">"RabbitMQ"</span>,<span class="string">"3.2.4"</span>},
-<span class="number">4.</span> 如果 <span class="number">3.3</span><span class="number">.0</span> 或则更新，则需要配置允许guest 账户，允许访问
-修改配置文件/etc/rabbitmq/rabbitmq.config
-添加如下内容：  [{rabbit, [{loopback_users, []}]}]. 
-<span class="number">5</span>，重启服务：
-<span class="preprocessor"># service rabbitmq-server restart </span>
+</code></pre><h2 id="（3），安装Messaging服务：（通常安装在controller节点上）。">（3），安装Messaging服务：（通常安装在controller节点上）。</h2><pre><code>    1. Openstack组件之间的通需要通过支持AMQP的Messaging的服务软件，Openstack支持的有RabbitMQ，Qpid，和ZeroMQ，这里安装的RabbitMQ，
+    # apt-get <span class="operator"><span class="keyword">install</span> rabbitmq-<span class="keyword">server</span>
+    <span class="number">2.</span> 安装RabbitMQ服务软件时，RabbitMQ默认用户guest的密码是guest，我们需要修改一下guest密码： 
+    # rabbitmqctl change_password guest RABBIT_PASS   (替换成你用的密码)
+    <span class="number">3.</span> 安装完之后需要查看RabbitMQ的<span class="keyword">version</span>
+    root@controller:~#  rabbitmqctl <span class="keyword">status</span> | grep rabbit
+    <span class="keyword">Status</span> <span class="keyword">of</span> node rabbit@controller ...
+    {running_applications,[{rabbit,<span class="string">"RabbitMQ"</span>,<span class="string">"3.2.4"</span>},
+    <span class="number">4.</span> 如果 <span class="number">3.3</span><span class="number">.0</span> 或则更新，则需要配置允许guest 账户，允许访问
+    修改配置文件/etc/rabbitmq/rabbitmq.config
+    添加如下内容：  [{rabbit, [{loopback_users, []}]}]. 
+    <span class="number">5</span>，重启服务：
+    # service rabbitmq-<span class="keyword">server</span> restart 
+
+AMQP消息队列服务特别重要，各个组件之间的通信都需要消息队列来联系，如果不能通信很多服务无法正常启动。
+一般出现AMQP的<span class="keyword">ERROR</span>，大多数的问题都出现在底层的通信上面，比如/etc/<span class="keyword">hosts</span>中定义的ip与名称是否正确，防火墙iptables是否正常放行所需的端口等。具体可以根据日志报错信息进行分析。
+      #grep AMQP /<span class="keyword">var</span>/<span class="keyword">log</span>/nova/nova-*.<span class="keyword">log</span> | grep <span class="keyword">ERROR</span></span>
 </code></pre>
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://www.stackops.info/2015/08/09/OpenStack-基础环境搭建二/" data-id="ciev9yinh001ir07brq782gzk" class="article-share-link">Share</a>
+      <a data-url="http://www.stackops.info/2015/08/09/OpenStack搭建03-基础环境二/" data-id="cifw0gw0a001ad47b41vju6kd" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/AMQP/">AMQP</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/NTP/">NTP</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/openstack/">openstack</a></li></ul>
@@ -190,19 +195,19 @@ Status of node rabbit@controller ...
     
 <nav id="article-nav">
   
-    <a href="/2015/08/15/机房网络优化/" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/2015/08/09/OpenStack搭建02-基础环境一/" id="article-nav-newer" class="article-nav-link-wrap">
       <strong class="article-nav-caption">Newer</strong>
       <div class="article-nav-title">
         
-          机房网络优化
+          OpenStack搭建02-基础环境一
         
       </div>
     </a>
   
   
-    <a href="/2015/08/09/OpenStack-基础环境搭建一/" id="article-nav-older" class="article-nav-link-wrap">
+    <a href="/2015/08/09/使用submin搭建图形化svn管理工具/" id="article-nav-older" class="article-nav-link-wrap">
       <strong class="article-nav-caption">Older</strong>
-      <div class="article-nav-title">OpenStack基础环境搭建一</div>
+      <div class="article-nav-title">使用submin搭建图形化svn管理工具</div>
     </a>
   
 </nav>
@@ -213,7 +218,7 @@ Status of node rabbit@controller ...
 
   <section id="comments">
     <!-- 多说评论框 start -->
-    <div class="ds-thread" data-thread-key="post-OpenStack-基础环境搭建二" data-title="OpenStack基础环境搭建二" data-url="http://www.stackops.info/2015/08/09/OpenStack-基础环境搭建二/"></div>
+    <div class="ds-thread" data-thread-key="post-OpenStack搭建03-基础环境二" data-title="OpenStack搭建03-基础环境二" data-url="http://www.stackops.info/2015/08/09/OpenStack搭建03-基础环境二/"></div>
     <!-- 多说评论框 end -->
     <!-- 多说公共JS代码 start (一个网页只需插入一次) -->
     <script type="text/javascript">

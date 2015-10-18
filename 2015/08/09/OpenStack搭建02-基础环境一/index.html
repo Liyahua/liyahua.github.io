@@ -3,19 +3,17 @@
 <head>
   <meta charset="utf-8">
   
-  <title>OpenStack搭建-dashboard组件 | Leoli&#39;s  blog</title>
+  <title>OpenStack搭建02-基础环境一 | Leoli&#39;s  blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="显示全文：">
 <meta property="og:type" content="article">
-<meta property="og:title" content="OpenStack搭建-dashboard组件">
-<meta property="og:url" content="http://www.stackops.info/2015/08/20/OpenStack搭建-dashboard组件/index.html">
+<meta property="og:title" content="OpenStack搭建02-基础环境一">
+<meta property="og:url" content="http://www.stackops.info/2015/08/09/OpenStack搭建02-基础环境一/index.html">
 <meta property="og:site_name" content="Leoli's  blog">
 <meta property="og:description" content="显示全文：">
-<meta property="og:image" content="http://7xl5dz.com1.z0.glb.clouddn.com/dashboard.jpg">
-<meta property="og:image" content="http://7xl5dz.com1.z0.glb.clouddn.com/dashboard2.png">
-<meta property="og:updated_time" content="2015-09-15T15:10:48.973Z">
+<meta property="og:updated_time" content="2015-10-18T03:27:53.581Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="OpenStack搭建-dashboard组件">
+<meta name="twitter:title" content="OpenStack搭建02-基础环境一">
 <meta name="twitter:description" content="显示全文：">
   
     <link rel="alternative" href="/atom.xml" title="Leoli&#39;s  blog" type="application/atom+xml">
@@ -77,10 +75,10 @@ var _hmt = _hmt || [];
   </div>
 </header>
       <div class="outer">
-        <section id="main"><article id="post-OpenStack搭建-dashboard组件" class="article article-type-post" itemscope itemprop="blogPost">
+        <section id="main"><article id="post-OpenStack搭建02-基础环境一" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2015/08/20/OpenStack搭建-dashboard组件/" class="article-date">
-  <time datetime="2015-08-20T06:35:47.000Z" itemprop="datePublished">2015-08-20</time>
+    <a href="/2015/08/09/OpenStack搭建02-基础环境一/" class="article-date">
+  <time datetime="2015-08-09T14:58:11.000Z" itemprop="datePublished">2015-08-09</time>
 </a>
     
   </div>
@@ -91,7 +89,7 @@ var _hmt = _hmt || [];
         
   
     <h1 class="article-title" itemprop="name">
-      OpenStack搭建-dashboard组件
+      OpenStack搭建02-基础环境一
     </h1>
   
 
@@ -100,71 +98,108 @@ var _hmt = _hmt || [];
     <div class="article-entry" itemprop="articleBody">
       
         <p>显示全文：<br><a id="more"></a></p>
-<h2 id="添加dashboard服务">添加dashboard服务</h2><p><strong>openstack  dashboard</strong>也被称为Horizon，是一个web界面，使用管理员和用户能够管理openstack不同的资源和服务<br>dashboard 通过OpenStack APIs操作openstack云计算控制器。Horizon允许定制自己的商标<br>Horizon提供了核心类和可重复使用的木板和工具</p>
-<p>这个部署使用的是 Apache web server.</p>
-<p>   系统要求： </p>
-<p>在安装openstack dashboard之前，你必须满足下面需求</p>
-<pre><code>•openstack计算安装，启用用户身份认证服务和项目管理
+<p> <strong>操作系统系统选择</strong>：使用ubuntu server  ubuntu-14.04.2-server-amd64  作为服务器的操作系统。<br> 第一次给服务器安装操作系统，我很low的拿着个小U盘来安装，使用UltraISO制作系统镜像。安装系统前对磁盘做了RAID5。</p>
+<p>安装完操作系统之后，需要修改接口的ip地址，使服务器能够连得上外网(不能简单的按照官方文档配置，必须切合实际，毕竟还需要安装组件),具体接口的配置如下：</p>
+<h3 id="controller节点：">controller节点：</h3><pre><code>root@controller:~<span class="preprocessor"># cat /etc/network/interfaces</span>
+<span class="preprocessor"># This file describes the network interfaces available on your system</span>
+<span class="preprocessor"># and how to activate them. For more information, see interfaces(<span class="number">5</span>).</span>
 
-•注意身份服务的urls和Compute endpoints.
+<span class="preprocessor"># The loopback network interface</span>
+<span class="keyword">auto</span> lo
+iface lo inet loopback
+<span class="keyword">auto</span> eth0
+iface eth0 inet <span class="keyword">static</span>
+address <span class="number">192.168</span><span class="number">.3</span><span class="number">.10</span>
+netmask <span class="number">255.255</span><span class="number">.255</span><span class="number">.0</span>
+gateway <span class="number">192.168</span><span class="number">.3</span><span class="number">.254</span>
+<span class="keyword">auto</span> eth1
+iface eth1 inet <span class="keyword">static</span>
+address <span class="number">10.0</span><span class="number">.0</span><span class="number">.11</span>
+netmask <span class="number">255.255</span><span class="number">.255</span><span class="number">.0</span> 
+</code></pre><p>(这里发生过一件很挫的事，居然在同一台服务器上配置了两个网关，导致有的时候网关是10.0.0.1一会儿又变成192.168.3.254.使得网络出现故障)。</p>
+<h3 id="修改/etc/hosts这个文件，地址和服务器名相关联，地址解析。">修改/etc/hosts这个文件，地址和服务器名相关联，地址解析。</h3><pre><code>root@controller:~<span class="preprocessor"># cat /etc/hosts</span>
+<span class="preprocessor">#<span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span>    localhost</span>
+<span class="preprocessor">#<span class="number">127.0</span><span class="number">.1</span><span class="number">.1</span>    controller</span>
 
-•用户认证服务具有sudo的权限。因为Apache 不能使用root用户服务，用户必须运行dashboard 作为sudo 权限身份认证服务。
+<span class="preprocessor"># controller    <span class="number">192.168</span><span class="number">.3</span><span class="number">.10</span></span>
+<span class="number">10.0</span><span class="number">.0</span><span class="number">.11</span>       controller
+<span class="preprocessor">#compute    <span class="number">192.168</span><span class="number">.3</span><span class="number">.12</span></span>
+<span class="number">10.0</span><span class="number">.0</span><span class="number">.31</span>       compute
+<span class="preprocessor">#compute1    <span class="number">192.168</span><span class="number">.3</span><span class="number">.11</span></span>
+<span class="number">10.0</span><span class="number">.0</span><span class="number">.41</span>    compute1
+<span class="preprocessor">#compute2    <span class="number">192.168</span><span class="number">.3</span><span class="number">.14</span></span>
+<span class="number">10.0</span><span class="number">.0</span><span class="number">.51</span>    compute2
 
-•Python <span class="number">2.6</span> 或则 <span class="number">2.7</span>，Python 版本必须支持Django。Python 版本应该运行在任何系统，包括Mac OS，不同的平台安装可能不一样。 
+<span class="preprocessor"># The following lines are desirable for IPv6 capable hosts</span>
+<span class="preprocessor">#::<span class="number">1</span>     localhost ip6-localhost ip6-loopback</span>
+<span class="preprocessor">#ff02::<span class="number">1</span> ip6-allnodes</span>
+<span class="preprocessor">#ff02::<span class="number">2</span> ip6-allrouters</span>
+</code></pre><p>这里注释掉了127.0.0.1。这里使用hosts为以后网络环境发生变化提供了很高的可扩展性，比如我从公司的内网192.168.0.0/24迁移到192.168.3.0/24段，需要进行改变的内容就比较小(因为很多配置文件中用到ip地址进行彼此之间信息交互,而是用host则比较方便)目前的博客是在我迁移过后做的.</p>
+<h3 id="compute节点：">compute节点：</h3><pre><code>root@compute:~<span class="preprocessor"># cat /etc/network/interfaces</span>
+<span class="preprocessor"># This file describes the network interfaces available on your system</span>
+<span class="preprocessor"># and how to activate them. For more information, see interfaces(<span class="number">5</span>).</span>
 
-然后在一个节点上安装和配置dashboard 可以连接身份认证服务
-</code></pre><p>用下面信息的用户，因此他们能够通过本地机器的浏览器访问dashboard</p>
-<pre><code>•通过公共<span class="literal">ip</span>地址，可以访问dashboard
+<span class="preprocessor"># The loopback network interfaces</span>
+<span class="keyword">auto</span> lo
+iface lo inet loopback
 
-•输入用户和密码
-
- 你的浏览器，必须支持HTML5 ，启用cookies 和JavaScript
-</code></pre><p>注意：</p>
-<pre><code>使用带有dashboard的VNC 客户端，浏览器必须支持HTML5 画布和 HTML5 WebSockets
-</code></pre><ul>
-<li>1），安装包：</li>
-</ul>
-<pre><code># apt-<span class="built_in">get</span> install openstack-dashboard apache2 libapache2-<span class="keyword">mod</span>-wsgi
-memcached <span class="keyword">python</span>-memcache
-</code></pre><p>注意：Ubuntu 安装  openstack-dashboard-ubuntu-theme包作为依赖。一些用户报告以前发布的版本有问题。如果你遇到问题，移除这个包，恢复到原先的openstack包。</p>
-<p>移除可以执行下面命令（这里执行了下面命令）</p>
-<pre><code><span class="preprocessor">#  dpkg --purge openstack-dashboard-ubuntu-theme</span>
-</code></pre><ul>
-<li>2），配置dashboard，修改配置文件/etc/openstack-dashboard/local_settings.py</li>
-</ul>
-<pre><code>OPENSTACK_HOST = <span class="string">"controller"</span>
-ALLOWED_HOSTS = [<span class="string">'*'</span>]
-
-CACHES = {
-<span class="string">'default'</span>: {
-<span class="string">'BACKEND'</span>: <span class="string">'django.core.cache.backends.memcached.
-MemcachedCache'</span>,
-<span class="string">'LOCATION'</span>: <span class="string">'127.0.0.1:11211'</span>,
-}
-}
-</code></pre><p>注意：注释掉其它session存储配置这里不需要修改</p>
-<p>.可选，配置其它 time zone</p>
-<p> TIME_ZONE = “TIME_ZONE”<br>/usr/share/zoneinfo/Asia/ 下保存着系统各个时区信息/etc/localtime 保存当前系统时区及时间信息</p>
+<span class="keyword">auto</span> eth0
+iface eth0 inet <span class="keyword">static</span>
+<span class="preprocessor">#address <span class="number">192.168</span><span class="number">.0</span><span class="number">.142</span></span>
+address <span class="number">192.168</span><span class="number">.3</span><span class="number">.12</span>
+netmask <span class="number">255.255</span><span class="number">.255</span><span class="number">.0</span>
+gateway <span class="number">192.168</span><span class="number">.3</span><span class="number">.254</span>
+<span class="preprocessor">#auto eth0 </span>
+iface eth0 inet manual
+    up ip link <span class="built_in">set</span> dev $IFACE up
+    down ip link <span class="built_in">set</span> dev $IFACE down
+<span class="keyword">auto</span> eth1
+iface eth1 inet <span class="keyword">static</span>
+address <span class="number">10.0</span><span class="number">.0</span><span class="number">.31</span>
+netmask <span class="number">255.255</span><span class="number">.255</span><span class="number">.0</span>
+</code></pre><p>###　修改/etc/hosts配置文件，关联IP和name<br>    root@compute:~# cat /etc/hosts</p>
+<pre><code><span class="hexcolor">#127</span>.<span class="number">0.0</span>.<span class="number">1</span>    localhost
+<span class="hexcolor">#127</span>.<span class="number">0.1</span>.<span class="number">1</span>    compute
+<span class="id">#computel</span>
+<span class="number">10.0</span>.<span class="number">0.31</span>    compute
+<span class="id">#controller</span>
+<span class="number">10.0</span>.<span class="number">0.11</span>    controller
+<span class="id">#The</span> following lines are desirable <span class="keyword">for</span> IPv6 capable hosts
+::<span class="number">1</span>     localhost ip6-localhost ip6-loopback
+ff02::<span class="number">1</span> ip6-allnodes
+ff02::<span class="number">2</span> ip6-allrouters
+</code></pre><h4 id="同时修改两个节点的DNS配置文件为：/etc/resolv-conf">同时修改两个节点的DNS配置文件为：/etc/resolv.conf</h4><p>添加：  </p>
+<pre><code>nameserver  <span class="number">114.114</span><span class="number">.114</span><span class="number">.114</span>     
+</code></pre><p>使用电信的DNS服务器。其实这样修改在ubuntu系统环境中时不对的，只能够暂时生效，如果想要永久生效，必须修改配置文件/etc/resolvconf/resolv.conf.d/base  每次开机都会从这个配置文件加载dns到/etc/resolv.conf这个配置文件中,这一点和centos不同。</p>
+<p>基本的网络地址配置完成之后，能够实现：</p>
 <ul>
-<li>3），检验安装：重启服务。</li>
+<li>1），compute和controller之间相互ping通，包括10.0.0.0网段和192.168.3.0网段</li>
+<li>2），都能够访问外网。</li>
+<li>3），都能够进行地址解析。</li>
 </ul>
-<pre><code><span class="preprocessor"># service apache2 restart</span>
-<span class="preprocessor"># service memcached restart</span>
-</code></pre><ul>
-<li>4)，打开浏览器，输入：192.168.0.146/horizon。可以选择使用demo或者admin这两个用户之一登录。</li>
-</ul>
-<p><img src="http://7xl5dz.com1.z0.glb.clouddn.com/dashboard.jpg" alt="dashboard"></p>
-<p>进入后的web界面大概是这样；</p>
-<p><img src="http://7xl5dz.com1.z0.glb.clouddn.com/dashboard2.png" alt="dashboard2"></p>
-<p>在这个界面里可以比较便捷的创建实例，迁移，调整实例大小，设置访问规则等，利用图形化界面管理特别方便。</p>
-
+<h3 id="接着配置ubuntu的更新源：这里使用的是阿里云的更新源。_配置文件是：/etc/apt/source-list">接着配置ubuntu的更新源：这里使用的是阿里云的更新源。 配置文件是：<strong>/etc/apt/source.list</strong></h3><pre><code>root<span class="property">@controller</span>:~<span class="comment"># cat /etc/apt/sources.list</span>
+deb <span class="attribute">http</span>:<span class="regexp">//mi</span>rrors.aliyun.com<span class="regexp">/ubuntu/</span> trusty main restricted universe multiverse
+deb <span class="attribute">http</span>:<span class="regexp">//mi</span>rrors.aliyun.com<span class="regexp">/ubuntu/</span> trusty-security main restricted universe multiverse
+deb <span class="attribute">http</span>:<span class="regexp">//mi</span>rrors.aliyun.com<span class="regexp">/ubuntu/</span> trusty-updates main restricted universe multiverse
+deb <span class="attribute">http</span>:<span class="regexp">//mi</span>rrors.aliyun.com<span class="regexp">/ubuntu/</span> trusty-proposed main restricted universe multiverse
+deb <span class="attribute">http</span>:<span class="regexp">//mi</span>rrors.aliyun.com<span class="regexp">/ubuntu/</span> trusty-backports main restricted universe multiverse
+deb-src <span class="attribute">http</span>:<span class="regexp">//mi</span>rrors.aliyun.com<span class="regexp">/ubuntu/</span> trusty main restricted universe multiverse
+deb-src <span class="attribute">http</span>:<span class="regexp">//mi</span>rrors.aliyun.com<span class="regexp">/ubuntu/</span> trusty-security main restricted universe multiverse
+deb-src <span class="attribute">http</span>:<span class="regexp">//mi</span>rrors.aliyun.com<span class="regexp">/ubuntu/</span> trusty-updates main restricted universe multiverse
+deb-src <span class="attribute">http</span>:<span class="regexp">//mi</span>rrors.aliyun.com<span class="regexp">/ubuntu/</span> trusty-proposed main restricted universe multiverse
+deb-src <span class="attribute">http</span>:<span class="regexp">//mi</span>rrors.aliyun.com<span class="regexp">/ubuntu/</span> trusty-backports main restricted universe multiverse
+</code></pre><p>配置完更新源之后进行更新：</p>
+<pre><code>#apt-<span class="built_in">get</span>  <span class="keyword">update</span>
+</code></pre><p>然后安装ssh服务，实现远程访问：</p>
+<pre><code><span class="id">#apt-get</span> install  ssh  -y
+</code></pre>
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://www.stackops.info/2015/08/20/OpenStack搭建-dashboard组件/" data-id="ciev9yimf000xr07bumhzwitv" class="article-share-link">Share</a>
+      <a data-url="http://www.stackops.info/2015/08/09/OpenStack搭建02-基础环境一/" data-id="cifw0gw0l001gd47bp8xxob4f" class="article-share-link">Share</a>
       
       
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/dashboard/">dashboard</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/openstack/">openstack</a></li></ul>
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/openstack/">openstack</a></li></ul>
 
     </footer>
   </div>
@@ -172,19 +207,19 @@ MemcachedCache'</span>,
     
 <nav id="article-nav">
   
-    <a href="/2015/08/20/OpenStack搭建-实例创建/" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/2015/08/09/OpenStack搭建01-简介/" id="article-nav-newer" class="article-nav-link-wrap">
       <strong class="article-nav-caption">Newer</strong>
       <div class="article-nav-title">
         
-          OpenStack搭建-实例创建
+          OpenStack搭建01-简介
         
       </div>
     </a>
   
   
-    <a href="/2015/08/20/OpenStackd搭建-网络组件/" id="article-nav-older" class="article-nav-link-wrap">
+    <a href="/2015/08/09/OpenStack搭建03-基础环境二/" id="article-nav-older" class="article-nav-link-wrap">
       <strong class="article-nav-caption">Older</strong>
-      <div class="article-nav-title">OpenStackd搭建-网络组件</div>
+      <div class="article-nav-title">OpenStack搭建03-基础环境二</div>
     </a>
   
 </nav>
@@ -195,7 +230,7 @@ MemcachedCache'</span>,
 
   <section id="comments">
     <!-- 多说评论框 start -->
-    <div class="ds-thread" data-thread-key="post-OpenStack搭建-dashboard组件" data-title="OpenStack搭建-dashboard组件" data-url="http://www.stackops.info/2015/08/20/OpenStack搭建-dashboard组件/"></div>
+    <div class="ds-thread" data-thread-key="post-OpenStack搭建02-基础环境一" data-title="OpenStack搭建02-基础环境一" data-url="http://www.stackops.info/2015/08/09/OpenStack搭建02-基础环境一/"></div>
     <!-- 多说评论框 end -->
     <!-- 多说公共JS代码 start (一个网页只需插入一次) -->
     <script type="text/javascript">

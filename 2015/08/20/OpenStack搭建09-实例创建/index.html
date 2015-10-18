@@ -3,21 +3,21 @@
 <head>
   <meta charset="utf-8">
   
-  <title>OpenStack搭建-实例创建 | Leoli&#39;s  blog</title>
+  <title>OpenStack搭建09-实例创建 | Leoli&#39;s  blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="显示全文：">
 <meta property="og:type" content="article">
-<meta property="og:title" content="OpenStack搭建-实例创建">
-<meta property="og:url" content="http://www.stackops.info/2015/08/20/OpenStack搭建-实例创建/index.html">
+<meta property="og:title" content="OpenStack搭建09-实例创建">
+<meta property="og:url" content="http://www.stackops.info/2015/08/20/OpenStack搭建09-实例创建/index.html">
 <meta property="og:site_name" content="Leoli's  blog">
 <meta property="og:description" content="显示全文：">
 <meta property="og:image" content="http://7xl5dz.com1.z0.glb.clouddn.com/vm1.png">
 <meta property="og:image" content="http://7xl5dz.com1.z0.glb.clouddn.com/vm2.png">
 <meta property="og:image" content="http://7xl5dz.com1.z0.glb.clouddn.com/vm3.png">
 <meta property="og:image" content="http://7xl5dz.com1.z0.glb.clouddn.com/vm4.png">
-<meta property="og:updated_time" content="2015-08-20T07:38:12.686Z">
+<meta property="og:updated_time" content="2015-10-18T03:30:24.270Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="OpenStack搭建-实例创建">
+<meta name="twitter:title" content="OpenStack搭建09-实例创建">
 <meta name="twitter:description" content="显示全文：">
   
     <link rel="alternative" href="/atom.xml" title="Leoli&#39;s  blog" type="application/atom+xml">
@@ -79,9 +79,9 @@ var _hmt = _hmt || [];
   </div>
 </header>
       <div class="outer">
-        <section id="main"><article id="post-OpenStack搭建-实例创建" class="article article-type-post" itemscope itemprop="blogPost">
+        <section id="main"><article id="post-OpenStack搭建09-实例创建" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2015/08/20/OpenStack搭建-实例创建/" class="article-date">
+    <a href="/2015/08/20/OpenStack搭建09-实例创建/" class="article-date">
   <time datetime="2015-08-20T07:20:21.000Z" itemprop="datePublished">2015-08-20</time>
 </a>
     
@@ -93,7 +93,7 @@ var _hmt = _hmt || [];
         
   
     <h1 class="article-title" itemprop="name">
-      OpenStack搭建-实例创建
+      OpenStack搭建09-实例创建
     </h1>
   
 
@@ -120,7 +120,7 @@ root@controller:~<span class="comment"># cat demo-openrc.sh </span>
 </ul>
 <pre><code><span class="variable">$ </span>ssh-keygen   （生成随机数）。
 </code></pre><ul>
-<li><p>3），添加公钥到openstack环境：</p>
+<li><p>3），添加公钥到openstack环境：这个公钥可以用在创建实例的时候注入，实现无密码登录。</p>
 <p>$ nova keypair-add –pub-key ~/.ssh/id_rsa.pub demo-key</p>
 </li>
 <li><p>4），查看公钥：</p>
@@ -183,7 +183,7 @@ root@controller:~<span class="comment"># cat demo-openrc.sh </span>
 <pre><code><span class="comment">$</span> <span class="comment">nova</span> <span class="comment">boot</span> <span class="literal">-</span><span class="literal">-</span><span class="comment">flavor</span> <span class="comment">m1</span><span class="string">.</span><span class="comment">tiny</span> <span class="literal">-</span><span class="literal">-</span><span class="comment">image</span> <span class="comment">cirros</span><span class="literal">-</span><span class="comment">0</span><span class="string">.</span><span class="comment">3</span><span class="string">.</span><span class="comment">3</span><span class="literal">-</span><span class="comment">x86_64</span> <span class="literal">-</span><span class="literal">-</span><span class="comment">nic</span> <span class="comment">net</span><span class="literal">-</span><span class="comment">id=</span>
 <span class="comment">DEMO_NET_ID</span> <span class="comment">\</span>
 <span class="literal">-</span><span class="literal">-</span><span class="comment">security</span><span class="literal">-</span><span class="comment">group</span> <span class="comment">default</span> <span class="literal">-</span><span class="literal">-</span><span class="comment">key</span><span class="literal">-</span><span class="comment">name</span> <span class="comment">demo</span><span class="literal">-</span><span class="comment">key</span> <span class="comment">demo</span><span class="literal">-</span><span class="comment">instance1</span>
-</code></pre><p>需要为其指定网卡，实例大小模型，镜像，安全组，公钥信息等。</p>
+</code></pre><p>需要为其指定网卡，实例大小模型，镜像，安全组，公钥信息等。（注意，如果想创建一个实例，并且能够ping通，ssh登录，要先对defualt安全组进行修改，放行对应的数据包，可以通过命令或者web界面直接修改）。</p>
 <pre><code>root<span class="comment">@controller:~# nova boot --flavor m1.tiny --image cirros-0.3.3-x86_64 --nic net-id=e7972845-3a38-49bb-ae53-56c4f71dc837 \</span>
 &gt; --security-group default --key-name demo-key demo-instance2
 +--------------------------------------+------------------------------------------------------------+
@@ -240,7 +240,7 @@ root@controller:~<span class="comment"># cat demo-openrc.sh </span>
 <p><img src="http://7xl5dz.com1.z0.glb.clouddn.com/vm1.png" alt="vm1"></p>
 <p>验证demo-net的网络：从vm上测试能否上外网：</p>
 <p><img src="http://7xl5dz.com1.z0.glb.clouddn.com/vm2.png" alt="vm2"></p>
-<p>接着添加安全组：</p>
+<p>##修改安全组的方法：</p>
 <p>1，给default安全组添加规则：<br>    a, 允许ping包；</p>
 <pre><code>$ nova secgroup-add-<span class="keyword">rule</span> default icmp -1 -1 0.0.0.0/0  
 </code></pre><p>这句的含义是在安全组default中添加一条规则，允许来自任何ip任何端口的icmp包</p>
@@ -251,15 +251,15 @@ $ nova secgroup-add-<span class="keyword">rule</span> default tcp 22 22 0.0.0.0/
 <p>2，从控制节点或者任何一个在外网的主机上测试一下挽留过的连通性。</p>
 <p><img src="http://7xl5dz.com1.z0.glb.clouddn.com/vm3.png" alt="vm3"></p>
 <p>因为192.168.0.179这个ip有冲突，还是使用180这个ip做测试。</p>
-<p>3，最后在控制节点上使用ssh访问vm实例。</p>
+<p>3，最后在控制节点上使用ssh访问vm实例。<br>这个测试用的镜像，默认的用户名和密码在开启启动的最后都输出来了，我们可以使用nova console-log  vm 查看日志输出<br>信息确定用户名和密码，默认是用户名：cirros 密码：cubswin:)</p>
 <p><img src="http://7xl5dz.com1.z0.glb.clouddn.com/vm4.png" alt="vm4"></p>
 <p>到这里，最基本的vm创建，vm访问外网，网络连通性都已经完成。</p>
-<p>下载qcow2镜像的地址: <a href="http://cloud.centos.org/centos/6/images/" target="_blank" rel="external">http://cloud.centos.org/centos/6/images/</a></p>
+<p>官方下载centos的qcow2格式镜像的地址: <a href="http://cloud.centos.org/centos/6/images/" target="_blank" rel="external">http://cloud.centos.org/centos/6/images/</a></p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://www.stackops.info/2015/08/20/OpenStack搭建-实例创建/" data-id="ciev9yim0000qr07b7joun0h5" class="article-share-link">Share</a>
+      <a data-url="http://www.stackops.info/2015/08/20/OpenStack搭建09-实例创建/" data-id="cifw0gvye000nd47bw5xqdudx" class="article-share-link">Share</a>
       
       
     </footer>
@@ -278,9 +278,9 @@ $ nova secgroup-add-<span class="keyword">rule</span> default tcp 22 22 0.0.0.0/
     </a>
   
   
-    <a href="/2015/08/20/OpenStack搭建-dashboard组件/" id="article-nav-older" class="article-nav-link-wrap">
+    <a href="/2015/08/20/OpenStack搭建08-dashboard组件/" id="article-nav-older" class="article-nav-link-wrap">
       <strong class="article-nav-caption">Older</strong>
-      <div class="article-nav-title">OpenStack搭建-dashboard组件</div>
+      <div class="article-nav-title">OpenStack搭建08-dashboard组件</div>
     </a>
   
 </nav>
@@ -291,7 +291,7 @@ $ nova secgroup-add-<span class="keyword">rule</span> default tcp 22 22 0.0.0.0/
 
   <section id="comments">
     <!-- 多说评论框 start -->
-    <div class="ds-thread" data-thread-key="post-OpenStack搭建-实例创建" data-title="OpenStack搭建-实例创建" data-url="http://www.stackops.info/2015/08/20/OpenStack搭建-实例创建/"></div>
+    <div class="ds-thread" data-thread-key="post-OpenStack搭建09-实例创建" data-title="OpenStack搭建09-实例创建" data-url="http://www.stackops.info/2015/08/20/OpenStack搭建09-实例创建/"></div>
     <!-- 多说评论框 end -->
     <!-- 多说公共JS代码 start (一个网页只需插入一次) -->
     <script type="text/javascript">
