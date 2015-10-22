@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>OpenStack搭建10-计算节点扩展 | Leoli&#39;s  blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="显示全文：">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OpenStack搭建10-计算节点扩展">
+<meta property="og:url" content="http://www.stackops.info/2015/10/21/OpenStack搭建10-计算节点扩展/index.html">
+<meta property="og:site_name" content="Leoli's  blog">
+<meta property="og:description" content="显示全文：">
+<meta property="og:updated_time" content="2015-10-22T00:35:17.852Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="OpenStack搭建10-计算节点扩展">
+<meta name="twitter:description" content="显示全文：">
+  
+    <link rel="alternative" href="/atom.xml" title="Leoli&#39;s  blog" type="application/atom+xml">
+  
+  
+  <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" type="text/css">
+  
+<script type="text/javascript">
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?d1a0120d84ac9dc6082c5423dec3ef3d";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+</script>
+
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Leoli&#39;s  blog</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">Follow your heart</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://www.stackops.info"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-OpenStack搭建10-计算节点扩展" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2015/10/21/OpenStack搭建10-计算节点扩展/" class="article-date">
+  <time datetime="2015-10-21T11:45:45.000Z" itemprop="datePublished">2015-10-21</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      OpenStack搭建10-计算节点扩展
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>显示全文：</p>
+<a id="more"></a>
+<p>OpenStack可以将多个计算节点的硬件资源，包括内存，硬盘，CPU等信息虚拟成一个资源池，我们在创建VM的时候只需要从这个计算资源池中申请对应的内存，硬盘，CPU的资源即可。而一台服务器的计算资源总是有限的，如果要进行资源的扩展，其实很简单，只需要再添加多台compute节点即可，openstack提供了便捷的横向扩展。具体的步骤和前面添加一台计算节点类似，并没有太大的区别。</p>
+<h2 id="扩展一个计算节点：">扩展一个计算节点：</h2><p>安装配置的过程类似于第一个计算节点，并没有太大的差别。</p>
+<h2 id="1），配置基础的底层网络：">1），配置基础的底层网络：</h2><pre><code>root@compute2:~<span class="preprocessor"># cat /etc/network/interfaces</span>
+<span class="preprocessor">#This file describes the network interfaces available on your system</span>
+<span class="preprocessor">#and how to activate them. For more information, see interfaces(<span class="number">5</span>).</span>
+
+<span class="preprocessor">#The loopback network interface</span>
+<span class="keyword">auto</span> lo
+iface lo inet loopback
+<span class="keyword">auto</span> em1 
+iface em1 inet <span class="keyword">static</span>
+address <span class="number">192.168</span><span class="number">.3</span><span class="number">.14</span>
+netmask <span class="number">255.255</span><span class="number">.255</span><span class="number">.0</span>
+gateway <span class="number">192.168</span><span class="number">.3</span><span class="number">.254</span>
+iface em1 inet manual
+        up ip link <span class="built_in">set</span> dev $IFACE up
+        down ip link <span class="built_in">set</span> dev $IFACE down
+
+<span class="keyword">auto</span> em2
+iface em2 inet <span class="keyword">static</span>
+address <span class="number">10.0</span><span class="number">.0</span><span class="number">.51</span>
+netmask <span class="number">255.255</span><span class="number">.255</span><span class="number">.0</span>
+</code></pre><h2 id="2），修改/etc/hosts配置文件，关联IP和name。">2），修改/etc/hosts配置文件，关联IP和name。</h2><pre><code>root@compute2:~<span class="preprocessor"># cat /etc/hosts</span>
+<span class="preprocessor">#<span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span>      localhost</span>
+<span class="preprocessor">#<span class="number">127.0</span><span class="number">.1</span><span class="number">.1</span>      compute2</span>
+
+<span class="preprocessor"># controller</span>
+<span class="number">10.0</span><span class="number">.0</span><span class="number">.11</span>       controller
+<span class="preprocessor">#compute</span>
+<span class="number">10.0</span><span class="number">.0</span><span class="number">.31</span>       compute
+<span class="preprocessor"># block1</span>
+<span class="preprocessor">#<span class="number">10.0</span><span class="number">.0</span><span class="number">.21</span>       block1</span>
+<span class="preprocessor">#compute1</span>
+<span class="number">10.0</span><span class="number">.0</span><span class="number">.41</span>       compute1
+<span class="preprocessor">#compute2</span>
+<span class="number">10.0</span><span class="number">.0</span><span class="number">.51</span>       compute2
+
+
+<span class="preprocessor"># The following lines are desirable for IPv6 capable hosts</span>
+<span class="preprocessor">#::<span class="number">1</span>     localhost ip6-localhost ip6-loopback</span>
+<span class="preprocessor">#ff02::<span class="number">1</span> ip6-allnodes</span>
+<span class="preprocessor">#ff02::<span class="number">2</span> ip6-allrouters</span>
+root@compute2:~<span class="preprocessor"># </span>
+</code></pre><p>做过hosts之后，测试一下controller和两个compute节点之间的连通性。</p>
+<pre><code>root@compute2:~<span class="preprocessor"># ping compute1</span>
+<span class="function">PING <span class="title">compute1</span> <span class="params">(<span class="number">10.0</span><span class="number">.0</span><span class="number">.41</span>)</span> 56<span class="params">(<span class="number">84</span>)</span> bytes of data.
+64 bytes from <span class="title">compute1</span> <span class="params">(<span class="number">10.0</span><span class="number">.0</span><span class="number">.41</span>)</span>: icmp_seq</span>=<span class="number">1</span> ttl=<span class="number">64</span> time=<span class="number">0.220</span> ms
+<span class="number">64</span> <span class="function">bytes from <span class="title">compute1</span> <span class="params">(<span class="number">10.0</span><span class="number">.0</span><span class="number">.41</span>)</span>: icmp_seq</span>=<span class="number">2</span> ttl=<span class="number">64</span> time=<span class="number">0.212</span> ms
+^C
+--- compute1 ping statistics ---
+<span class="number">2</span> packets transmitted, <span class="number">2</span> received, <span class="number">0</span>% packet loss, time <span class="number">999</span>ms
+rtt min/avg/max/mdev = <span class="number">0.212</span>/<span class="number">0.216</span>/<span class="number">0.220</span>/<span class="number">0.004</span> ms
+root@compute2:~<span class="preprocessor"># ping compute2</span>
+<span class="function">PING <span class="title">compute2</span> <span class="params">(<span class="number">10.0</span><span class="number">.0</span><span class="number">.51</span>)</span> 56<span class="params">(<span class="number">84</span>)</span> bytes of data.
+64 bytes from <span class="title">compute2</span> <span class="params">(<span class="number">10.0</span><span class="number">.0</span><span class="number">.51</span>)</span>: icmp_seq</span>=<span class="number">1</span> ttl=<span class="number">64</span> time=<span class="number">0.056</span> ms
+<span class="number">64</span> <span class="function">bytes from <span class="title">compute2</span> <span class="params">(<span class="number">10.0</span><span class="number">.0</span><span class="number">.51</span>)</span>: icmp_seq</span>=<span class="number">2</span> ttl=<span class="number">64</span> time=<span class="number">0.054</span> ms
+^C
+--- compute2 ping statistics ---
+<span class="number">2</span> packets transmitted, <span class="number">2</span> received, <span class="number">0</span>% packet loss, time <span class="number">999</span>ms
+rtt min/avg/max/mdev = <span class="number">0.054</span>/<span class="number">0.055</span>/<span class="number">0.056</span>/<span class="number">0.001</span> ms
+root@compute2:~<span class="preprocessor"># ping controller</span>
+<span class="function">PING <span class="title">controller</span> <span class="params">(<span class="number">10.0</span><span class="number">.0</span><span class="number">.11</span>)</span> 56<span class="params">(<span class="number">84</span>)</span> bytes of data.
+64 bytes from <span class="title">controller</span> <span class="params">(<span class="number">10.0</span><span class="number">.0</span><span class="number">.11</span>)</span>: icmp_seq</span>=<span class="number">1</span> ttl=<span class="number">64</span> time=<span class="number">0.258</span> ms
+<span class="number">64</span> <span class="function">bytes from <span class="title">controller</span> <span class="params">(<span class="number">10.0</span><span class="number">.0</span><span class="number">.11</span>)</span>: icmp_seq</span>=<span class="number">2</span> ttl=<span class="number">64</span> time=<span class="number">0.246</span> ms
+^C
+--- controller ping statistics ---
+<span class="number">2</span> packets transmitted, <span class="number">2</span> received, <span class="number">0</span>% packet loss, time <span class="number">999</span>ms
+rtt min/avg/max/mdev = <span class="number">0.246</span>/<span class="number">0.252</span>/<span class="number">0.258</span>/<span class="number">0.006</span> ms
+</code></pre><h2 id="3），修改Ubuntu系统的dns服务器：">3），修改Ubuntu系统的dns服务器：</h2><p>想要永久生效的话就需要修改<strong>/etc/resolvconf/resolv.conf/base</strong>这个配置文件。<br>和centos不同的是，如果我们只修改<strong>/etc/resolv.conf</strong>这个配置文件的话，每次重启服务器都会被刷新掉，不会永久保存。<br>修改过配置文件之后，执行命令：<strong>#resolvconf -u</strong>   可以立即生效配置文件，你会发现<strong>/etc/resolv.conf</strong>已经从<strong>/etc/resolvconf/resolv.conf/base</strong>这个文件中读取相关的配置。</p>
+<pre><code>root@compute2:~# <span class="keyword">cat</span>  /etc/resolvconf/resolv.<span class="keyword">conf</span>.<span class="keyword">d</span>/base 
+nameserver 114.114.114.114
+root@compute2:~# <span class="keyword">cat</span>  /etc/resolv.<span class="keyword">conf</span> 
+# Dynamic resolv.<span class="keyword">conf</span>(5) <span class="keyword">file</span> <span class="keyword">for</span> glibc resolver(3) generated <span class="keyword">by</span> resolvconf(8)
+#     <span class="keyword">DO</span> NOT <span class="keyword">EDIT</span> THIS <span class="keyword">FILE</span> <span class="keyword">BY</span> HAND -- YOUR CHANGES WILL BE OVERWRITTEN
+root@compute2:~# resolvconf -<span class="keyword">u</span>
+root@compute2:~# <span class="keyword">cat</span> /etc/resolv.<span class="keyword">conf</span> 
+# Dynamic resolv.<span class="keyword">conf</span>(5) <span class="keyword">file</span> <span class="keyword">for</span> glibc resolver(3) generated <span class="keyword">by</span> resolvconf(8)
+#     <span class="keyword">DO</span> NOT <span class="keyword">EDIT</span> THIS <span class="keyword">FILE</span> <span class="keyword">BY</span> HAND -- YOUR CHANGES WILL BE OVERWRITTEN
+nameserver 114.114.114.114
+</code></pre><h2 id="4），安装NTP服务，并运行时间同步：">4），安装NTP服务，并运行时间同步：</h2><pre><code><span class="number">1</span>，安装NTP服务：
+    <span class="preprocessor">#apt-get install ntp</span>
+
+<span class="number">2</span>，修改/etc/ntp.conf的配置文件，为其添加  ntp server
+    server controller  iburst
+<span class="number">3</span>，重启ntp服务
+    <span class="preprocessor">#service ntp restart</span>
+<span class="number">4</span>，查看同步的状态:
+
+    <span class="preprocessor"># ntpq -c assoc</span>
+    ind assid status  conf reach auth condition  last_event cnt
+    ===========================================================
+      <span class="number">1</span> <span class="number">32829</span>  <span class="number">963</span>a   yes   yes  none  sys.peer    sys_peer  <span class="number">3</span>
+    root@block1:~<span class="preprocessor"># ntpq -c peers</span>
+         remote           refid      st t when poll reach   delay   offset  jitter
+    ==============================================================================
+    *controller      <span class="number">91.189</span><span class="number">.89</span><span class="number">.199</span>    <span class="number">3</span> u  <span class="number">452</span> <span class="number">1024</span>  <span class="number">377</span>    <span class="number">0.187</span>   -<span class="number">1.106</span>   <span class="number">0.940</span>
+</code></pre><h2 id="5），安装openstack的packages：">5），安装openstack的packages：</h2><pre><code><span class="id">#apt-get</span> install ubuntu-cloud-keyring
+<span class="id">#echo</span> <span class="string">"deb http://ubuntu-cloud.archive.canonical.com/ubuntu"</span> \
+<span class="string">"trusty-updates/juno main"</span> &gt; /etc/apt/sources<span class="class">.list</span><span class="class">.d</span>/cloudarchive-juno<span class="class">.list</span> 
+
+ 更新系统上的packages：
+<span class="id">#apt-get</span> update &amp;&amp; apt-get dist-upgrade  
+</code></pre><h2 id="6），安装配置nova的compute服务：">6），安装配置nova的compute服务：</h2><pre><code><span class="number">1</span>，安装nova-compute
+<span class="preprocessor">#apt-get install nova-compute sysfsutils </span>
+<span class="number">2</span>，修改/etc/nova/nova.conf的配置文件，配置文件的修改参照第一个compute节点，修改的内容不是很多。
+</code></pre><h2 id="7），在新添加的compute节点上添加网络服务。">7），在新添加的compute节点上添加网络服务。</h2><pre><code><span class="number">1</span>），安装网络服务：
+<span class="id">#apt-get</span> install nova-network nova-api-metadata 
+<span class="number">2</span>）， 编辑nova.conf配置文件，参考之前贴出的配置文件，修改的地方不大。
+<span class="number">3</span>），重启服务：
+<span class="id">#service</span> nova-network restart
+<span class="id">#service</span> nova-api-metadata restart
+
+<span class="number">4</span>），需要创建一个软连接，将/usr/bin/nova-dhcpbridge这个二进制文件链接到/usr/local/bin/dhcpbridge下
+<span class="id">#ln</span> -s /usr/bin/nova-dhcpbridge 。
+重启nova服务。
+<span class="id">#service</span> nova-network restart
+<span class="id">#service</span> nova-compute restart`
+
+修改/etc/sysctl<span class="class">.conf</span> 文件添加如下内容，实现地址的转发功能：
+net<span class="class">.ipv4</span><span class="class">.ip_forward</span>=<span class="number">1</span>
+net<span class="class">.ipv4</span><span class="class">.conf</span><span class="class">.all</span><span class="class">.rp_filter</span>=<span class="number">0</span>
+net<span class="class">.ipv4</span><span class="class">.conf</span><span class="class">.default</span><span class="class">.rp_filter</span>=<span class="number">0</span>
+激活应用：
+<span class="id">#sysctl</span>  -p
+</code></pre><h2 id="8），校验运行状况：">8），校验运行状况：</h2><pre><code>如果以上配置都正确的情况下，并在这个compute节点上运行vm的时候。我们查看网络方面的输出：
+<span class="preprocessor">#route      <span class="comment">//可以看到默认路由的出口是br100.</span></span>
+root@compute2:~<span class="preprocessor"># route</span>
+Kernel IP routing table
+Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
+<span class="keyword">default</span>         <span class="number">192.168</span><span class="number">.3</span><span class="number">.254</span>   <span class="number">0.0</span><span class="number">.0</span><span class="number">.0</span>         UG    <span class="number">0</span>      <span class="number">0</span>        <span class="number">0</span> br100
+<span class="number">10.0</span><span class="number">.0</span><span class="number">.0</span>        *               <span class="number">255.255</span><span class="number">.255</span><span class="number">.0</span>   U     <span class="number">0</span>      <span class="number">0</span>        <span class="number">0</span> em2
+<span class="number">192.168</span><span class="number">.3</span><span class="number">.0</span>     *               <span class="number">255.255</span><span class="number">.255</span><span class="number">.0</span>   U     <span class="number">0</span>      <span class="number">0</span>        <span class="number">0</span> br100
+<span class="number">192.168</span><span class="number">.3</span><span class="number">.32</span>    *               <span class="number">255.255</span><span class="number">.255</span><span class="number">.224</span> U     <span class="number">0</span>      <span class="number">0</span>        <span class="number">0</span> br100
+<span class="number">192.168</span><span class="number">.122</span><span class="number">.0</span>   *               <span class="number">255.255</span><span class="number">.255</span><span class="number">.0</span>   U     <span class="number">0</span>      <span class="number">0</span>        <span class="number">0</span> virbr0
+
+<span class="preprocessor">#brctl show 可以看到当前运行的所有vm的网络接口都桥接在br100这个接口上。</span>
+
+
+root@compute2:~<span class="preprocessor"># brctl show</span>
+bridge name     bridge id               STP enabled     interfaces
+br100           <span class="number">8000.842</span>b2b614546       no              em1
+                                                        vnet1
+                                                        vnet2
+                                                        vnet3
+                                                        vnet4
+                                                        vnet5
+                                                        vnet6
+                                                        vnet7
+                                                        vnet8
+virbr0          <span class="number">8000.000000000000</span>       yes
+
+
+接着在controller节点上查看当前的服务，可以看到compute2的nova-network和nova-compute两个服务都已经启动了，并且state都是up状态。
+这代表添加的新的compute节点已经能够正常的使用了。
+
+root@controller:~<span class="preprocessor"># nova service-list</span>
++----+------------------+------------+----------+---------+-------+----------------------------+-----------------+
+| Id | Binary           | Host       | Zone     | Status  | State | Updated_at                 | Disabled Reason |
++----+------------------+------------+----------+---------+-------+----------------------------+-----------------+
+| <span class="number">1</span>  | nova-cert        | controller | internal | enabled | up    | <span class="number">2015</span>-<span class="number">10</span>-<span class="number">21</span>T13:<span class="number">10</span>:<span class="number">56.000000</span> | -               |
+| <span class="number">2</span>  | nova-consoleauth | controller | internal | enabled | up    | <span class="number">2015</span>-<span class="number">10</span>-<span class="number">21</span>T13:<span class="number">10</span>:<span class="number">54.000000</span> | -               |
+| <span class="number">3</span>  | nova-conductor   | controller | internal | enabled | up    | <span class="number">2015</span>-<span class="number">10</span>-<span class="number">21</span>T13:<span class="number">10</span>:<span class="number">52.000000</span> | -               |
+| <span class="number">4</span>  | nova-scheduler   | controller | internal | enabled | up    | <span class="number">2015</span>-<span class="number">10</span>-<span class="number">21</span>T13:<span class="number">11</span>:<span class="number">00.000000</span> | -               |
+| <span class="number">6</span>  | nova-compute     | compute    | nova     | enabled | up    | <span class="number">2015</span>-<span class="number">10</span>-<span class="number">21</span>T13:<span class="number">10</span>:<span class="number">57.000000</span> | -               |
+| <span class="number">7</span>  | nova-network     | compute    | internal | enabled | up    | <span class="number">2015</span>-<span class="number">10</span>-<span class="number">21</span>T13:<span class="number">10</span>:<span class="number">52.000000</span> | -               |
+| <span class="number">10</span> | nova-compute     | compute1   | nova     | enabled | up    | <span class="number">2015</span>-<span class="number">10</span>-<span class="number">21</span>T13:<span class="number">10</span>:<span class="number">51.000000</span> | None            |
+| <span class="number">11</span> | nova-compute     | compute2   | nova     | enabled | up    | <span class="number">2015</span>-<span class="number">10</span>-<span class="number">21</span>T13:<span class="number">10</span>:<span class="number">57.000000</span> | None            |
+| <span class="number">12</span> | nova-network     | compute1   | internal | enabled | up    | <span class="number">2015</span>-<span class="number">10</span>-<span class="number">21</span>T13:<span class="number">10</span>:<span class="number">51.000000</span> | -               |
+| <span class="number">13</span> | nova-network     | compute2   | internal | enabled | up    | <span class="number">2015</span>-<span class="number">10</span>-<span class="number">21</span>T13:<span class="number">10</span>:<span class="number">55.000000</span> | -               |
++----+------------------+------------+----------+---------+-------+----------------------------+-----------------+
+</code></pre>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://www.stackops.info/2015/10/21/OpenStack搭建10-计算节点扩展/" data-id="cig1hz8py000nf87barctfd8b" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/compute/">compute</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/expand/">expand</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/openstack/">openstack</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2015/09/22/Linux命令详解-top/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Linux命令详解-top</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+  <section id="comments">
+    <!-- 多说评论框 start -->
+    <div class="ds-thread" data-thread-key="post-OpenStack搭建10-计算节点扩展" data-title="OpenStack搭建10-计算节点扩展" data-url="http://www.stackops.info/2015/10/21/OpenStack搭建10-计算节点扩展/"></div>
+    <!-- 多说评论框 end -->
+    <!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+    <script type="text/javascript">
+    var duoshuoQuery = {short_name:'leoli'};
+      (function() {
+        var ds = document.createElement('script');
+        ds.type = 'text/javascript';ds.async = true;
+        ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+        ds.charset = 'UTF-8';
+        (document.getElementsByTagName('head')[0] 
+         || document.getElementsByTagName('body')[0]).appendChild(ds);
+      })();
+      </script>
+    <!-- 多说公共JS代码 end -->
+  </section>
+  </section>
+        
+          <aside id="sidebar">
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/AMQP/">AMQP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Cisco/">Cisco</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Etherchannel/">Etherchannel</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Fibonacci-Sequence/">Fibonacci Sequence</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Keystone/">Keystone</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NTP/">NTP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NetEase/">NetEase</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/OpenStack/">OpenStack</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RSTP/">RSTP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/bash/">bash</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/compute/">compute</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dashboard/">dashboard</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/expand/">expand</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/free/">free</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/glance/">glance</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/">hexo</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/image/">image</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/kernel/">kernel</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/">linux</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/network/">network</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nova/">nova</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nova-network/">nova-network</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/openstack/">openstack</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/portfast/">portfast</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/submin/">submin</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/svn/">svn</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/switch/">switch</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/top/">top</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/vmstat/">vmstat</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/AMQP/" style="font-size: 10px;">AMQP</a> <a href="/tags/Cisco/" style="font-size: 10px;">Cisco</a> <a href="/tags/Etherchannel/" style="font-size: 10px;">Etherchannel</a> <a href="/tags/Fibonacci-Sequence/" style="font-size: 10px;">Fibonacci Sequence</a> <a href="/tags/Keystone/" style="font-size: 10px;">Keystone</a> <a href="/tags/NTP/" style="font-size: 10px;">NTP</a> <a href="/tags/NetEase/" style="font-size: 10px;">NetEase</a> <a href="/tags/OpenStack/" style="font-size: 10px;">OpenStack</a> <a href="/tags/RSTP/" style="font-size: 10px;">RSTP</a> <a href="/tags/bash/" style="font-size: 10px;">bash</a> <a href="/tags/compute/" style="font-size: 13.33px;">compute</a> <a href="/tags/dashboard/" style="font-size: 10px;">dashboard</a> <a href="/tags/expand/" style="font-size: 10px;">expand</a> <a href="/tags/free/" style="font-size: 10px;">free</a> <a href="/tags/glance/" style="font-size: 10px;">glance</a> <a href="/tags/hexo/" style="font-size: 10px;">hexo</a> <a href="/tags/image/" style="font-size: 10px;">image</a> <a href="/tags/kernel/" style="font-size: 10px;">kernel</a> <a href="/tags/linux/" style="font-size: 16.67px;">linux</a> <a href="/tags/network/" style="font-size: 10px;">network</a> <a href="/tags/nova/" style="font-size: 10px;">nova</a> <a href="/tags/nova-network/" style="font-size: 10px;">nova-network</a> <a href="/tags/openstack/" style="font-size: 20px;">openstack</a> <a href="/tags/portfast/" style="font-size: 10px;">portfast</a> <a href="/tags/submin/" style="font-size: 10px;">submin</a> <a href="/tags/svn/" style="font-size: 10px;">svn</a> <a href="/tags/switch/" style="font-size: 10px;">switch</a> <a href="/tags/top/" style="font-size: 10px;">top</a> <a href="/tags/vmstat/" style="font-size: 10px;">vmstat</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">13</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recents</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2015/10/21/OpenStack搭建10-计算节点扩展/">OpenStack搭建10-计算节点扩展</a>
+          </li>
+        
+          <li>
+            <a href="/2015/09/22/Linux命令详解-top/">Linux命令详解-top</a>
+          </li>
+        
+          <li>
+            <a href="/2015/09/22/Linux命令详解-vmstat/">Linux命令详解-vmstat</a>
+          </li>
+        
+          <li>
+            <a href="/2015/09/21/网易互联网-系统运维工程师面试记/">网易互联网-系统运维工程师面试记</a>
+          </li>
+        
+          <li>
+            <a href="/2015/09/20/Linux命令详解-free/">Linux命令详解-free</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2015 liyahua<br>
+       <script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+          <span id="busuanzi_container_site_pv">您是本站第<span id="busuanzi_value_site_pv"></span>位访客</span><br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+ </footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css" type="text/css">
+  <script src="/fancybox/jquery.fancybox.pack.js" type="text/javascript"></script>
+
+
+<script src="/js/script.js" type="text/javascript"></script>
+
+  </div>
+</body>
+</html>

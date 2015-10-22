@@ -2,6 +2,11 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://www.stackops.info/2015/10/21/OpenStack%E6%90%AD%E5%BB%BA10-%E8%AE%A1%E7%AE%97%E8%8A%82%E7%82%B9%E6%89%A9%E5%B1%95/</loc>
+    <lastmod>2015-10-22T00:35:17.852Z</lastmod>
+  </url>
+  
+  <url>
     <loc>http://www.stackops.info/2015/08/20/OpenStack%E6%90%AD%E5%BB%BA09-%E5%AE%9E%E4%BE%8B%E5%88%9B%E5%BB%BA/</loc>
     <lastmod>2015-10-18T03:30:24.270Z</lastmod>
   </url>
